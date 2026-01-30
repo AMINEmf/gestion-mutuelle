@@ -130,7 +130,7 @@ export default function ModalForm({ show, onClose, title, fields = [], onSubmit 
                 type="submit" 
                 className="btn"
                 style={{ 
-                  backgroundColor: '#00695c', 
+                  backgroundColor: '#2c767c', 
                   color: '#fff', 
                   border: 'none',
                   borderRadius: '8px',

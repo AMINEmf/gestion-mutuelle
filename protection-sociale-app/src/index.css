@@ -1,13 +1,14 @@
 /* ============================================
    PROTECTION SOCIALE - DESIGN SYSTEM
+   (Basé sur ProjetFront - RH SPS Stage)
    ============================================ */
 
 :root {
-  /* Couleurs Primaires */
-  --primary: #00695c;
-  --primary-light: #4db6ac;
-  --primary-dark: #004d40;
-  --secondary: #26a69a;
+  /* Couleurs Primaires - Identique à ProjetFront */
+  --primary: #2c767c;
+  --primary-light: #37928a;
+  --primary-dark: #245f64;
+  --secondary: #37736f;
   --accent-cyan: #00bcd4;
 
   /* Couleurs Fonctionnelles */

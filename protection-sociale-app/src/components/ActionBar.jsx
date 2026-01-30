@@ -1,11 +1,11 @@
 const variantStyles = {
-  primary: { backgroundColor: '#00695c', borderColor: '#00695c', color: '#fff' },
-  secondary: { backgroundColor: '#26a69a', borderColor: '#26a69a', color: '#fff' },
+  primary: { backgroundColor: '#2c767c', borderColor: '#2c767c', color: '#fff' },
+  secondary: { backgroundColor: '#37736f', borderColor: '#37736f', color: '#fff' },
   success: { backgroundColor: '#4caf50', borderColor: '#4caf50', color: '#fff' },
   warning: { backgroundColor: '#ff9800', borderColor: '#ff9800', color: '#fff' },
   danger: { backgroundColor: '#ef4444', borderColor: '#ef4444', color: '#fff' },
   info: { backgroundColor: '#2196f3', borderColor: '#2196f3', color: '#fff' },
-  outline: { backgroundColor: 'transparent', borderColor: '#00695c', color: '#00695c' }
+  outline: { backgroundColor: 'transparent', borderColor: '#2c767c', color: '#2c767c' }
 };
 
 export default function ActionBar({ actions = [] }) {

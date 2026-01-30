@@ -6,7 +6,7 @@ export default function PageHeader({ title, subtitle, breadcrumb = [] }) {
       <nav aria-label="breadcrumb">
         <ol className="breadcrumb" style={{ marginBottom: '8px' }}>
           <li className="breadcrumb-item">
-            <Link to="/" style={{ color: '#00695c', textDecoration: 'none' }}>Accueil</Link>
+            <Link to="/" style={{ color: '#2c767c', textDecoration: 'none' }}>Accueil</Link>
           </li>
           {breadcrumb.map((item, index) => (
             <li
@@ -17,13 +17,13 @@ export default function PageHeader({ title, subtitle, breadcrumb = [] }) {
               {index === breadcrumb.length - 1 ? (
                 item.label
               ) : (
-                <Link to={item.path} style={{ color: '#00695c', textDecoration: 'none' }}>{item.label}</Link>
+                <Link to={item.path} style={{ color: '#2c767c', textDecoration: 'none' }}>{item.label}</Link>
               )}
             </li>
           ))}
         </ol>
       </nav>
-      <h2 style={{ color: '#111827', marginBottom: '4px', fontWeight: 600 }}>{title}</h2>
+      <h2 style={{ color: '#2c3e50', marginBottom: '4px', fontWeight: 700, fontSize: '22px', letterSpacing: '-0.025em' }}>{title}</h2>
       {subtitle && <p style={{ color: '#6b7280', margin: 0 }}>{subtitle}</p>}
     </div>
   );

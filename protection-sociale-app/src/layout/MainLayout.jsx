@@ -7,10 +7,10 @@ export default function MainLayout() {
     <div className="d-flex">
       <Sidebar />
       <div style={{ 
-        marginLeft: '260px', 
-        width: 'calc(100% - 260px)', 
+        marginLeft: '13%', 
+        width: 'calc(100% - 13%)', 
         minHeight: '100vh', 
-        backgroundColor: '#f9fafb' 
+        backgroundColor: '#ffffff' 
       }}>
         <Topbar />
         <main style={{ padding: '24px' }}>

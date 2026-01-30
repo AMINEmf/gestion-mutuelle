@@ -1,5 +1,6 @@
 /* ============================================
    PROTECTION SOCIALE - COMPOSANTS STYLES
+   (Basé sur ProjetFront - RH SPS Stage)
    ============================================ */
 
 /* Root */
@@ -12,16 +13,32 @@
    ============================================ */
 .sidebar {
   width: 13%;
-  min-width: 240px;
-  max-width: 280px;
+  min-width: 220px;
+  max-width: 260px;
   position: fixed;
   left: 0;
   top: 0;
   height: 100vh;
-  background-color: var(--primary, #00695c);
+  background-color: #2c767c;
   overflow-y: auto;
   z-index: 1000;
   transition: all 0.3s ease;
+  scrollbar-color: #2c767c #e0e0e0;
+}
+
+.sidebar::-webkit-scrollbar {
+  width: 8px;
+  cursor: pointer;
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+  background-color: #2c767c;
+  cursor: pointer;
+}
+
+.sidebar::-webkit-scrollbar-track {
+  background-color: #2c767c;
+  cursor: pointer;
 }
 
 .sidebar-header {
@@ -69,12 +86,14 @@
 }
 
 .sidebar .submenu .nav-item {
-  margin-bottom: 2px;
+  margin-bottom: 1px;
 }
 
 .sidebar .nav-link {
-  padding: 8px 16px 8px 32px;
-  color: var(--text-light-alt, #b8dce5);
+  padding-left: 32px;
+  padding-top: 6px;
+  padding-bottom: 6px;
+  color: #e8f4f8;
   font-size: 0.875rem;
   transition: all 0.2s ease;
   display: flex;
@@ -83,8 +102,8 @@
 }
 
 .sidebar .nav-link:hover {
-  background-color: rgba(0, 0, 0, 0.1);
-  border-left: 4px solid #ffffff;
+  background-color: rgba(255, 255, 255, 0.15);
+  border-left: 3px solid #ffffff;
   transform: translateX(2px);
   color: #ffffff;
 }
@@ -92,26 +111,8 @@
 .sidebar .nav-link.active {
   background-color: rgba(255, 255, 255, 0.15);
   color: #ffffff;
-  border-left: 4px solid var(--accent-cyan, #00bcd4);
-  font-weight: 500;
-}
-
-/* Sidebar Scrollbar */
-.sidebar::-webkit-scrollbar {
-  width: 6px;
-}
-
-.sidebar::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.sidebar::-webkit-scrollbar-thumb {
-  background-color: rgba(255, 255, 255, 0.2);
-  border-radius: 3px;
-}
-
-.sidebar::-webkit-scrollbar-thumb:hover {
-  background-color: rgba(255, 255, 255, 0.3);
+  border-left: 3px solid #ffffff;
+  font-weight: 400;
 }
 
 /* ============================================

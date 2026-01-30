@@ -53,7 +53,7 @@ export default function Filters({ filters = [], onFilter }) {
                 className="btn btn-sm" 
                 onClick={onFilter}
                 style={{
-                  backgroundColor: '#26a69a',
+                  backgroundColor: '#2c767c',
                   color: '#fff',
                   border: 'none',
                   borderRadius: '8px',

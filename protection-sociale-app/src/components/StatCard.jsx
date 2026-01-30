@@ -1,6 +1,6 @@
 const colorMap = {
-  primary: { bg: '#00695c', light: 'rgba(0, 105, 92, 0.1)', text: '#00695c' },
-  secondary: { bg: '#26a69a', light: 'rgba(38, 166, 154, 0.1)', text: '#26a69a' },
+  primary: { bg: '#2c767c', light: 'rgba(44, 118, 124, 0.1)', text: '#2c767c' },
+  secondary: { bg: '#37736f', light: 'rgba(55, 115, 111, 0.1)', text: '#37736f' },
   success: { bg: '#4caf50', light: 'rgba(76, 175, 80, 0.1)', text: '#4caf50' },
   warning: { bg: '#ff9800', light: 'rgba(255, 152, 0, 0.1)', text: '#ff9800' },
   danger: { bg: '#f44336', light: 'rgba(244, 67, 54, 0.1)', text: '#f44336' },
