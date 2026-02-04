@@ -52,6 +52,9 @@ class EmployesImport implements ToCollection
             }
 
             $data['departement_id'] = $this->departementId;
+            
+            // On force le statut actif par défaut lors de l'import
+            $data['active'] = 1;
 
             \Log::info('Données importées:', $data);
 

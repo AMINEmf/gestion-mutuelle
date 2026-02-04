@@ -493,6 +493,11 @@ use App\Http\Controllers\DetailsRegleController;
 use App\Http\Controllers\HeureTravailController;
 use App\Http\Controllers\HoraireExceptionnelController;
 
+// Imports pour Affiliation Mutuelle
+use App\Http\Controllers\MutuelleController;
+use App\Http\Controllers\RegimeMutuelleController;
+use App\Http\Controllers\AffiliationMutuelleController;
+
 // api_Soukaina
 
 use App\Http\Controllers\PaysController;
@@ -571,7 +576,7 @@ use Illuminate\Support\Facades\Route;
 
 
 
-Route::get('/full-data', [PaysController::class, 'getFullData']);
+// Route::get('/full-data', [PaysController::class, 'getFullData']);
 
 
 
@@ -596,6 +601,34 @@ Route::post("/login", [AuthController::class, 'login']);
     //logout
      Route::post("/logout", [AuthController::class, 'logout']);
 
+// Routes pour mutuelles (temporaire sans auth)
+Route::get('/mutuelles', [MutuelleController::class, 'index']);
+Route::post('/mutuelles', [MutuelleController::class, 'store']);
+Route::get('/mutuelles/{id}', [MutuelleController::class, 'show']);
+Route::put('/mutuelles/{id}', [MutuelleController::class, 'update']);
+Route::delete('/mutuelles/{id}', [MutuelleController::class, 'destroy']);
+// Route spécifique pour récupérer les régimes d'une mutuelle
+Route::get('/mutuelles/{mutuelle_id}/regimes', [MutuelleController::class, 'regimes']);
+
+// Routes pour régimes mutuelle (temporaire sans auth)
+Route::get('/regimes-mutuelle', [RegimeMutuelleController::class, 'index']);
+Route::post('/regimes-mutuelle', [RegimeMutuelleController::class, 'store']);
+Route::get('/regimes-mutuelle/{id}', [RegimeMutuelleController::class, 'show']);
+Route::put('/regimes-mutuelle/{id}', [RegimeMutuelleController::class, 'update']);
+Route::delete('/regimes-mutuelle/{id}', [RegimeMutuelleController::class, 'destroy']);
+Route::get('/regimes-mutuelle/mutuelle/{mutuelle_id}', [RegimeMutuelleController::class, 'getByMutuelle']);
+
+// Routes pour employés éligibles (temporaire sans auth)
+Route::get('/employes/eligibles-mutuelle', [AffiliationMutuelleController::class, 'employesEligibles']);
+
+// Routes pour affiliations mutuelle (temporaire sans auth)
+Route::get('/affiliations-mutuelle', [AffiliationMutuelleController::class, 'index']);
+Route::post('/affiliations-mutuelle', [AffiliationMutuelleController::class, 'store']);
+Route::get('/affiliations-mutuelle/{id}', [AffiliationMutuelleController::class, 'show']);
+Route::put('/affiliations-mutuelle/{id}', [AffiliationMutuelleController::class, 'update']);
+Route::delete('/affiliations-mutuelle/{id}', [AffiliationMutuelleController::class, 'destroy']);
+Route::put('/affiliations-mutuelle/{id}/resilier', [AffiliationMutuelleController::class, 'resilier']);
+
 
 Route::middleware('auth:sanctum')->group(function () {
 
@@ -614,7 +647,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
 
 
-Route::apiResource('pays', PaysController::class);
+// Route::apiResource('pays', PaysController::class);
 Route::apiResource('villes', VilleController::class);
 Route::apiResource('communes', CommuneController::class);
 Route::get('/villes', [VilleController::class, 'getVilles']);
@@ -1172,6 +1205,7 @@ Route::apiResource('heures-travail', HeureTravailController::class);
 
 Route::apiResource('horaire-exceptionnel', HoraireExceptionnelController::class);
 
+// Routes pour Affiliation Mutuelle - DEPLACED vers le haut (lignes 605+)
 
 });
 

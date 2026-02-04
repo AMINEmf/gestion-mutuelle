@@ -92,6 +92,14 @@ public function demandesConges()
     return $this->hasMany(GpDemandeConge::class, 'employe_id');
 }
 
+/**
+ * Relation avec les affiliations mutuelle
+ */
+public function affiliationsMutuelle()
+{
+    return $this->hasMany(AffiliationMutuelle::class, 'employe_id');
+}
+
 
 
 
