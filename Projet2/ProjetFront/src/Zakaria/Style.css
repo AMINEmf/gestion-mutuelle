@@ -165,6 +165,11 @@
     height: auto;    
   }
   
+  .container_employee.with-form {
+    max-width: 40.5%;
+    width: 36.5%;
+  }
+  
   
   
   .container2 {

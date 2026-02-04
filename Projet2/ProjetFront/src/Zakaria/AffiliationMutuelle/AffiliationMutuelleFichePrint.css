@@ -1,0 +1,252 @@
+/* Styles pour la fiche d'impression d'affiliation mutuelle */
+.fiche-modal-header {
+  background: linear-gradient(135deg, #00afaa, #0891b2);
+  color: white;
+  border-bottom: none;
+}
+
+.fiche-modal-header .modal-title {
+  color: white;
+  font-weight: 600;
+}
+
+.fiche-modal-header .btn-close {
+  filter: brightness(0) invert(1);
+}
+
+.fiche-modal-body {
+  padding: 0;
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.fiche-content {
+  padding: 30px;
+  background-color: white;
+}
+
+.fiche-header {
+  text-align: center;
+  margin-bottom: 30px;
+  padding: 20px;
+  background: linear-gradient(135deg, rgba(0, 175, 170, 0.1), rgba(8, 145, 178, 0.1));
+  border-radius: 8px;
+  border-left: 4px solid #00afaa;
+}
+
+.fiche-title {
+  color: #00afaa;
+  font-weight: 700;
+  margin: 0;
+  font-size: 1.5rem;
+  letter-spacing: 1px;
+}
+
+.fiche-subtitle {
+  color: #666;
+  margin: 8px 0 0 0;
+  font-size: 1.1rem;
+  font-weight: 500;
+}
+
+.fiche-section {
+  margin: 25px 0;
+  padding: 20px;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  background-color: #fafbfc;
+}
+
+.section-title {
+  color: #00afaa;
+  font-weight: 600;
+  font-size: 1.1rem;
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid rgba(0, 175, 170, 0.2);
+  display: flex;
+  align-items: center;
+}
+
+.section-title i {
+  color: #00afaa;
+  margin-right: 8px;
+}
+
+.info-item {
+  margin: 12px 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.info-item label {
+  font-weight: 600;
+  color: #374151;
+  min-width: 140px;
+  margin: 0;
+}
+
+.info-item span {
+  color: #1f2937;
+  font-weight: 400;
+}
+
+.badge {
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.badge-actif {
+  background-color: #d1fae5;
+  color: #065f46;
+  border: 1px solid #a7f3d0;
+}
+
+.badge-inactif {
+  background-color: #fee2e2;
+  color: #991b1b;
+  border: 1px solid #fca5a5;
+}
+
+.badge-suspendu {
+  background-color: #fef3c7;
+  color: #92400e;
+  border: 1px solid #fcd34d;
+}
+
+.repartition-summary {
+  background-color: white;
+  padding: 15px;
+  border-radius: 6px;
+  border: 1px solid #e5e7eb;
+}
+
+.repartition-item {
+  margin: 8px 0;
+  padding: 6px 0;
+  color: #374151;
+}
+
+.repartition-item:not(:last-child) {
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.repartition-item strong {
+  color: #00afaa;
+  font-weight: 600;
+}
+
+.observations-box {
+  background-color: white;
+  padding: 20px;
+  border-radius: 6px;
+  border: 1px solid #e5e7eb;
+  border-left: 4px solid #00afaa;
+  color: #374151;
+  line-height: 1.6;
+  min-height: 80px;
+}
+
+.fiche-modal-footer {
+  border-top: 1px solid #e9ecef;
+  background-color: #f8f9fa;
+}
+
+.fiche-modal-footer .btn {
+  border-radius: 6px;
+  padding: 10px 20px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.fiche-modal-footer .btn:hover {
+  transform: translateY(-1px);
+}
+
+.fiche-modal-footer .btn-primary {
+  background-color: #00afaa;
+  border-color: #00afaa;
+}
+
+.fiche-modal-footer .btn-primary:hover {
+  background-color: #0891b2;
+  border-color: #0891b2;
+}
+
+.fiche-modal-footer .btn-outline-primary {
+  color: #00afaa;
+  border-color: #00afaa;
+}
+
+.fiche-modal-footer .btn-outline-primary:hover {
+  background-color: #00afaa;
+  border-color: #00afaa;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .fiche-content {
+    padding: 20px;
+  }
+  
+  .fiche-section {
+    padding: 15px;
+    margin: 20px 0;
+  }
+  
+  .info-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+  
+  .info-item label {
+    min-width: auto;
+    font-size: 0.9rem;
+  }
+  
+  .repartition-summary {
+    margin-top: 10px;
+  }
+}
+
+/* Styles d'impression */
+@media print {
+  .fiche-modal-header,
+  .fiche-modal-footer,
+  .btn {
+    display: none !important;
+  }
+  
+  .fiche-modal-body {
+    max-height: none;
+    overflow: visible;
+  }
+  
+  .fiche-content {
+    padding: 0;
+    margin: 0;
+  }
+  
+  .fiche-section {
+    break-inside: avoid;
+    background-color: white !important;
+    border: 1px solid #ccc;
+    margin: 15px 0;
+  }
+  
+  .fiche-header {
+    background-color: white !important;
+    border: 2px solid #00afaa;
+  }
+  
+  body {
+    font-size: 12pt;
+    line-height: 1.4;
+  }
+}

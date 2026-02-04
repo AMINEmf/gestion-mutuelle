@@ -1,0 +1,118 @@
+/* Styles pour le formulaire d'ajout d'affiliation mutuelle - Style identique à AddEmp.css */
+
+.add-affiliation-overlay {
+  position: fixed;
+  top: 9.4%;
+  left: 31%;
+  justify-content: flex-end;
+  z-index: 1000;
+  overflow-y: auto;
+  width: 68%;
+  height: calc(-160px + 100vh) !important;
+  border-radius: 8px;
+  background-color: #fff;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1) !important;
+  animation: slideIn 0.3s ease-out;
+}
+
+.add-affiliation-overlay::-webkit-scrollbar {
+  width: 8px !important;
+}
+
+.add-affiliation-overlay::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.2) !important;
+  border-radius: 4px !important;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+.addper {
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  overflow: auto;
+  min-height: 100%;
+}
+
+.addper .card-body {
+  background: #fff;
+  padding: 20px;
+}
+
+.form-control, .form-select {
+  border-radius: 5px;
+  border: 1px solid #ced4da;
+  padding: 10px;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.form-control:focus, .form-select:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 0 0.2rem rgba(38, 143, 255, 0.25);
+}
+
+.row {
+  margin-bottom: 15px;
+  background-color: #fff;
+}
+
+.form-label {
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+}
+
+/* Loader CSS moved here or kept in component style tag */
+.loader {
+  width: 20px;
+  height: 20px;
+  border: 3px solid #ffffff;
+  border-bottom-color: transparent;
+  border-radius: 50%;
+  display: inline-block;
+  box-sizing: border-box;
+  animation: rotation 1s linear infinite;
+}
+
+@keyframes rotation {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* New Sidebar Style */
+.add-affiliation-sidebar {
+  width: 100%;
+  height: 100%;
+  max-height: calc(100vh - 150px);
+  border-radius: 8px;
+  background-color: #fff;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: slideInSide 0.3s ease-out;
+  border: 1px solid #e0e0e0;
+}
+
+@keyframes slideInSide {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.add-affiliation-sidebar {
+  position: relative; /* Ensure absolute children are relative to this */
+}

@@ -1,0 +1,375 @@
+/* Styles principaux pour le conteneur des affiliations mutuelles */
+.affiliation-mutuelle-manager {
+  min-height: 100vh;
+  background-color: #f5f7fa;
+  padding: 0;
+}
+
+/* Structure layout avec sidebar (copié de DepartementManager) */
+.departement_home1 {
+  position: relative;
+  width: 100%;
+  height: calc(100vh - 160px);
+  display: flex;
+  border: none;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Styles pour la liste/sidebar (panneau latéral gauche) */
+.departement_home1 .departement_list {
+  display: flex;
+  flex-direction: column;
+  width: 10%;
+  min-width: 16%;
+  max-width: 20%;
+  height: calc(100vh - 160px);
+  overflow-y: auto;
+  overflow-x: hidden;
+  background-color: #fff;
+  border-radius: 10px;
+  padding: 1%;
+  margin-right: 20px;
+  transition: all 0.3s ease;
+  border: none !important;
+  scrollbar-width: thin;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.departement_home1 .departement_list::-webkit-scrollbar {
+  width: 5px;
+}
+
+.departement_home1 .departement_list::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+.departement_home1 .departement_list::-webkit-scrollbar-thumb {
+  background: #3a8a90;
+  border-radius: 10px;
+}
+
+.affiliation-mutuelle-manager .container-fluid {
+  max-width: 100%;
+  padding-left: 20px;
+  padding-right: 20px;
+}
+
+.affiliation-mutuelle-manager .form-control:focus {
+  border-color: #1976d2;
+  box-shadow: 0 0 0 0.2rem rgba(25, 118, 210, 0.15);
+}
+
+.affiliation-mutuelle-manager .badge {
+  font-weight: 500;
+  letter-spacing: 0.3px;
+}
+
+/* Tableau */
+.affiliation-mutuelle-manager table {
+  margin-bottom: 0;
+}
+
+.affiliation-mutuelle-manager table thead th {
+  background-color: #f8f9fa;
+  font-weight: 600;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #495057;
+  border-bottom: 2px solid #dee2e6;
+  padding: 12px 15px;
+}
+
+.affiliation-mutuelle-manager table tbody tr {
+  transition: background-color 0.2s;
+}
+
+.affiliation-mutuelle-manager table tbody tr:hover {
+  background-color: #f8f9fa;
+}
+
+.affiliation-mutuelle-manager table tbody td {
+  padding: 12px 15px;
+  vertical-align: middle;
+  font-size: 0.9rem;
+}
+
+.departement_home1 {
+  position: relative;
+  width: 100%;
+  height: calc(100vh - 160px);
+  display: flex;
+  border: none;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+  
+
+  /* Styles pour la liste des départements */
+  .departement_home1 .departement_list {
+    display: flex;
+    flex-direction: column;
+    width: 10%;
+    min-width: 16%;
+    max-width: 20%;
+    height: calc(100vh - 160px);
+    overflow-y: auto;
+    overflow-x: hidden;
+    background-color: #fff;
+    border-radius: 10px;
+    padding: 1%;
+    margin-right: 20px;
+    transition: all 0.3s ease;
+    border: none !important;
+    scrollbar-width: thin;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  
+  
+  .departement_home1 .departement_list::-webkit-scrollbar {
+    width: 5px;
+  }
+  
+  .departement_home1 .departement_list::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+  }
+  
+  .departement_home1 .departement_list::-webkit-scrollbar-thumb {
+    background: #3a8a90;
+    border-radius: 10px;
+  }
+  
+  
+  /* Styles pour les éléments de département */
+  .department-item {
+    border-radius: 8px;
+    transition: all 0.2s ease-in-out;
+    margin-bottom: 8px;
+    border-left: 3px solid transparent;
+  }
+  
+  .department-item:hover {
+    background-color: rgba(8, 179, 173, 0.05);
+    /* transform: translateX(2px); */
+  }
+  
+  .department-item.selected {
+    background-color: rgba(8, 179, 173, 0.1);
+    border-left: 3px solid #3a8a90;
+  }
+  
+  .department-item-content {
+    display: flex;
+    align-items: center;
+    padding: 10px 12px;
+    cursor: pointer;
+    border-radius: 8px;
+  }
+  
+  /* Styles pour les boutons d'expansion */
+  .expand-button {
+    background: transparent;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    margin-right: 8px;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+  }
+  
+  .expand-button:hover {
+    background-color: rgba(8, 179, 173, 0.1);
+  }
+  
+  .expand-button svg {
+    color: #3a8a90;
+    transition: transform 0.2s ease;
+  }
+  
+  /* Styles pour le texte commun */
+  .common-text {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    color: #2d3748;
+    font-weight: 500;
+    padding: 4px 0;
+    cursor: pointer;
+    user-select: none;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  .common-text:hover {
+    color: #3a8a90;
+  }
+  
+  .common-text.selected {
+    color: #3a8a90;
+    font-weight: 600;
+  }
+  
+  .common-text svg {
+    color: #3a8a90;
+    flex-shrink: 0;
+  }
+  
+  /* Styles pour les wrapper de contenu */
+  .department-content-wrapper {
+    display: flex;
+    align-items: center;
+    width: 100%;
+  }
+  
+  /* Styles pour l'input de sous-département */
+  .sub-departement-input {
+    margin-left: 32px;
+    margin-top: 8px;
+  }
+  
+  .sub-departement-input .form-control {
+    font-size: 13px;
+    height: 32px;
+    border: 1px solid #3a8a90;
+    border-radius: 4px;
+    background: white;
+  }
+  
+  .sub-departement-input .form-control:focus {
+    border-color: #08b3ad;
+    box-shadow: 0 0 0 0.2rem rgba(8, 179, 173, 0.25);
+  }
+  
+  /* Styles pour le menu contextuel */
+  .context-menu {
+    position: absolute;
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    z-index: 1000;
+    padding: 8px 0;
+    min-width: 180px;
+  }
+  
+  .context-menu button {
+    display: block;
+    width: 100%;
+    padding: 8px 16px;
+    background: none;
+    border: none;
+    text-align: left;
+    font-size: 14px;
+    color: #2d3748;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+  }
+  
+  .context-menu button:hover:not(.disabled-btn) {
+    background-color: #f7fafc;
+    color: #3a8a90;
+  }
+  
+  .context-menu button.disabled-btn {
+    color: #a0aec0;
+    cursor: not-allowed;
+  }
+  
+  /* Styles pour le formulaire d'édition */
+  .edit-form {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    z-index: 1000;
+  }
+  
+  .edit-form input {
+    margin-bottom: 12px;
+    border: 1px solid #3a8a90;
+    border-radius: 4px;
+    padding: 8px 12px;
+    font-size: 14px;
+  }
+  
+  .edit-form input:focus {
+    border-color: #08b3ad;
+    box-shadow: 0 0 0 0.2rem rgba(8, 179, 173, 0.25);
+    outline: none;
+  }
+  
+  .edit-form button {
+    background: #3a8a90;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 8px 16px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+  }
+  
+  .edit-form button:hover {
+    background: #08b3ad;
+  }
+  
+  /* Styles pour le séparateur */
+  .separator {
+    height: 1px;
+    background: linear-gradient(to right, transparent, #e2e8f0, transparent);
+    margin: 12px 0;
+  }
+  
+  /* Animation pour l'expansion */
+  .department-item ul {
+    overflow: hidden;
+    transition: all 0.3s ease;
+  }
+  
+  /* Responsive */
+  @media (max-width: 768px) {
+    .departement_home1 .departement_list {
+      min-width: 200px;
+      max-width: 250px;
+    }
+    
+    .common-text {
+      font-size: 13px;
+    }
+  }
+  
+  /* Container affiliation mutuelle styles */
+  .container_affiliation_mutuelle {
+    width: 90%;
+    transition: width 0.3s ease;
+  }
+  
+  .container_affiliation_mutuelle.with-form {
+    width: 60%;
+  }
+  
+  /* Disabled button styles */
+  .disabled-btn {
+    opacity: 0.5 !important;
+    cursor: not-allowed !important;
+    pointer-events: none;
+  }

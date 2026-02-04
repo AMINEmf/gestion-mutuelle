@@ -32,6 +32,7 @@ import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import AddShoppingCartIcon from '@mui/icons-material/AddShoppingCart';
 import ListIcon from '@mui/icons-material/List';
+import SecurityIcon from '@mui/icons-material/Security';
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import { styled } from "@mui/material/styles";
 import List from "@mui/material/List";
@@ -373,6 +374,7 @@ const Navigation = () => {
   const [permissions, setPermissions] = useState([]);
   const [isCommandsOpen, setIsCommandsOpen] = useState(false);
   const [isEmployeesOpen, setIsEmployeesOpen] = useState(false);
+  const [isAffiliationMutuelleOpen, setIsAffiliationMutuelleOpen] = useState(false);
   const [isPlanificationOpen, setIsPlanificationOpen] = useState(false);
   const [isPlanificationPaieOpen, setIsPlanificationPaieOpen] = useState(false);
   const [isTraitementPaieOpen, setIsTraitementPaieOpen] = useState(false);
@@ -419,6 +421,10 @@ const Navigation = () => {
 
   const handleEmployeesClick = () => {
     setIsEmployeesOpen(!isEmployeesOpen);
+  };
+
+  const handleAffiliationMutuelleClick = () => {
+    setIsAffiliationMutuelleOpen(!isAffiliationMutuelleOpen);
   };
 
   const handlePlanificationClick = () => {
@@ -821,8 +827,6 @@ const Navigation = () => {
       <ListItemText primary="Gestion des Employés" />
     </SubMenuItem>
     )}
-    
-   
 
     {permissions.includes("view_all_employee_histories") && (
       <SubMenuItem button component={Link} to="/emphistorique">
@@ -838,12 +842,32 @@ const Navigation = () => {
 </Collapse>
 
 
+{/*-------------------------------- Menu Gestion Affiliation Mutuelle -------------------------------------- */}
+<ListItem
+  button
+  style={{ color: "white", display: "flex" }}
+  sx={{ "& .MuiListItemIcon-root": { minWidth: 56 } }}
+  onClick={handleAffiliationMutuelleClick}
+>
+  <ListItemIcon style={{ color: 'white' }}>
+    <SecurityIcon style={{ fontSize: "1.6rem", color: "white" }} />
+  </ListItemIcon>
+  <ListItemText primary="Gestion Affiliation Mutuelle" />
+  {isAffiliationMutuelleOpen ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
+</ListItem>
 
-
-
-
-
-
+<Collapse in={isAffiliationMutuelleOpen} timeout="auto" unmountOnExit>
+  <List component="div" disablePadding>
+    {permissions.includes("view_all_employes") && (
+    <SubMenuItem button component={Link} to="/affiliation-mutuelle">
+      <ListItemIcon>
+        <SecurityIcon />
+      </ListItemIcon>
+      <ListItemText primary="Affiliation Mutuelle" />
+    </SubMenuItem>
+    )}
+  </List>
+</Collapse>
 
 
 {/*-------------------------------- MEnu Planification  -------------------------------------- */}
