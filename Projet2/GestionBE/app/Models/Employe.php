@@ -100,6 +100,16 @@ public function affiliationsMutuelle()
     return $this->hasMany(AffiliationMutuelle::class, 'employe_id');
 }
 
+public function mutuelleDocuments()
+{
+    return $this->hasMany(MutuelleDocument::class, 'employe_id');
+}
+
+public function mutuelleOperations()
+{
+    return $this->hasMany(MutuelleOperation::class, 'employe_id');
+}
+
 
 
 
@@ -150,5 +160,4 @@ protected static function booted()
 
 
 }
-
 

@@ -164,7 +164,7 @@ class EmployeController extends Controller
 
     public function store(Request $request)
     { 
-        if (Gate::allows('create_employes')) {
+        // if (Gate::allows('create_employes')) {
             
 
         Log::info('Requête reçue pour création d\'employé : ', $request->all());
@@ -282,9 +282,9 @@ class EmployeController extends Controller
                 'error' => 'Une erreur s\'est produite lors de la création de l\'employé : ' . $e->getMessage()
             ], 500);
         }
-    } else {
-        abort(403, 'Vous n\'avez pas l\'autorisation de créer un employé.');
-    }
+    // } else {
+    //     abort(403, 'Vous n\'avez pas l\'autorisation de créer un employé.');
+    // }
 
     }
 
@@ -479,7 +479,7 @@ class EmployeController extends Controller
 
     public function destroy(Employe $employe)
     {
-        if (Gate::allows('delete_employes')) {
+        // if (Gate::allows('delete_employes')) {
         try {
             $employe->delete();
             return response()->json(['message' => ''], 200);
@@ -487,9 +487,9 @@ class EmployeController extends Controller
             Log::error('', ['error' => $e->getMessage()]);
             return response()->json(['error' => ''], 500);
         }
-    } else {
-        abort(403, 'Vous n\'avez pas l\'autorisation de supprimer un employé.');
-    }
+    // } else {
+    //     abort(403, 'Vous n\'avez pas l\'autorisation de supprimer un employé.');
+    // }
     }
 
 

@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 // use App\Http\Controllers\AuthController;
 // use App\Http\Controllers\AutorisationController;
@@ -150,20 +150,20 @@
 //     Route::delete('/vehicule-livreurs/{id}', [VehiculeLivreurController::class, 'destroy']);
 
 
-//     // Définition des routes pour les site clients
+//     // DÃ©finition des routes pour les site clients
 //     Route::get('siteclients', [SiteClientController::class, 'index']); // Route pour obtenir tous les site clients
 //     Route::get('siteclients/{siteclient}', [SiteClientController::class, 'show']);
 //     Route::put('siteclients/{siteclient}', [SiteClientController::class, 'update']);
 //     Route::post('siteclients', [SiteClientController::class, 'store']);
 //     Route::delete('siteclients/{siteclient}', [SiteClientController::class, 'destroy']);
-//     // Route pour obtenir les site clients associés à un client spécifique
+//     // Route pour obtenir les site clients associÃ©s Ã  un client spÃ©cifique
 //     Route::get('clients/{clientId}/siteclients', [ClientController::class, 'siteclients']);
 
 //     Route::get('clients/{clientId}/bonslivraison', [ClientController::class, 'bonsLivraisonClient']);
 
 //     Route::apiResource('/devises', DevisController::class);
 //     Route::apiResource('/lignedevis', LigneDevisController::class);
-//     // Route pour obtenir les lignedevis associés à un devis spécifique
+//     // Route pour obtenir les lignedevis associÃ©s Ã  un devis spÃ©cifique
 //     Route::get('devises/{devisId}/lignedevis', [DevisController::class, 'lignedevis']);
 //     //Factures
 //     Route::apiResource('/factures', FactureController::class);
@@ -225,7 +225,7 @@
 
 // Route::apiResource('/devises', DevisController::class);
 // Route::apiResource('/ligneDevis', LigneDevisController::class);
-// // Route pour obtenir les lignedevis associés à un devis spécifique
+// // Route pour obtenir les lignedevis associÃ©s Ã  un devis spÃ©cifique
 // Route::get('devises/{devisId}/ligneDevis', [DevisController::class, 'lignedevis']);
 // Route::post('devises/{devisId}/ligneDevis', [DevisController::class, 'lignedevis']);
 // Route::put('devises/{devisId}/ligneDevis', [DevisController::class, 'lignedevis']);
@@ -259,7 +259,7 @@
 // Route::apiResource('/factures', FactureController::class);
 
 // Route::apiResource('/ligneFacture', LigneFactureController::class);
-// // Route pour obtenir les lignedevis associés à un devis spécifique
+// // Route pour obtenir les lignedevis associÃ©s Ã  un devis spÃ©cifique
 // Route::get('factures/{facturesId}/ligneFacture', [FactureController::class, 'lignefacture']);
 // Route::post('factures/{facturesId}/ligneFacture', [FactureController::class, 'lignefacture']);
 // Route::put('factures/{facturesId}/ligneFacture', [FactureController::class, 'lignefacture']);
@@ -268,7 +268,7 @@
 // //bon livresan
 // Route::apiResource('/livraisons', BonLivraisonController::class);
 // Route::apiResource('/lignelivraisons', LigneLivraisonController::class);
-// // Route pour obtenir les lignedevis associés à un devis spécifique
+// // Route pour obtenir les lignedevis associÃ©s Ã  un devis spÃ©cifique
 // Route::get('livraisons/{livraisonsId}/lignelivraisons', [BonLivraisonController::class, 'lignelivraison']);
 // Route::post('livraisons/{livraisonsId}/lignelivraisons', [BonLivraisonController::class, 'lignelivraison']);
 // Route::put('livraisons/{livraisonsId}/lignelivraisons', [BonLivraisonController::class, 'lignelivraison']);
@@ -408,56 +408,56 @@
 
 
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\AutorisationController;
-use App\Http\Controllers\BonLivraisonController;
-use App\Http\Controllers\CalibreController;
-use App\Http\Controllers\CasseController;
-use App\Http\Controllers\CategorieController;
-use App\Http\Controllers\ChargementCommandeController;
-use App\Http\Controllers\ChiffreAffaireController;
-use App\Http\Controllers\ClientController;
-use App\Http\Controllers\CommandeController;
-use App\Http\Controllers\ComptesController;
-use App\Http\Controllers\DevisController;
-use App\Http\Controllers\EncaissementController;
-use App\Http\Controllers\EntrerBanqueController;
-use App\Http\Controllers\EtatRecouvrementController;
-use App\Http\Controllers\FactureController;
-use App\Http\Controllers\FournisseurController;
-use App\Http\Controllers\LigneCommandeController;
-use App\Http\Controllers\LigneDevisController;
-use App\Http\Controllers\LigneencaissementController;
-use App\Http\Controllers\LigneentrercompteController;
-use App\Http\Controllers\LigneFactureController;
-use App\Http\Controllers\LigneLivraisonController;
-use App\Http\Controllers\LivreurController;
-use App\Http\Controllers\ObjectifController;
-use App\Http\Controllers\OeuffinisemifiniController;
-use App\Http\Controllers\PermisController;
-use App\Http\Controllers\PermissionController;
-use App\Http\Controllers\PreparationCommandeController;
-use App\Http\Controllers\PreparationLigneCommandeController;
-use App\Http\Controllers\ProduitController;
-use App\Http\Controllers\ReclamationController;
-use App\Http\Controllers\RegionController;
+// use App\Http\Controllers\AutorisationController;
+// use App\Http\Controllers\BonLivraisonController;
+// use App\Http\Controllers\CalibreController;
+// use App\Http\Controllers\CasseController;
+// use App\Http\Controllers\CategorieController;
+// use App\Http\Controllers\ChargementCommandeController;
+// use App\Http\Controllers\ChiffreAffaireController;
+// use App\Http\Controllers\ClientController;
+// use App\Http\Controllers\CommandeController;
+// use App\Http\Controllers\ComptesController;
+// use App\Http\Controllers\DevisController;
+// use App\Http\Controllers\EncaissementController;
+// use App\Http\Controllers\EntrerBanqueController;
+// use App\Http\Controllers\EtatRecouvrementController;
+// use App\Http\Controllers\FactureController;
+// use App\Http\Controllers\FournisseurController;
+// use App\Http\Controllers\LigneCommandeController;
+// use App\Http\Controllers\LigneDevisController;
+// use App\Http\Controllers\LigneencaissementController;
+// use App\Http\Controllers\LigneentrercompteController;
+// use App\Http\Controllers\LigneFactureController;
+// use App\Http\Controllers\LigneLivraisonController;
+// use App\Http\Controllers\LivreurController;
+// use App\Http\Controllers\ObjectifController;
+// use App\Http\Controllers\OeuffinisemifiniController;
+// use App\Http\Controllers\PermisController;
+// use App\Http\Controllers\PermissionController;
+// use App\Http\Controllers\PreparationCommandeController;
+// use App\Http\Controllers\PreparationLigneCommandeController;
+// use App\Http\Controllers\ProduitController;
+// use App\Http\Controllers\ReclamationController;
+// use App\Http\Controllers\RegionController;
 use App\Http\Controllers\RoleController;
-use App\Http\Controllers\SiteClientController;
-use App\Http\Controllers\StatusCommandeController;
-use App\Http\Controllers\StockController;
-use App\Http\Controllers\VehiculeController;
-use App\Http\Controllers\VehiculeLivreurController;
-use App\Http\Controllers\VisiteController;
-use App\Http\Controllers\ZoneController;
+// use App\Http\Controllers\SiteClientController;
+// use App\Http\Controllers\StatusCommandeController;
+// use App\Http\Controllers\StockController;
+// use App\Http\Controllers\VehiculeController;
+// use App\Http\Controllers\VehiculeLivreurController;
+// use App\Http\Controllers\VisiteController;
+// use App\Http\Controllers\ZoneController;
 
 use App\Http\Controllers\OffreController;
 use App\Http\Controllers\OffreDetailController;
 
-use App\Http\Controllers\GroupeClientController; //new 
+// use App\Http\Controllers\GroupeClientController; //new 
 
-use App\Http\Controllers\ClientGroupeClientController;  //new
+// use App\Http\Controllers\ClientGroupeClientController;  //new
 
 
-use App\Http\Controllers\OffreGroupeController;  //new
+// use App\Http\Controllers\OffreGroupeController;  //new
  
 
 // use App\Http\Controllers\SocieteController;
@@ -477,14 +477,14 @@ use App\Http\Controllers\HoraireController;
 use App\Http\Controllers\GroupeHoraireController;
 use App\Http\Controllers\HorairePeriodiqueController;
 
-use App\Http\Controllers\DetailsPeriodiqueController;
-use App\Http\Controllers\CalendrieController;
+// use App\Http\Controllers\DetailsPeriodiqueController;
+// use App\Http\Controllers\CalendrieController;
 
 
 
 
-use App\Http\Controllers\DetailsCalendrieController;
-use App\Http\Controllers\RegleCompensationController;
+// use App\Http\Controllers\DetailsCalendrieController;
+// use App\Http\Controllers\RegleCompensationController;
 use App\Http\Controllers\PenaliteController;
 use App\Http\Controllers\GroupeArrondiController;
 use App\Http\Controllers\ArrondiController;
@@ -497,47 +497,51 @@ use App\Http\Controllers\HoraireExceptionnelController;
 use App\Http\Controllers\MutuelleController;
 use App\Http\Controllers\RegimeMutuelleController;
 use App\Http\Controllers\AffiliationMutuelleController;
+use App\Http\Controllers\MutuelleDossierController;
+use App\Http\Controllers\MutuelleDocumentController;
+use App\Http\Controllers\MutuelleOperationController;
+use App\Http\Controllers\MutuelleDashboardController;
 
 // api_Soukaina
 
-use App\Http\Controllers\PaysController;
-use App\Http\Controllers\VilleController;
-use App\Http\Controllers\CommuneController;
+// use App\Http\Controllers\PaysController;
+// use App\Http\Controllers\VilleController;
+// use App\Http\Controllers\CommuneController;
 
 
-use App\Http\Controllers\ServiceController;
-use App\Http\Controllers\UniteController;
-use App\Http\Controllers\PosteController;
-use App\Http\Controllers\GpCalendrierEmployeController;
-use App\Http\Controllers\RegleCompEmployeController;
-use App\Http\Controllers\GpBanqueController;
-use App\Http\Controllers\GpAgenceController;
-use App\Http\Controllers\GpCompteBancaireController;
-use App\Http\Controllers\SocieteController;
-use App\Http\Controllers\GpBonSortieController;
+// use App\Http\Controllers\ServiceController;
+// use App\Http\Controllers\UniteController;
+// use App\Http\Controllers\PosteController;
+// use App\Http\Controllers\GpCalendrierEmployeController;
+// use App\Http\Controllers\RegleCompEmployeController;
+// use App\Http\Controllers\GpBanqueController;
+// use App\Http\Controllers\GpAgenceController;
+// use App\Http\Controllers\GpCompteBancaireController;
+// use App\Http\Controllers\SocieteController;
+// use App\Http\Controllers\GpBonSortieController;
 
-use App\Http\Controllers\GroupConstanteController;
-use App\Http\Controllers\GroupRubriqueController;
-use App\Http\Controllers\TypeRubriqueController;
-use App\Http\Controllers\MemoController;
-use App\Http\Controllers\RubriqueController;
-use App\Http\Controllers\MemosConstanteController;
-use App\Http\Controllers\ImprimableController;
-use App\Http\Controllers\MoisClotureController;
-use App\Http\Controllers\RappelSalaireController;
-use App\Http\Controllers\ProprieteController;
-use App\Http\Controllers\CalculController;
-use App\Http\Controllers\TypeConstanteController;
+// use App\Http\Controllers\GroupConstanteController;
+// use App\Http\Controllers\GroupRubriqueController;
+// use App\Http\Controllers\TypeRubriqueController;
+// use App\Http\Controllers\MemoController;
+// use App\Http\Controllers\RubriqueController;
+// use App\Http\Controllers\MemosConstanteController;
+// use App\Http\Controllers\ImprimableController;
+// use App\Http\Controllers\MoisClotureController;
+// use App\Http\Controllers\RappelSalaireController;
+// use App\Http\Controllers\ProprieteController;
+// use App\Http\Controllers\CalculController;
+// use App\Http\Controllers\TypeConstanteController;
 
 
 
-use App\Http\Controllers\ConstanteController;
-use App\Http\Controllers\BultinModelController;
-use App\Http\Controllers\ThemeBultinModelController;
-use App\Http\Controllers\GpEmployeBulletinController;
-use App\Http\Controllers\GpGroupPaieController;
-use App\Http\Controllers\GpCongeController;
-use App\Http\Controllers\GpDemandeCongeController;
+// use App\Http\Controllers\ConstanteController;
+// use App\Http\Controllers\BultinModelController;
+// use App\Http\Controllers\ThemeBultinModelController;
+// use App\Http\Controllers\GpEmployeBulletinController;
+// use App\Http\Controllers\GpGroupPaieController;
+// use App\Http\Controllers\GpCongeController;
+// use App\Http\Controllers\GpDemandeCongeController;
 
 
 
@@ -601,40 +605,64 @@ Route::post("/login", [AuthController::class, 'login']);
     //logout
      Route::post("/logout", [AuthController::class, 'logout']);
 
-// Routes pour mutuelles (temporaire sans auth)
-Route::get('/mutuelles', [MutuelleController::class, 'index']);
-Route::post('/mutuelles', [MutuelleController::class, 'store']);
-Route::get('/mutuelles/{id}', [MutuelleController::class, 'show']);
-Route::put('/mutuelles/{id}', [MutuelleController::class, 'update']);
-Route::delete('/mutuelles/{id}', [MutuelleController::class, 'destroy']);
-// Route spécifique pour récupérer les régimes d'une mutuelle
-Route::get('/mutuelles/{mutuelle_id}/regimes', [MutuelleController::class, 'regimes']);
+// Routes pour mutuelles
+Route::get('/mutuelle/dashboard-stats', [MutuelleDashboardController::class, 'dashboardStats']);
+Route::prefix('mutuelles')->group(function () {
+    // Dossiers
+    Route::get('/dossiers', [MutuelleDossierController::class, 'index']);
+    Route::get('/dossiers/{numero_dossier}', [MutuelleDossierController::class, 'show'])->where('numero_dossier', '.*');
+    Route::get('/dossiers/{employe}/documents', [MutuelleDocumentController::class, 'index']);
+    Route::get('/dossiers/{employe}/operations', [MutuelleOperationController::class, 'indexByEmploye']);
+    Route::post('/dossiers/{employe}/documents', [MutuelleDocumentController::class, 'storeByEmploye']);
+    Route::post('/dossiers/{employe}/operations', [MutuelleOperationController::class, 'storeByEmploye']);
 
-// Routes pour régimes mutuelle (temporaire sans auth)
+    // Mutuelles
+    Route::get('/', [MutuelleController::class, 'index']);
+    Route::get('/{id}', [MutuelleController::class, 'show']);
+    Route::get('/{mutuelle_id}/regimes', [MutuelleController::class, 'regimes']);
+    Route::post('/', [MutuelleController::class, 'store']);
+    Route::put('/{id}', [MutuelleController::class, 'update']);
+    Route::delete('/{id}', [MutuelleController::class, 'destroy']);
+
+    // Operations (General)
+    Route::put('/operations/{operation}', [MutuelleOperationController::class, 'update']);
+    Route::delete('/operations/{operation}', [MutuelleOperationController::class, 'destroy']);
+
+    // Documents (General)
+    Route::post('/documents', [MutuelleDocumentController::class, 'store']);
+    Route::delete('/documents/{document}', [MutuelleDocumentController::class, 'destroy']);
+
+    // Dashboard stats
+    Route::get('/dashboard-stats', [MutuelleDashboardController::class, 'dashboardStats']);
+});
+
+// RÃ©gimes & Affiliations (Public/Read)
 Route::get('/regimes-mutuelle', [RegimeMutuelleController::class, 'index']);
-Route::post('/regimes-mutuelle', [RegimeMutuelleController::class, 'store']);
 Route::get('/regimes-mutuelle/{id}', [RegimeMutuelleController::class, 'show']);
-Route::put('/regimes-mutuelle/{id}', [RegimeMutuelleController::class, 'update']);
-Route::delete('/regimes-mutuelle/{id}', [RegimeMutuelleController::class, 'destroy']);
 Route::get('/regimes-mutuelle/mutuelle/{mutuelle_id}', [RegimeMutuelleController::class, 'getByMutuelle']);
 
-// Routes pour employés éligibles (temporaire sans auth)
 Route::get('/employes/eligibles-mutuelle', [AffiliationMutuelleController::class, 'employesEligibles']);
-
-// Routes pour affiliations mutuelle (temporaire sans auth)
+Route::get('/employes/affilies-mutuelle', [AffiliationMutuelleController::class, 'employesAffilies']);
+Route::get('/employes/{id}/affiliations-mutuelle', [AffiliationMutuelleController::class, 'getByEmploye']);
 Route::get('/affiliations-mutuelle', [AffiliationMutuelleController::class, 'index']);
-Route::post('/affiliations-mutuelle', [AffiliationMutuelleController::class, 'store']);
 Route::get('/affiliations-mutuelle/{id}', [AffiliationMutuelleController::class, 'show']);
+
+Route::get('/departements/hierarchy', [DepartementController::class, 'getHierarchy']);
+
+// Actions pour RÃ©gimes & Affiliations
+Route::post('/regimes-mutuelle', [RegimeMutuelleController::class, 'store']);
+Route::put('/regimes-mutuelle/{id}', [RegimeMutuelleController::class, 'update']);
+Route::delete('/regimes-mutuelle/{id}', [RegimeMutuelleController::class, 'destroy']);
+Route::post('/affiliations-mutuelle', [AffiliationMutuelleController::class, 'store']);
 Route::put('/affiliations-mutuelle/{id}', [AffiliationMutuelleController::class, 'update']);
 Route::delete('/affiliations-mutuelle/{id}', [AffiliationMutuelleController::class, 'destroy']);
 Route::put('/affiliations-mutuelle/{id}/resilier', [AffiliationMutuelleController::class, 'resilier']);
 
-
 Route::middleware('auth:sanctum')->group(function () {
-
     Route::post("/register", [AuthController::class, 'register']);
     Route::get("/user", [AuthController::class, 'user']);
-    Route::apiResource('calendrie', CalendrieController::class);
+    // Route::apiResource('calendrie', CalendrieController::class);
+
 
 
 
@@ -648,21 +676,21 @@ Route::middleware('auth:sanctum')->group(function () {
 
 
 // Route::apiResource('pays', PaysController::class);
-Route::apiResource('villes', VilleController::class);
-Route::apiResource('communes', CommuneController::class);
-Route::get('/villes', [VilleController::class, 'getVilles']);
+// Route::apiResource('villes', VilleController::class);
+// Route::apiResource('communes', CommuneController::class);
+// Route::get('/villes', [VilleController::class, 'getVilles']);
 
-Route::get('/communes', [CommuneController::class, 'getCommunes']);
+// Route::get('/communes', [CommuneController::class, 'getCommunes']);
 
-Route::apiResource('postes ', PosteController::class);
-Route::get('postes/{id}/hierarchy', [PosteController::class, 'getHierarchy']);
+// Route::apiResource('postes ', PosteController::class);
+// Route::get('postes/{id}/hierarchy', [PosteController::class, 'getHierarchy']);
 
-Route::apiResource('services', ServiceController::class);
-Route::apiResource('unites', UniteController::class);
+// Route::apiResource('services', ServiceController::class);
+// Route::apiResource('unites', UniteController::class);
 
 Route::get('/departements/{id}/services', [DepartementController::class, 'getServices']);
-Route::get('/services/{id}/unites', [ServiceController::class, 'getUnitesByService']);
-Route::get('/unites/{id}/postes', [PosteController::class, 'getPostesByUnite']);
+// Route::get('/services/{id}/unites', [ServiceController::class, 'getUnitesByService']);
+// Route::get('/unites/{id}/postes', [PosteController::class, 'getPostesByUnite']);
 
 
 
@@ -674,78 +702,78 @@ Route::delete('/departements/{departement}', [DepartementController::class, 'des
 Route::get('/departements/{departement}/children', [DepartementController::class, 'children']);
 Route::post('/departements/{departement}/children', [DepartementController::class, 'storeChild']);
 
-Route::apiResource('calendriers-employes', GpCalendrierEmployeController::class);
+// Route::apiResource('calendriers-employes', GpCalendrierEmployeController::class);
 // Route::apiResource('calendrie', CalendrieController::class);
 Route::get('/departements/employes', [EmployeController::class, 'index']);
-Route::apiResource('regles-comp-employes', RegleCompEmployeController::class);
+// Route::apiResource('regles-comp-employes', RegleCompEmployeController::class);
 
 
 
 
-Route::apiResource('banque', GpBanqueController::class);
-Route::apiResource('agences', GpAgenceController::class);
-Route::apiResource('comptes-bancaires', GpCompteBancaireController::class);
+// Route::apiResource('banque', GpBanqueController::class);
+// Route::apiResource('agences', GpAgenceController::class);
+// Route::apiResource('comptes-bancaires', GpCompteBancaireController::class);
 
 
 
 
 // Routes pour les constantes
-Route::apiResource('type-constantes', TypeConstanteController::class);
-Route::apiResource('constantes', ConstanteController::class);
+// Route::apiResource('type-constantes', TypeConstanteController::class);
+// Route::apiResource('constantes', ConstanteController::class);
 
 
 
 // Routes pour les constantes et groupes de constantes
-Route::apiResource('constante', ConstanteController::class);
-Route::apiResource('group-constantes', GroupConstanteController::class);
+// Route::apiResource('constante', ConstanteController::class);
+// Route::apiResource('group-constantes', GroupConstanteController::class);
 
 // Routes pour les rubriques et leurs composants
-Route::apiResource('group-rubriques', GroupRubriqueController::class);
-Route::apiResource('type-rubriques', TypeRubriqueController::class);
-Route::apiResource('memos', MemoController::class);
-Route::apiResource('rubriques', RubriqueController::class);
+// Route::apiResource('group-rubriques', GroupRubriqueController::class);
+// Route::apiResource('type-rubriques', TypeRubriqueController::class);
+// Route::apiResource('memos', MemoController::class);
+// Route::apiResource('rubriques', RubriqueController::class);
 
-// Routes spéciales pour les rubriques incomplètes/complètes
-Route::get('/rubriques/incomplete', [RubriqueController::class, 'getIncomplete']);
-Route::post('/rubriques/{rubrique}/mark-complete', [RubriqueController::class, 'markAsComplete']);
+// Routes spÃ©ciales pour les rubriques incomplÃ¨tes/complÃ¨tes
+// Route::get('/rubriques/incomplete', [RubriqueController::class, 'getIncomplete']);
+// Route::post('/rubriques/{rubrique}/mark-complete', [RubriqueController::class, 'markAsComplete']);
 
-Route::apiResource('memos-constantes', MemosConstanteController::class);
-Route::apiResource('imprimables', ImprimableController::class);
-Route::apiResource('mois-clotures', MoisClotureController::class);
-Route::apiResource('rappel-salaires', RappelSalaireController::class);
-Route::apiResource('proprietes', ProprieteController::class);
+// Route::apiResource('memos-constantes', MemosConstanteController::class);
+// Route::apiResource('imprimables', ImprimableController::class);
+// Route::apiResource('mois-clotures', MoisClotureController::class);
+// Route::apiResource('rappel-salaires', RappelSalaireController::class);
+// Route::apiResource('proprietes', ProprieteController::class);
 
-// Route spécialisée pour la liaison Rubriques ↔ Calculs - Reconstruction de formule
-Route::post('rubriques/{rubrique}/rebuild-formule', [RubriqueController::class, 'rebuildFormule']);
+// Route spÃ©cialisÃ©e pour la liaison Rubriques â†” Calculs - Reconstruction de formule
+// Route::post('rubriques/{rubrique}/rebuild-formule', [RubriqueController::class, 'rebuildFormule']);
 
 // Routes pour les calculs
-Route::apiResource('calculs', CalculController::class);
+// Route::apiResource('calculs', CalculController::class);
 
-// Route pour récupérer les calculs par groupe
-Route::get('/calculs/group/{groupId}', [CalculController::class, 'getByGroup']);
+// Route pour rÃ©cupÃ©rer les calculs par groupe
+// Route::get('/calculs/group/{groupId}', [CalculController::class, 'getByGroup']);
 
 // <---------------------------- api SALMA -------------------------->
-Route::apiResource('bultinmodels',BultinModelController::class);
-Route::get('/bultinmodels/{id}/rubriques', [BultinModelController::class, 'getRubriques']);
-Route::post('/bultinmodels/{id}/rubriques', [BultinModelController::class, 'attachRubriques']);
+// Route::apiResource('bultinmodels',BultinModelController::class);
+// Route::get('/bultinmodels/{id}/rubriques', [BultinModelController::class, 'getRubriques']);
+// Route::post('/bultinmodels/{id}/rubriques', [BultinModelController::class, 'attachRubriques']);
 
 
-Route::get('/allrubriques', [RubriqueController::class, 'allrubrique']);
-Route::get('/constantesbultinmodels', [ConstanteController::class, 'allconstante']);
-Route::get('/bultinmodels/{id}/constantes', [BultinModelController::class, 'getConstantes']);
-Route::post('/bultinmodels/{id}/constantes', [BultinModelController::class, 'attachConstantes']);
-Route::delete('/bultinmodels/{bultinModel}/rubriques/{rubrique}', [BultinModelController::class, 'detachRubrique']);
-Route::delete('/bultinmodels/{bultinModel}/constantes/{constante}', [BultinModelController::class, 'detachConstante']);
-Route::post('/bultinmodels/{id}/duplicate', [BultinModelController::class, 'duplicate']);
-Route::put('/rubriques/{id}/ordre', [BultinModelController::class, 'updateOrdreRubrique']);
-Route::put('/constantes/{id}/ordre', [BultinModelController::class, 'updateOrdreConstante']);
-Route::post('/constantes/unlink-multiple', [BultinModelController::class, 'unlinkMultipleConstante']);
-Route::post('/rubriques/unlink-multiple', [BultinModelController::class, 'UnlikMultipleRubrique']);
+// Route::get('/allrubriques', [RubriqueController::class, 'allrubrique']);
+// Route::get('/constantesbultinmodels', [ConstanteController::class, 'allconstante']);
+// Route::get('/bultinmodels/{id}/constantes', [BultinModelController::class, 'getConstantes']);
+// Route::post('/bultinmodels/{id}/constantes', [BultinModelController::class, 'attachConstantes']);
+// Route::delete('/bultinmodels/{bultinModel}/rubriques/{rubrique}', [BultinModelController::class, 'detachRubrique']);
+// Route::delete('/bultinmodels/{bultinModel}/constantes/{constante}', [BultinModelController::class, 'detachConstante']);
+// Route::post('/bultinmodels/{id}/duplicate', [BultinModelController::class, 'duplicate']);
+// Route::put('/rubriques/{id}/ordre', [BultinModelController::class, 'updateOrdreRubrique']);
+// Route::put('/constantes/{id}/ordre', [BultinModelController::class, 'updateOrdreConstante']);
+// Route::post('/constantes/unlink-multiple', [BultinModelController::class, 'unlinkMultipleConstante']);
+// Route::post('/rubriques/unlink-multiple', [BultinModelController::class, 'UnlikMultipleRubrique']);
 
 //pour theme
-Route::apiResource('themes',ThemeBultinModelController::class);
-Route::put('/themes/{id}', [ThemeBultinModelController::class, 'update']);
-Route::post('/themes/{id}/definir-par-defaut', [ThemeBultinModelController::class, 'definirParDefaut']);
+// Route::apiResource('themes',ThemeBultinModelController::class);
+// Route::put('/themes/{id}', [ThemeBultinModelController::class, 'update']);
+// Route::post('/themes/{id}/definir-par-defaut', [ThemeBultinModelController::class, 'definirParDefaut']);
 
 // <---------------------------- api IKRAM -------------------------->
 
@@ -754,47 +782,20 @@ Route::post('/themes/{id}/definir-par-defaut', [ThemeBultinModelController::clas
 //route afficher department
 // routes/api.php
 
-Route::get('departements/hierarchy', [DepartementController::class, 'getHierarchy']);
 
-Route::get('/departements/{id}', [DepartementController::class, 'show']);
-Route::get('/constantes-rubriques', [ConstantesRubriquesController::class, 'index']);
-Route::post('/employes/{employe}/bulletins', [GpEmployeBulletinController::class, 'store']);
-
-
-
-
-Route::get('/groupes-paie/{id}/rubriques', [GpGroupPaieController::class, 'getRubriques']);
-Route::post('/groupes-paie/{id}/rubriques', [GpGroupPaieController::class, 'attachRubriques']);
-
-Route::delete('groupes-paie/{groupPaie}/rubriques/{rubrique}', [GpGroupPaieController::class, 'detachRubrique']);
-
-Route::apiResource('groupes-paie', GpGroupPaieController::class);
-Route::apiResource('gp_bon_sortie', GpBonSortieController::class);
-Route::get('/employes/dashboard-stats', [EmployeController::class, 'getDashboardStats']);
-Route::get('/total-departemet', [DepartementController::class, 'TotalDepartemet']);
-
-
-
-
-
-
-
-
-
-
-Route::post('/import-employes',[EmployeController::class , 'import']);
+    Route::get('/departements/{id}', [DepartementController::class, 'show']);
+    // Route::post('/import-employes',[EmployeController::class , 'import']);
+});
 
 //societe
-Route::apiResource('societes', SocieteController::class);
+// Route::apiResource('societes', SocieteController::class);
 Route::get('/employee-history', [EmployeDepartementController::class, 'getEmployeeHistory']);
 
 
-Route::get('/conge', [GpCongeController::class, 'index']);
+// Route::get('/conge', [GpCongeController::class, 'index']);
 
-Route::apiResource('demandes-conges', GpDemandeCongeController::class);
-Route::apiResource('groupe-arrondi', GroupeArrondiController::class);
-
-
+// Route::apiResource('demandes-conges', GpDemandeCongeController::class);
+// Route::apiResource('groupe-arrondi', GroupeArrondiController::class);
 
 
 
@@ -817,6 +818,9 @@ Route::apiResource('groupe-arrondi', GroupeArrondiController::class);
 
 
 
+
+
+/*
     //produits
     Route::get('produits', [ProduitController::class, 'index']);
     Route::get('produits/{produit}', [ProduitController::class, 'show']);
@@ -830,6 +834,7 @@ Route::apiResource('groupe-arrondi', GroupeArrondiController::class);
     Route::get('fournisseurs/{fournisseur}', [FournisseurController::class, 'show']);
     Route::put('fournisseurs/{fournisseur}', [FournisseurController::class, 'update']);
     Route::delete('fournisseurs/{fournisseur}', [FournisseurController::class, 'destroy']);
+*/
 
 
 
@@ -842,6 +847,7 @@ Route::apiResource('groupe-arrondi', GroupeArrondiController::class);
 
 
     Route::apiResource('/roles', RoleController::class);
+/*
     Route::apiResource('/categories', CategorieController::class);
 
     //zone
@@ -880,20 +886,20 @@ Route::apiResource('groupe-arrondi', GroupeArrondiController::class);
     Route::delete('/vehicule-livreurs/{id}', [VehiculeLivreurController::class, 'destroy']);
 
 
-    // Définition des routes pour les site clients
+    // DÃ©finition des routes pour les site clients
     Route::get('siteclients', [SiteClientController::class, 'index']); // Route pour obtenir tous les site clients
     Route::get('siteclients/{siteclient}', [SiteClientController::class, 'show']);
     Route::put('siteclients/{siteclient}', [SiteClientController::class, 'update']);
     Route::post('siteclients', [SiteClientController::class, 'store']);
     Route::delete('siteclients/{siteclient}', [SiteClientController::class, 'destroy']);
-    // Route pour obtenir les site clients associés à un client spécifique
+    // Route pour obtenir les site clients associÃ©s Ã  un client spÃ©cifique
     Route::get('clients/{clientId}/siteclients', [ClientController::class, 'siteclients']);
 
     Route::get('clients/{clientId}/bonslivraison', [ClientController::class, 'bonsLivraisonClient']);
 
     Route::apiResource('/devises', DevisController::class);
     Route::apiResource('/lignedevis', LigneDevisController::class);
-    // Route pour obtenir les lignedevis associés à un devis spécifique
+    // Route pour obtenir les lignedevis associÃ©s Ã  un devis spÃ©cifique
     Route::get('devises/{devisId}/lignedevis', [DevisController::class, 'lignedevis']);
     //Factures
     Route::apiResource('/factures', FactureController::class);
@@ -955,13 +961,14 @@ Route::delete('/chiffre-affaire/{id}', [ChiffreAffaireController::class, 'destro
 
 Route::apiResource('/devises', DevisController::class);
 Route::apiResource('/ligneDevis', LigneDevisController::class);
-// Route pour obtenir les lignedevis associés à un devis spécifique
+// Route pour obtenir les lignedevis associÃ©s Ã  un devis spÃ©cifique
 Route::get('devises/{devisId}/ligneDevis', [DevisController::class, 'lignedevis']);
 Route::post('devises/{devisId}/ligneDevis', [DevisController::class, 'lignedevis']);
 Route::put('devises/{devisId}/ligneDevis', [DevisController::class, 'lignedevis']);
 Route::delete('devises/{devisId}/ligneDevis', [DevisController::class, 'lignedevis']);
 
 
+/*
 //Ligneentrercompte
 Route::apiResource('/ligneentrercompte',LigneentrercompteController::class);
 //Route for EntrerBanque
@@ -979,8 +986,11 @@ Route::put('/reclamations/{id}', [ReclamationController::class, 'update']);
 Route::delete('/reclamations/{id}', [ReclamationController::class, 'destroy']);
 
 Route::apiResource('/encaissements', EncaissementController::class,);
+*/
 
 
+
+/*
 Route::apiResource('/ligneencaissement', LigneencaissementController::class,);
 
 //compte
@@ -989,7 +999,7 @@ Route::apiResource('/comptes', ComptesController::class,);
 Route::apiResource('/factures', FactureController::class);
 
 Route::apiResource('/ligneFacture', LigneFactureController::class);
-// Route pour obtenir les lignedevis associés à un devis spécifique
+// Route pour obtenir les lignedevis associÃ©s Ã  un devis spÃ©cifique
 Route::get('factures/{facturesId}/ligneFacture', [FactureController::class, 'lignefacture']);
 Route::post('factures/{facturesId}/ligneFacture', [FactureController::class, 'lignefacture']);
 Route::put('factures/{facturesId}/ligneFacture', [FactureController::class, 'lignefacture']);
@@ -998,7 +1008,7 @@ Route::delete('factures/{facturesId}/ligneFacture', [FactureController::class, '
 //bon livraison
 Route::apiResource('/livraisons', BonLivraisonController::class);
 Route::apiResource('/lignelivraisons', LigneLivraisonController::class);
-// Route pour obtenir les lignedevis associés à un devis spécifique
+// Route pour obtenir les lignedevis associÃ©s Ã  un devis spÃ©cifique
 Route::get('livraisons/{livraisonsId}/lignelivraisons', [BonLivraisonController::class, 'lignelivraison']);
 Route::post('livraisons/{livraisonsId}/lignelivraisons', [BonLivraisonController::class, 'lignelivraison']);
 Route::put('livraisons/{livraisonsId}/lignelivraisons', [BonLivraisonController::class, 'lignelivraison']);
@@ -1007,6 +1017,7 @@ Route::delete('livraisons/{livraisonsId}/lignelivraisons', [BonLivraisonControll
 
 
 //clients
+/*
 Route::get('clients', [ClientController::class, 'index']);
 Route::post('clients', [ClientController::class, 'store']);
 Route::get('clients/{client}', [ClientController::class, 'show']);
@@ -1014,6 +1025,7 @@ Route::put('clients/{client}', [ClientController::class, 'update']);
 Route::delete('clients/{client}', [ClientController::class, 'destroy']);
     
 
+/*
 Route::get('/groupes', [GroupeClientController::class, 'index']);
 Route::post('/groupes', [GroupeClientController::class, 'store']);
 Route::get('/groupes/{Id_groupe}', [GroupeClientController::class, 'show']);
@@ -1034,14 +1046,18 @@ Route::post('/offres-groupe', [OffreGroupeController::class, 'store']);
 Route::get('/offres-groupe/{id}', [OffreGroupeController::class, 'show']);
 Route::put('/offres-groupe/{id}', [OffreGroupeController::class, 'update']);
 Route::delete('/offres-groupe/{id}', [OffreGroupeController::class, 'destroy']);
+/*
 Route::delete('/offres-groupe/{id}', [OffreGroupeController::class, 'removeOffreFromGroup']);
-Route::put('offres/{id}/update-groupes', [OffreController::class, 'updateGroupes']);
-Route::put('/offres/{id}/update-groupes', [OffreController::class, 'updateGroupes']);
-Route::apiResource('/offres', OffreController::class);
-// Resource routes for OffreDetailController
-Route::apiResource('/offre_details', OffreDetailController::class);
-// Route to get OffreDetails associated with a specific Offre
-Route::get('offres/{offreId}/offre_details', [OffreController::class, 'offreDetails']);
+
+// Route::put('offres/{id}/update-groupes', [OffreController::class, 'updateGroupes']);
+// Route::put('/offres/{id}/update-groupes', [OffreController::class, 'updateGroupes']);
+// Route::apiResource('/offres', OffreController::class);
+// // Resource routes for OffreDetailController
+// Route::apiResource('/offre_details', OffreDetailController::class);
+// // Route to get OffreDetails associated with a specific Offre
+// Route::get('offres/{offreId}/offre_details', [OffreController::class, 'offreDetails']);
+*/
+
 
 
 
@@ -1116,19 +1132,20 @@ Route::get('offres/{offreId}/offre_details', [OffreController::class, 'offreDeta
 
 
 
-// Route::get('/departements', [DepartementController::class, 'index']);
-// Route::post('/departements', [DepartementController::class, 'store']);
-// Route::put('/departements/{departement}', [DepartementController::class, 'update']);
-// Route::delete('/departements/{departement}', [DepartementController::class, 'destroy']);
-// Route::get('/departements/{departement}/children', [DepartementController::class, 'children']); // Fetch child departments
-// Route::post('/departements/{departement}/children', [DepartementController::class, 'storeChild']); // Create a department inside another
+/*
+Route::get('/departements', [DepartementController::class, 'index']);
+Route::post('/departements', [DepartementController::class, 'store']);
+Route::put('/departements/{departement}', [DepartementController::class, 'update']);
+Route::delete('/departements/{departement}', [DepartementController::class, 'destroy']);
+Route::get('/departements/{departement}/children', [DepartementController::class, 'children']); // Fetch child departments
+Route::post('/departements/{departement}/children', [DepartementController::class, 'storeChild']); // Create a department inside another
 
 
 
 // Add this route to handle employees within a specific department
 
 // Route::post('/departements/employes', [EmployeController::class, 'storeEmployeForDepartement']);
-
+*/
 Route::put('/employes/{employe}', [EmployeController::class, 'update']);
 Route::delete('/employes/{employe}', [EmployeController::class, 'destroy']);
 
@@ -1147,6 +1164,7 @@ Route::put('/employe-departements/update', [EmployeDepartementController::class,
 // Route::get('/employee-history', [EmployeDepartementController::class, 'getEmployeeHistory']);
 // Route::get('departements/hierarchy', [DepartementController::class, 'getHierarchy']);
 
+/*
 Route::get('/contrats', [ContratController::class, 'index']);
 Route::post('/contrats', [ContratController::class, 'store']);
 Route::get('/contrats/{id}', [ContratController::class, 'show']);
@@ -1188,12 +1206,12 @@ Route::get('/detail-motif-absences', [DetailMotifAbsenceController::class, 'inde
     
 
 Route::apiResource('horaires-periodiques', HorairePeriodiqueController::class);
-Route::apiResource('details-periodiques', DetailsPeriodiqueController::class);
+// Route::apiResource('details-periodiques', DetailsPeriodiqueController::class);
 
 
-Route::apiResource('details-calendrie', DetailsCalendrieController::class);
+// Route::apiResource('details-calendrie', DetailsCalendrieController::class);
 // Route::apiResource('calendrie', CalendrieController::class);
-Route::apiResource('regle-compensations', RegleCompensationController::class);
+// Route::apiResource('regle-compensations', RegleCompensationController::class);
 Route::apiResource('penalites', PenaliteController::class);
 // Route::apiResource('details-regles', DetailsRegleController::class);
 Route::apiResource('arrondis', ArrondiController::class);
@@ -1204,10 +1222,9 @@ Route::apiResource('heures-travail', HeureTravailController::class);
 
 
 Route::apiResource('horaire-exceptionnel', HoraireExceptionnelController::class);
+*/
+
 
 // Routes pour Affiliation Mutuelle - DEPLACED vers le haut (lignes 605+)
 
-});
 
-
-  

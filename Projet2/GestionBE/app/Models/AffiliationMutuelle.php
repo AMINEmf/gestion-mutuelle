@@ -70,4 +70,12 @@ class AffiliationMutuelle extends Model
     {
         return $query->where('statut', 'RESILIE');
     }
+
+    /**
+     * Une affiliation peut avoir plusieurs opérations
+     */
+    public function operations()
+    {
+        return $this->hasMany(MutuelleOperation::class, 'affiliation_id');
+    }
 }

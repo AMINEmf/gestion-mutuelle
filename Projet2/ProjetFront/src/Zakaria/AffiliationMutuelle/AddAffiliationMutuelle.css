@@ -1,118 +1,286 @@
-/* Styles pour le formulaire d'ajout d'affiliation mutuelle - Style identique à AddEmp.css */
+/* Styles pour le formulaire d'ajout d'affiliation mutuelle - Panel latéral droit */
 
+/* Overlay semi-transparent pour sombre l'arrière-plan */
 .add-affiliation-overlay {
   position: fixed;
-  top: 9.4%;
-  left: 31%;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 2000;
+  display: flex;
   justify-content: flex-end;
-  z-index: 1000;
-  overflow-y: auto;
-  width: 68%;
-  height: calc(-160px + 100vh) !important;
-  border-radius: 8px;
-  background-color: #fff;
-  box-shadow: 0 0 10px rgba(0,0,0,0.1) !important;
-  animation: slideIn 0.3s ease-out;
+  animation: fadeIn 0.2s ease-out;
 }
 
-.add-affiliation-overlay::-webkit-scrollbar {
-  width: 8px !important;
+/* Animation d'apparition de l'overlay */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
 }
 
-.add-affiliation-overlay::-webkit-scrollbar-thumb {
-  background-color: rgba(0, 0, 0, 0.2) !important;
-  border-radius: 4px !important;
+/* Conteneur principal du panel */
+.add-affiliation-panel {
+  width: 480px;
+  height: 100vh;
+  background-color: #ffffff;
+  box-shadow: -4px 0 16px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  animation: slideInRight 0.3s ease-out;
+  position: relative;
+  overflow: hidden;
 }
 
-@keyframes slideIn {
+/* Animation de glissement depuis la droite */
+@keyframes slideInRight {
   from {
     transform: translateX(100%);
   }
+
   to {
     transform: translateX(0);
   }
 }
 
-.addper {
-  border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  overflow: auto;
-  min-height: 100%;
-}
-
-.addper .card-body {
-  background: #fff;
-  padding: 20px;
-}
-
-.form-control, .form-select {
-  border-radius: 5px;
-  border: 1px solid #ced4da;
-  padding: 10px;
-  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
-}
-
-.form-control:focus, .form-select:focus {
-  border-color: #007bff;
-  box-shadow: 0 0 0 0.2rem rgba(38, 143, 255, 0.25);
-}
-
-.row {
-  margin-bottom: 15px;
-  background-color: #fff;
-}
-
-.form-label {
-  font-weight: 600;
-  color: #374151;
-  margin-bottom: 8px;
-  display: flex;
-  align-items: center;
-}
-
-/* Loader CSS moved here or kept in component style tag */
-.loader {
-  width: 20px;
-  height: 20px;
-  border: 3px solid #ffffff;
-  border-bottom-color: transparent;
-  border-radius: 50%;
-  display: inline-block;
-  box-sizing: border-box;
-  animation: rotation 1s linear infinite;
-}
-
-@keyframes rotation {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-/* New Sidebar Style */
-.add-affiliation-sidebar {
-  width: 100%;
-  height: 100%;
-  max-height: calc(100vh - 150px);
-  border-radius: 8px;
-  background-color: #fff;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+/* Conteneur flexbox pour organiser header, body, footer */
+.panel-container {
   display: flex;
   flex-direction: column;
+  height: 100%;
   overflow: hidden;
-  animation: slideInSide 0.3s ease-out;
-  border: 1px solid #e0e0e0;
 }
 
-@keyframes slideInSide {
-  from {
-    opacity: 0;
-    transform: translateX(20px);
+/* Header du panel avec titre et bouton fermer */
+.panel-header {
+  flex-shrink: 0;
+  padding: 1.5rem 1.5rem 1rem;
+  border-bottom: 1px solid #e5e7eb;
+  background-color: #ffffff;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 10;
+}
+
+/* Body scrollable avec les sections du formulaire */
+.panel-body {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 1.5rem;
+  min-height: 0;
+}
+
+/* Customisation de la scrollbar pour le body */
+.panel-body::-webkit-scrollbar {
+  width: 6px;
+}
+
+.panel-body::-webkit-scrollbar-track {
+  background: #f3f4f6;
+}
+
+.panel-body::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 3px;
+}
+
+.panel-body::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
+
+/* Footer sticky avec les boutons d'action */
+.panel-footer {
+  flex-shrink: 0;
+  position: sticky;
+  bottom: 0;
+  padding: 1rem 1.5rem;
+  border-top: 1px solid #e5e7eb;
+  background-color: #ffffff;
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.05);
+  z-index: 10;
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+}
+
+/* Section headers avec icônes et bordure inférieure */
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+/* Styles des champs de formulaire */
+.form-control,
+.form-select {
+  border-radius: 6px;
+  border: 1px solid #e5e7eb;
+  font-size: 0.875rem;
+  height: 38px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form-control:focus,
+.form-select:focus {
+  border-color: #3a8a90;
+  box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.1);
+  outline: none;
+}
+
+/* Textarea spécifique */
+textarea.form-control {
+  height: auto;
+  min-height: 80px;
+  resize: vertical;
+}
+
+/* Labels des formulaires */
+.form-label {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #3a8a90;
+  margin-bottom: 0.5rem;
+  display: block;
+}
+
+/* Messages d'erreur */
+.text-danger {
+  font-size: 0.7rem;
+  color: #dc2626;
+  display: block;
+  margin-top: 0.25rem;
+}
+
+/* Messages d'aide */
+.text-muted {
+  font-size: 0.7rem;
+  color: #9ca3af;
+}
+
+/* Loader spinner pour les actions asynchrones */
+.loader {
+  border: 2px solid #f3f3f3;
+  border-top: 2px solid #3a8a90;
+  border-radius: 50%;
+  width: 16px;
+  height: 16px;
+  animation: spin 0.8s linear infinite;
+  display: inline-block;
+  vertical-align: middle;
+  margin-right: 0.5rem;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
   }
-  to {
-    opacity: 1;
-    transform: translateX(0);
+
+  100% {
+    transform: rotate(360deg);
   }
 }
 
-.add-affiliation-sidebar {
-  position: relative; /* Ensure absolute children are relative to this */
+/* Media queries pour responsive design */
+
+/* Pour écrans moyens (tablettes) */
+@media (max-width: 768px) {
+  .add-affiliation-panel {
+    width: 100%;
+    max-width: 100%;
+  }
+}
+
+/* Pour petits écrans (mobiles) */
+@media (max-width: 480px) {
+  .panel-header {
+    padding: 1rem;
+  }
+
+  .panel-body {
+    padding: 1rem;
+  }
+
+  .panel-footer {
+    padding: 0.75rem 1rem;
+    flex-direction: column;
+  }
+
+  .panel-footer button {
+    width: 100%;
+  }
+}
+
+/* Support pour les différents niveaux de zoom */
+@media screen and (min-resolution: 120dpi) and (max-resolution: 144dpi) {
+
+  /* Zoom 125% */
+  .add-affiliation-panel {
+    width: 420px;
+  }
+
+  .panel-body {
+    padding: 1.25rem;
+  }
+}
+
+@media screen and (min-resolution: 145dpi) and (max-resolution: 168dpi) {
+
+  /* Zoom 150% */
+  .add-affiliation-panel {
+    width: 380px;
+  }
+
+  .panel-body {
+    padding: 1rem;
+  }
+
+  .panel-footer {
+    padding: 0.875rem 1rem;
+  }
+}
+
+@media screen and (min-resolution: 169dpi) {
+
+  /* Zoom 175%+ */
+  .add-affiliation-panel {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .panel-body {
+    padding: 0.875rem;
+  }
+
+  .panel-footer {
+    padding: 0.75rem;
+  }
+}
+
+/* Gestion du zoom via CSS transform (alternatif) */
+@media (min-width: 1920px) {
+  .add-affiliation-panel {
+    width: 520px;
+  }
+}
+
+/* Support pour les très grands écrans */
+@media (min-width: 2560px) {
+  .add-affiliation-panel {
+    width: 600px;
+  }
+
+  .panel-body {
+    padding: 2rem;
+  }
 }

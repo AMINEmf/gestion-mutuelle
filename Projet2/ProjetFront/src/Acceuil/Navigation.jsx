@@ -1,4 +1,4 @@
-// export default Navigation;
+﻿// export default Navigation;
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
@@ -16,8 +16,8 @@ import {
   ListItemButton,
   Collapse,
 } from "@mui/material";
-import {   InputBase,Menu } from "@mui/material";
-import {  alpha } from "@mui/material/styles";
+import { InputBase, Menu } from "@mui/material";
+import { alpha } from "@mui/material/styles";
 
 
 
@@ -106,9 +106,9 @@ const AppBar = styled(MuiAppBar, {
     easing: theme.transitions.easing.sharp,
     duration: theme.transitions.duration.leavingScreen,
   }),
-   // <--------------------------- Couleur de Appbar ----------------------------------->
+  // <--------------------------- Couleur de Appbar ----------------------------------->
   backgroundColor: "#f9fafb",
-  boxShadow:"0 0 10px rgba(0,0,0,0.1)",
+  boxShadow: "0 0 10px rgba(0,0,0,0.1)",
 
   ...(open && {
     marginLeft: drawerWidth,
@@ -147,7 +147,7 @@ const SearchIconWrapper = styled("div")(({ theme }) => ({
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
-  color:"#2c3e50"
+  color: "#2c3e50"
 }));
 
 const StyledInputBase = styled(InputBase)(({ theme }) => ({
@@ -190,18 +190,18 @@ const SubMenuItem = styled(ListItem)(({ theme }) => ({
   borderLeft: "3px solid rgba(255, 255, 255, 0.2)",
   transition: "all 0.2s ease",
   color: "#e8f4f8",
-  
+
   "&:hover": {
     backgroundColor: "rgba(255, 255, 255, 0.15)",
     borderLeft: "3px solid #ffffff",
     transform: "translateX(2px)",
   },
-  
+
   "& .MuiListItemIcon-root": {
     color: "#b8dce5",
     minWidth: "36px",
   },
-  
+
   "& .MuiListItemText-root": {
     "& .MuiListItemText-primary": {
       fontSize: "0.875rem",
@@ -217,18 +217,18 @@ const MainMenuItem = styled(ListItem)(({ theme }) => ({
   marginRight: "8px",
   transition: "all 0.3s ease",
   color: "#ffffff",
-  
+
   "&:hover": {
     backgroundColor: "rgba(255, 255, 255, 0.1)",
     transform: "translateX(4px)",
     boxShadow: "0 2px 8px rgba(0, 0, 0, 0.2)",
   },
-  
+
   "& .MuiListItemIcon-root": {
     color: "#ffffff",
     minWidth: "40px",
   },
-  
+
   "& .MuiListItemText-root": {
     "& .MuiListItemText-primary": {
       fontSize: "0.95rem",
@@ -250,18 +250,18 @@ const LogoutButton = styled(ListItem)(({ theme }) => ({
   borderTop: "1px solid rgba(255, 255, 255, 0.1)",
   transition: "all 0.3s ease",
   cursor: "pointer",
-  
+
   "&:hover": {
     backgroundColor: "rgba(255, 255, 255, 0.1)",
     borderLeft: "4px solid #ff8a80",
   },
-  
+
   "& .MuiListItemIcon-root": {
     color: "rgba(255, 255, 255, 0.7)",
     minWidth: "40px",
     transition: "all 0.3s ease",
   },
-  
+
   "& .MuiListItemText-root": {
     "& .MuiListItemText-primary": {
       color: "rgba(255, 255, 255, 0.8)",
@@ -269,12 +269,12 @@ const LogoutButton = styled(ListItem)(({ theme }) => ({
       fontSize: "0.95rem",
     }
   },
-  
+
   "&:hover .MuiListItemIcon-root": {
     color: "#ff8a80",
     transform: "translateX(4px)",
   },
-  
+
   "&:hover .MuiListItemText-primary": {
     color: "#ff8a80",
   }
@@ -290,7 +290,7 @@ const StyledMenu = styled(Menu)(({ theme }) => ({
     border: '1px solid #e0e0e0',
     boxShadow: '0 8px 25px rgba(0,0,0,0.15)',
     padding: '8px',
-    
+
     '& .MuiMenuItem-root': {
       padding: '12px 16px',
       gap: '12px',
@@ -298,18 +298,18 @@ const StyledMenu = styled(Menu)(({ theme }) => ({
       margin: '4px 0',
       transition: 'all 0.2s ease',
       fontWeight: 500,
-      
+
       '&:hover': {
         backgroundColor: '#f5f5f5',
         transform: 'translateX(4px)',
       },
-      
+
       '& .MuiSvgIcon-root': {
         fontSize: 20,
         color: '#666',
         transition: 'color 0.2s ease',
       },
-      
+
       '&:hover .MuiSvgIcon-root': {
         color: '#37736f',
       }
@@ -449,11 +449,11 @@ const Navigation = () => {
     setIsSocieteOpen(!isSocieteOpen);
   };
 
- 
+
   const handleThemeClick = () => {
     setIsThemeOpen(!isThemeOpen);
   };
-  
+
 
 
   const isAuthenticated = localStorage.getItem("isAuthenticated");
@@ -532,12 +532,12 @@ const Navigation = () => {
           setUser(response.data);
           const permissionsData = response.data[0].roles[0].permissions;
 
-          // Récupérer les noms des permissions
+          // RÃ©cupÃ©rer les noms des permissions
           const permissionNames = permissionsData.map(
             (permission) => permission.name
           );
 
-          // Mettre à jour l'état des permissions
+          // Mettre Ã  jour l'Ã©tat des permissions
           setPermissions(permissionNames);
           console.log(permissionNames);
           console.log(response.data);
@@ -550,7 +550,7 @@ const Navigation = () => {
     };
 
     fetchUserData();
-  }, []); // Dépendance vide pour que ce useEffect s'exécute une seule fois après le montage initial
+  }, []); // DÃ©pendance vide pour que ce useEffect s'exÃ©cute une seule fois aprÃ¨s le montage initial
 
 
   const MyListItemButton = styled(ListItemButton)(({ theme }) => ({
@@ -579,12 +579,12 @@ const Navigation = () => {
     toggleOpen();
   };
 
-  const { title, searchQuery, setSearchQuery, onPrint, onExportPDF, onExportExcel } = useHeader();
+  const { title, searchQuery, setSearchQuery, onPrint, onExportPDF, onExportExcel, showSearch } = useHeader();
 
   return (
 
 
-    
+
     <ThemeProvider theme={defaultTheme}>
       <Box sx={{
         marginLeft: "-20px",
@@ -601,12 +601,12 @@ const Navigation = () => {
           cursor: "pointer",
         },
         "&::-webkit-scrollbar-track": {
-            backgroundColor: "#2c767c",
-            cursor: "pointer",
-          },
+          backgroundColor: "#2c767c",
+          cursor: "pointer",
+        },
       }}>
         <CssBaseline />
-        
+
 
 
         <AppBar position="absolute" open={open} className="beige-appbar">
@@ -643,18 +643,18 @@ const Navigation = () => {
 
 
 
-            <Typography 
-  component="h1"
-  variant="h6"
-  noWrap
-  sx={{ 
-    flexGrow: 1,
-    fontSize: "22px", 
-    fontWeight: 700, 
-    color: "#2c3e50", 
-    letterSpacing: "-0.025em" 
-  }}
->
+            <Typography
+              component="h1"
+              variant="h6"
+              noWrap
+              sx={{
+                flexGrow: 1,
+                fontSize: "22px",
+                fontWeight: 700,
+                color: "#2c3e50",
+                letterSpacing: "-0.025em"
+              }}
+            >
               {title}
             </Typography>
 
@@ -662,49 +662,49 @@ const Navigation = () => {
 
 
 
- 
-  
-
-            <Box sx={{ display: "flex", marginRight:'-1%' }}>
-            <Search>
-            <SearchIconWrapper>
-              <SearchIcon />
-            </SearchIconWrapper>
-            <StyledInputBase
-              placeholder="Recherche globale..."
-              inputProps={{ "aria-label": "search" }}
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-            {/* Icône ⋮ à l'intérieur de la barre */}
-            <IconButton color="#2c3e50" onClick={handleMenuOpen} size="small" style={{ marginLeft:'32%'}}>
-              <MoreVertIcon />
-            </IconButton>
-          </Search>
-
-          <StyledMenu
-  anchorEl={anchorEl}
-  open={openMenu}
-  onClose={handleMenuClose}
->
-  <MenuItem onClick={() => { handleMenuClose(); onPrint && onPrint(); }} disabled={!onPrint}>
-    <PrintIcon /> Imprimer le document
-  </MenuItem>
-  <MenuItem onClick={() => { handleMenuClose(); onExportPDF && onExportPDF(); }} disabled={!onExportPDF}>
-    <PictureAsPdfIcon /> Générer fichier PDF
-  </MenuItem>
-  <MenuItem onClick={() => { handleMenuClose(); onExportExcel && onExportExcel(); }} disabled={!onExportExcel}>
-  <FontAwesomeIcon icon={faFileExcel} style={{ fontSize: "17px", color: "grey" , marginBottom:'3px'}} /> Exporter vers Excel
-  </MenuItem>
-  
-</StyledMenu>
 
 
 
+            <Box sx={{ display: showSearch ? "flex" : "none", marginRight: '-1%' }}>
+              <Search>
+                <SearchIconWrapper>
+                  <SearchIcon />
+                </SearchIconWrapper>
+                <StyledInputBase
+                  placeholder="Recherche globale..."
+                  inputProps={{ "aria-label": "search" }}
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+                {/* IcÃ´ne â‹® Ã  l'intÃ©rieur de la barre */}
+                <IconButton color="#2c3e50" onClick={handleMenuOpen} size="small" style={{ marginLeft: '32%' }}>
+                  <MoreVertIcon />
+                </IconButton>
+              </Search>
+
+              <StyledMenu
+                anchorEl={anchorEl}
+                open={openMenu}
+                onClose={handleMenuClose}
+              >
+                <MenuItem onClick={() => { handleMenuClose(); onPrint && onPrint(); }} disabled={!onPrint}>
+                  <PrintIcon /> Imprimer le document
+                </MenuItem>
+                <MenuItem onClick={() => { handleMenuClose(); onExportPDF && onExportPDF(); }} disabled={!onExportPDF}>
+                  <PictureAsPdfIcon /> Générer fichier PDF
+                </MenuItem>
+                <MenuItem onClick={() => { handleMenuClose(); onExportExcel && onExportExcel(); }} disabled={!onExportExcel}>
+                  <FontAwesomeIcon icon={faFileExcel} style={{ fontSize: "17px", color: "grey", marginBottom: '3px' }} /> Exporter vers Excel
+                </MenuItem>
+
+              </StyledMenu>
 
 
-          {/* Icônes à côté */}
-          {/* <IconButton color="inherit">
+
+
+
+              {/* IcÃ´nes Ã  cÃ´tÃ© */}
+              {/* <IconButton color="inherit">
             <PrintIcon />
           </IconButton>
           <IconButton color="inherit">
@@ -714,7 +714,7 @@ const Navigation = () => {
             <TableViewIcon />
           </IconButton> */}
 
-        </Box>
+            </Box>
 
 
 
@@ -738,7 +738,7 @@ const Navigation = () => {
           </Toolbar>
         </AppBar>
 
-        
+
         <Drawer variant="permanent" open={open}>
           {/* <Toolbar
             sx={{
@@ -782,7 +782,7 @@ const Navigation = () => {
                 <ListItemText primary={``} />
               </ListItem>
             )}
-            <ListItem button component={Link} to="/" style={{ color: "white" }}     sx={{ "& .MuiListItemIcon-root": { minWidth: 56 } }}
+            <ListItem button component={Link} to="/" style={{ color: "white" }} sx={{ "& .MuiListItemIcon-root": { minWidth: 56 } }}
             >
               <ListItemIcon style={{ color: 'white' }}>
                 <HomeIcon style={{ fontSize: "1.6rem", color: "white" }} />
@@ -790,87 +790,6 @@ const Navigation = () => {
               </ListItemIcon>
               <ListItemText primary="Accueil" />
             </ListItem>
-           
-
-
-
-
-
-
-
-
-{/*-------------------------------- Menu Gestion des Employés -------------------------------------- */}
-
-
-  <ListItem
-    button
-    onClick={handleEmployeesClick}
-    sx={{ "& .MuiListItemIcon-root": { minWidth: 56 } }}
-    style={{ color: "white", display: "flex" }}
-  >
-    <ListItemIcon >
-    <PeopleIcon style={{ fontSize: "1.6rem", color: "white" }} />
-    </ListItemIcon>
-    <ListItemText primary="Gestion employés" />
-    {isEmployeesOpen ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
-  </ListItem>
-
-
-<Collapse in={isEmployeesOpen} timeout="auto" unmountOnExit>
-  <List component="div" disablePadding>
-
-    {permissions.includes("view_all_employes") && (
-    <SubMenuItem button component={Link} to="/employes">
-      <ListItemIcon>
-        <ListIcon />
-      </ListItemIcon>
-      <ListItemText primary="Gestion des Employés" />
-    </SubMenuItem>
-    )}
-
-    {permissions.includes("view_all_employee_histories") && (
-      <SubMenuItem button component={Link} to="/emphistorique">
-        <ListItemIcon>
-          <LocalShippingIcon />
-        </ListItemIcon>
-        <ListItemText primary="Historique" />
-      </SubMenuItem>
-    )}
-
-    
-  </List>
-</Collapse>
-
-
-{/*-------------------------------- Menu Gestion Affiliation Mutuelle -------------------------------------- */}
-<ListItem
-  button
-  style={{ color: "white", display: "flex" }}
-  sx={{ "& .MuiListItemIcon-root": { minWidth: 56 } }}
-  onClick={handleAffiliationMutuelleClick}
->
-  <ListItemIcon style={{ color: 'white' }}>
-    <SecurityIcon style={{ fontSize: "1.6rem", color: "white" }} />
-  </ListItemIcon>
-  <ListItemText primary="Gestion Affiliation Mutuelle" />
-  {isAffiliationMutuelleOpen ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
-</ListItem>
-
-<Collapse in={isAffiliationMutuelleOpen} timeout="auto" unmountOnExit>
-  <List component="div" disablePadding>
-    {permissions.includes("view_all_employes") && (
-    <SubMenuItem button component={Link} to="/affiliation-mutuelle">
-      <ListItemIcon>
-        <SecurityIcon />
-      </ListItemIcon>
-      <ListItemText primary="Affiliation Mutuelle" />
-    </SubMenuItem>
-    )}
-  </List>
-</Collapse>
-
-
-{/*-------------------------------- MEnu Planification  -------------------------------------- */}
 
 
 
@@ -880,71 +799,149 @@ const Navigation = () => {
 
 
 
-{/*-------------------------------- MEnu Traitement Paie  -------------------------------------- */}
+            {/*-------------------------------- Menu Gestion des EmployÃ©s -------------------------------------- */}
+
+
+            <ListItem
+              button
+              onClick={handleEmployeesClick}
+              sx={{ "& .MuiListItemIcon-root": { minWidth: 56 } }}
+              style={{ color: "white", display: "flex" }}
+            >
+              <ListItemIcon >
+                <PeopleIcon style={{ fontSize: "1.6rem", color: "white" }} />
+              </ListItemIcon>
+              <ListItemText primary="Gestion employés" />
+              {isEmployeesOpen ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
+            </ListItem>
+
+
+            <Collapse in={isEmployeesOpen} timeout="auto" unmountOnExit>
+              <List component="div" disablePadding>
+
+                {permissions.includes("view_all_employes") && (
+                  <SubMenuItem button component={Link} to="/employes">
+                    <ListItemIcon>
+                      <ListIcon />
+                    </ListItemIcon>
+                    <ListItemText primary="Gestion des employés" />
+                  </SubMenuItem>
+                )}
+
+                {permissions.includes("view_all_employee_histories") && (
+                  <SubMenuItem button component={Link} to="/emphistorique">
+                    <ListItemIcon>
+                      <LocalShippingIcon />
+                    </ListItemIcon>
+                    <ListItemText primary="Historique" />
+                  </SubMenuItem>
+                )}
+
+
+              </List>
+            </Collapse>
+
+
+            {/*-------------------------------- Menu Gestion Affiliation Mutuelle -------------------------------------- */}
+            <ListItem
+              button
+              style={{ color: "white", display: "flex" }}
+              sx={{ "& .MuiListItemIcon-root": { minWidth: 56 } }}
+              onClick={handleAffiliationMutuelleClick}
+            >
+              <ListItemIcon style={{ color: 'white' }}>
+                <SecurityIcon style={{ fontSize: "1.6rem", color: "white" }} />
+              </ListItemIcon>
+              <ListItemText primary="Gestion Affiliation Mutuelle" />
+              {isAffiliationMutuelleOpen ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
+            </ListItem>
+
+            <Collapse in={isAffiliationMutuelleOpen} timeout="auto" unmountOnExit>
+              <List component="div" disablePadding>
+                {permissions.includes("view_all_employes") && (
+                  <SubMenuItem button component={Link} to="/mutuelle/dashboard">
+                    <ListItemIcon>
+                      <SecurityIcon />
+                    </ListItemIcon>
+                    <ListItemText primary="Dashboard Mutuelle" />
+                  </SubMenuItem>
+                )}
+                {permissions.includes("view_all_employes") && (
+                  <SubMenuItem button component={Link} to="/affiliation-mutuelle">
+                    <ListItemIcon>
+                      <SecurityIcon />
+                    </ListItemIcon>
+                    <ListItemText primary="Affiliation Mutuelle" />
+                  </SubMenuItem>
+                )}
+                {permissions.includes("view_all_employes") && (
+                  <SubMenuItem button component={Link} to="/mutuelle/dossiers">
+                    <ListItemIcon>
+                      <SecurityIcon />
+                    </ListItemIcon>
+                    <ListItemText primary="Dossier Mutuelle" />
+                  </SubMenuItem>
+                )}
+              </List>
+            </Collapse>
+
+
+            {/*-------------------------------- MEnu Planification  -------------------------------------- */}
 
 
 
-{/*-------------------------------- MEnu Société  -------------------------------------- */}
-  <ListItem
-    button
-    style={{ color: "white", display: "flex" }}
-    sx={{ "& .MuiListItemIcon-root": { minWidth: 56 } }}
-    onClick={handleTraitementSocieteClick}
-  >
-    <ListItemIcon style={{ color: 'white' }}>
-      <BusinessIcon style={{ fontSize: "1.6rem", color: "white" }} />
-    </ListItemIcon>
-    <ListItemText primary="Société" />
-    {isTraitementPaieOpen ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
-  </ListItem>
-  
-<Collapse in={isSocieteOpen} timeout="auto" unmountOnExit>
-  <List component="div" disablePadding>
-    {permissions.includes("view_all_societes") && (
-      <SubMenuItem button component={Link} to="/societes">
-        <ListItemIcon style={{ color: 'white' }}>
-          <ListIcon />
-        </ListItemIcon>
-        <ListItemText primary="Société" />
-      </SubMenuItem>
-    )}
-    
-  
-  </List>
-</Collapse>
-
-
-          
- <ListItem
-                button
-                component={Link}
-                to="/users"
-                style={{ color: "white" }}
-              >
-                <ListItemIcon style={{ color: 'white' }}>
-                  <StarHalfIcon />
-                </ListItemIcon>
-                <ListItemText primary="Users" />
-              </ListItem>
 
 
 
 
 
 
+            {/*-------------------------------- MEnu Traitement Paie  -------------------------------------- */}
 
 
 
+            {/*-------------------------------- MEnu Société  -------------------------------------- */}
+            <ListItem
+              button
+              style={{ color: "white", display: "flex" }}
+              sx={{ "& .MuiListItemIcon-root": { minWidth: 56 } }}
+              onClick={handleTraitementSocieteClick}
+            >
+              <ListItemIcon style={{ color: 'white' }}>
+                <BusinessIcon style={{ fontSize: "1.6rem", color: "white" }} />
+              </ListItemIcon>
+              <ListItemText primary="Société" />
+              {isTraitementPaieOpen ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
+            </ListItem>
+
+            <Collapse in={isSocieteOpen} timeout="auto" unmountOnExit>
+              <List component="div" disablePadding>
+                {permissions.includes("view_all_societes") && (
+                  <SubMenuItem button component={Link} to="/societes">
+                    <ListItemIcon style={{ color: 'white' }}>
+                      <ListIcon />
+                    </ListItemIcon>
+                    <ListItemText primary="Société" />
+                  </SubMenuItem>
+                )}
+
+
+              </List>
+            </Collapse>
 
 
 
-
-
-
-
-
-
-{/*--------------------------------   -------------------------------------- */}
+            <ListItem
+              button
+              component={Link}
+              to="/users"
+              style={{ color: "white" }}
+            >
+              <ListItemIcon style={{ color: 'white' }}>
+                <StarHalfIcon />
+              </ListItemIcon>
+              <ListItemText primary="Users" />
+            </ListItem>
 
 
 
@@ -955,23 +952,42 @@ const Navigation = () => {
 
 
 
-        
-         
-           
+
+
+
+
+
+
+
+
+            {/*--------------------------------   -------------------------------------- */}
+
+
+
+
+
+
+
+
+
+
+
+
+
           </List>
 
           <LogoutButton
-  button
-  onClick={() => {
-    handleLogoutClick();
-    logout();
-  }}
->
-  <ListItemIcon>
-    <ExitToAppIcon  />
-  </ListItemIcon>
-  <ListItemText primary="Se déconnecter" />
-</LogoutButton>
+            button
+            onClick={() => {
+              handleLogoutClick();
+              logout();
+            }}
+          >
+            <ListItemIcon>
+              <ExitToAppIcon />
+            </ListItemIcon>
+            <ListItemText primary="Se déconnecter" />
+          </LogoutButton>
 
 
 
@@ -983,3 +999,4 @@ const Navigation = () => {
 };
 
 export default Navigation;
+

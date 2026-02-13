@@ -1,4 +1,4 @@
-import 'bootstrap/dist/css/bootstrap.min.css';
+﻿import 'bootstrap/dist/css/bootstrap.min.css';
 
 import './App.css'
 import { Routes, Route, useLocation } from 'react-router-dom';
@@ -8,6 +8,8 @@ import Navigation from './Acceuil/Navigation';
 import Dashboard from './Acceuil/Dashboard';
 import DepartementManager from './Zakaria/Employe/DepartementManager';
 import AffiliationMutuelleManagerSimple from './Zakaria/AffiliationMutuelle/AffiliationMutuelleManagerSimple';
+import MutuelleDashboard from './Zakaria/MutuelleDashboard/MutuelleDashboard';
+import DossierMutuelle from './Zakaria/MutuelleDossier/DossierMutuelle';
 
 import EmpHistorique from './Zakaria/EmpHistorique.jsx';
 
@@ -38,6 +40,8 @@ const App = () => {
 
             <Route path="/employes" element={<DepartementManager />} />
             <Route path="/affiliation-mutuelle" element={<AffiliationMutuelleManagerSimple />} />
+            <Route path="/mutuelle/dashboard" element={<MutuelleDashboard />} />
+            <Route path="/mutuelle/dossiers" element={<DossierMutuelle />} />
 
 
 
@@ -61,3 +65,4 @@ const App = () => {
 };
 
 export default App;
+

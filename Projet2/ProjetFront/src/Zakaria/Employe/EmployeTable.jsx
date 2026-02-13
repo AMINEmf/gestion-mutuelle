@@ -1312,502 +1312,550 @@ body {
 
   return (
 
-    <div style={{
+    <div className={showAddForm ? "container_employee with-split-view" : "container_employee"} style={{
       position: 'relative',
       top: "0",
       height: 'calc(100vh - 120px)',
-      flex: 1,
-      minWidth: 0,
-      overflow: 'auto'
-    }} className={`${isAddingEmploye ? "with-form" : "container_employee"}`}>
-      {/* Refreshing the key when adding/editing helps ensure state is fresh. */}
-      <div className="mt-4"   >
-        <div className="section-header mb-3">
-          <div className="d-flex align-items-center justify-content-between flex-wrap" style={{ gap: '16px' }}>
-            {/* Bloc titre */}
-            <div style={{ flex: '1 1 300px', minWidth: 0 }}>
-              <span className="section-title mb-1" style={{ fontSize: '1.2rem', fontWeight: 'bold', color: '#2c767c' }}>
-                <i className="fas fa-users me-2"></i>
-                Détails Employé
-              </span>
-              {!showAddForm && (
-                <p className="section-description text-muted mb-0">
-                  {filteredEmployees.length} employé
-                  {filteredEmployees.length > 1 ? 's' : ''} actuellement affiché
-                  {filteredEmployees.length > 1 ? 's' : ''}
-                </p>
-              )}
+      width: '100%',
+      overflow: 'hidden',
+      display: 'flex',
+    }}>
+      <style>
+        {`
+          .with-split-view .addemp-overlay {
+              position: relative !important;
+              top: 0 !important;
+              left: 0 !important;
+              width: 100% !important;
+              height: 100% !important;
+              box-shadow: none !important;
+              animation: none !important;
+          }
+        `}
+      </style>
+
+      {/* Colonne Gauche: Tableau + Filtres */}
+      <div style={{
+        flex: showAddForm ? '0 0 55%' : '1 1 100%',
+        overflow: 'auto',
+        height: '100%',
+        borderRight: showAddForm ? '2px solid #eef2f5' : 'none',
+        paddingRight: showAddForm ? '10px' : '0',
+        transition: 'all 0.3s ease'
+      }}>
+        {/* Refreshing the key when adding/editing helps ensure state is fresh. */}
+        <style>
+          {`
+          .custom-employe-header {
+              border-bottom: none !important;
+              padding-bottom: 15px;
+              margin-bottom: 25px;
+          }
+          .custom-employe-title {
+              color: #2c767c;
+              font-weight: bold;
+              font-size: 1.2rem;
+              display: flex;
+              align-items: center;
+          }
+          .custom-employe-desc {
+              color: #6c757d;
+              font-size: 0.9rem;
+              margin-bottom: 0;
+          }
+        `}
+        </style>
+        <div className="mt-4">
+          <div className="custom-employe-header mb-3">
+            <div className="d-flex align-items-center justify-content-between flex-wrap" style={{ gap: '16px' }}>
+              {/* Bloc titre */}
+              <div style={{ flex: '1 1 300px', minWidth: 0 }}>
+                <span className="custom-employe-title mb-1">
+                  <i className="fas fa-users me-2"></i>
+                  Détails Employé
+                </span>
+                {!showAddForm && (
+                  <p className="custom-employe-desc mb-0">
+                    {filteredEmployees.length} employé
+                    {filteredEmployees.length > 1 ? 's' : ''} actuellement affiché
+                    {filteredEmployees.length > 1 ? 's' : ''}
+                  </p>
+                )}
 
 
-            </div>
-            {/* Bloc Dropdowns */}
-            <div style={{ display: "flex", gap: "10px", alignItems: 'center', flexWrap: 'wrap' }}>
+              </div>
+              {/* Bloc Dropdowns */}
+              <div style={{ display: "flex", gap: "10px", alignItems: 'center', flexWrap: 'wrap' }}>
 
-              <FontAwesomeIcon
-                onClick={() => handleFiltersToggle && handleFiltersToggle(!filtersVisible)}
-                icon={filtersVisible ? faClose : faFilter}
-                color={filtersVisible ? 'green' : ''}
-                style={{
-                  cursor: "pointer",
-                  fontSize: "1.9rem",
-                  color: "#2c767c",
-                  marginTop: "1.3%",
-                  marginRight: "8px",
-                }}
-              />
-
-
-
-              {/* Bouton Ajouter */}
-              <Button
-                onClick={() => {
-                  if (!departementId) return;
-                  handleAddNewEmployee();
-                }}
-                className={`btn btn-outline-primary d-flex align-items-center ${!departementId ? "disabled-btn" : ""}`}
-                size="sm"
-                style={{
-                  marginRight: '30px !important',
-                  width: '160px',
-                }}
-              >
-                <FaPlusCircle className="me-2" />
-                Ajouter Employé
-              </Button>
-
-
-              <Dropdown show={showDropdown} onToggle={(isOpen) => setShowDropdown(isOpen)} >
-                <Dropdown.Toggle
-                  as="button"
-                  id="dropdown-visibility"
-                  title="Visibilité Colonnes"
-                  style={iconButtonStyle}
-                >
-                  <FontAwesomeIcon
-                    icon={faSliders}
-                    style={{ width: 18, height: 18, color: "#4b5563" }}
-                  />
-                </Dropdown.Toggle>
-                <Dropdown.Menu as={CustomMenu} />
-              </Dropdown>
-
-              <Dropdown show={showDropdown} onToggle={(isOpen) => setShowDropdown(isOpen)}>
-                <Dropdown.Toggle
-                  as="button"
-                  id="dropdown-planning"
-                  title="Affecter Planning"
-                  onClick={handleOpenPlanningModal}
+                <FontAwesomeIcon
+                  onClick={() => handleFiltersToggle && handleFiltersToggle(!filtersVisible)}
+                  icon={filtersVisible ? faClose : faFilter}
+                  color={filtersVisible ? 'green' : ''}
                   style={{
-                    ...iconButtonStyle,
-                    cursor: selectedEmployers.length === 0 ? "not-allowed" : "pointer",
-                    backgroundColor: selectedEmployers.length === 0 ? "#e5e7eb" : "#ffffff",
-                    borderColor: selectedEmployers.length === 0 ? "#d1d5db" : "#ccc"
+                    cursor: "pointer",
+                    fontSize: "1.9rem",
+                    color: "#2c767c",
+                    marginTop: "1.3%",
+                    marginRight: "8px",
                   }}
-                  disabled={selectedEmployers.length === 0}
-                >
-                  <FontAwesomeIcon
-                    icon={faCalendarAlt}
-                    style={{
-                      width: 18,
-                      height: 18,
-                      color: selectedEmployers.length === 0 ? "#9ca3af" : "#4b5563"
-                    }}
-                  />
-                </Dropdown.Toggle>
-              </Dropdown>
-              <Dropdown
-                show={showRegleDropdown}
-                onToggle={isOpen => setShowRegleDropdown(isOpen)}
-              >
-                <Dropdown.Toggle
-                  as="button"
-                  id="dropdown-regle"
-                  title="Affecter règle compensation"
-                  onClick={handleOpenRegleModal}
+                />
+
+
+
+                {/* Bouton Ajouter */}
+                <Button
+                  onClick={() => {
+                    if (!departementId) return;
+                    handleAddNewEmployee();
+                  }}
+                  className={`btn btn-outline-primary d-flex align-items-center ${!departementId ? "disabled-btn" : ""}`}
+                  size="sm"
                   style={{
-                    ...iconButtonStyle,
-                    cursor: selectedEmployers.length === 0 ? "not-allowed" : "pointer",
-                    backgroundColor: selectedEmployers.length === 0 ? "#e5e7eb" : "#ffffff",
-                    borderColor: selectedEmployers.length === 0 ? "#d1d5db" : "#ccc"
+                    marginRight: '30px !important',
+                    width: '160px',
                   }}
-                  disabled={selectedEmployers.length === 0}
                 >
-                  <FontAwesomeIcon
-                    icon={faClipboardCheck}
-                    style={{
-                      width: 18,
-                      height: 18,
-                      color: selectedEmployers.length === 0 ? "#9ca3af" : "#4b5563"
-                    }}
-                  />
-                </Dropdown.Toggle>
-              </Dropdown>
-              <Dropdown show={showImportDropdown} onToggle={(isOpen) => setShowImportDropdown(isOpen)}>
-                <Dropdown.Toggle
-                  as="button"
-                  id="dropdown-import"
-                  title="Importer Employés"
-                  onClick={() => setShowImportModal(true)}
-                  style={iconButtonStyle}
-                >
-                  <FontAwesomeIcon
-                    icon={faFileExcel}
-                    style={{ width: 18, height: 18, color: '#4b5563' }}
-                  />
-                </Dropdown.Toggle>
-              </Dropdown>
+                  <FaPlusCircle className="me-2" />
+                  Ajouter Employé
+                </Button>
 
 
-
-            </div>
-          </div>
-        </div>
-      </div>
-      {/* Section des filtres */}
-      <AnimatePresence>
-        {filtersVisible && (
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.3 }}
-            className="filters-container"
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '12px',
-              padding: '16px 20px',
-              minHeight: 0
-            }}
-          >
-            {/* Ligne 1: Icône et titre */}
-            <div className="filters-icon-section" style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              justifyContent: 'center',
-              marginLeft: '-8px',
-              marginRight: '14%',
-            }}>
-              <svg
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="#4a90a4"
-                strokeWidth="2"
-                className="filters-icon"
-              >
-                <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
-              </svg>
-              <span className="filters-title">Filtres</span>
-            </div>
-
-            {/* Ligne 2: Tous les filtres */}
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '1px',
-              flexWrap: 'wrap',
-              justifyContent: 'center',
-              width: '100%'
-            }}>
-              {filterOptions.filters.map((filter, index) => (
-                <div key={index} style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  margin: 0,
-                  marginRight: '46px'
-                }}>            <label className="filter-label" style={{
-                  fontSize: '0.9rem',
-                  margin: 0,
-                  marginRight: '-44px',
-                  whiteSpace: 'nowrap',
-                  minWidth: 'auto',
-                  fontWeight: 600,
-                  color: '#2c3e50'
-                }}>
-                    {filter.label}
-                  </label>
-
-                  {filter.type === 'select' ? (
-                    <select
-                      value={filter.value}
-                      onChange={(e) => handleFilterChange(filter.key, e.target.value)}
-                      className="filter-input"
-                      style={{
-                        minWidth: 80,
-                        maxWidth: 110,
-                        height: 30,
-                        fontSize: '0.9rem',
-                        padding: '2px 6px',
-                        borderRadius: 6
-                      }}
-                    >
-                      <option value="">{filter.placeholder}</option>
-                      {filter.options?.map((option, optIndex) => (
-                        <option key={optIndex} value={option.value}>
-                          {option.label}
-                        </option>
-                      ))}
-                    </select>
-                  ) : filter.type === 'range' ? (
-                    <div style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '4px'
-                    }}>
-                      <input
-                        type="number"
-                        value={filter.min}
-                        onChange={(e) => handleRangeFilterChange(filter.key, 'min', e.target.value)}
-                        placeholder={filter.placeholderMin}
-                        className="filter-input filter-range-input"
-                        style={{
-                          minWidth: 50,
-                          maxWidth: 70,
-                          height: 30,
-                          fontSize: '0.9rem',
-                          padding: '2px 4px',
-                          borderRadius: 6
-                        }}
-                      />
-                      <span className="filter-range-separator" style={{
-                        margin: '0 2px',
-                        fontSize: '0.9rem',
-                        color: '#666'
-                      }}>
-                        -
-                      </span>
-                      <input
-                        type="number"
-                        value={filter.max}
-                        onChange={(e) => handleRangeFilterChange(filter.key, 'max', e.target.value)}
-                        placeholder={filter.placeholderMax}
-                        className="filter-input filter-range-input"
-                        style={{
-                          minWidth: 50,
-                          maxWidth: 70,
-                          height: 30,
-                          fontSize: '0.9rem',
-                          padding: '2px 4px',
-                          borderRadius: 6
-                        }}
-                      />
-                    </div>
-                  ) : null}
-                </div>
-              ))}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-
-      {/* Modal pour l'affectation du planning */}
-      <Modal
-        show={showPlanningModal}
-        onHide={() => setShowPlanningModal(false)}
-        dialogClassName="custom-modal"
-        centered
-      >
-        <Modal.Body className="d-flex flex-column align-items-center justify-content-center pt-0">
-          <div className="position-relative w-100" style={{ marginTop: '30px' }}>
-            {/* Titre flottant */}
-            <div
-              style={{
-                position: 'absolute',
-                top: '-12px',
-                left: '20px',
-                backgroundColor: 'white',
-                padding: '0 12px',
-                color: '#00afaa',
-                fontWeight: 'bold',
-                fontSize: '1.1rem',
-                zIndex: 1,
-              }}
-            >
-              Affecter un planning
-            </div>
-
-            {/* Contenu encadré */}
-            <div
-              style={{
-                border: '1px solid #e0e0e0',
-                borderRadius: '12px',
-                padding: '30px 25px 10px',
-                boxShadow: '0 2px 10px rgba(0,0,0,0.05)',
-                backgroundColor: 'white',
-                maxHeight: '400px',
-                overflowY: 'auto',
-              }}
-            >
-              <Table className="custom-header" style={{ marginBottom: 0 }}>
-                <thead>
-                  <tr style={{ textAlign: 'center' }}>
-                    <th style={{ color: '#4b5563', backgroundColor: '#f9fafb', fontWeight: '600' }}>Planning</th>
-                    <th style={{ color: '#4b5563', backgroundColor: '#f9fafb', fontWeight: '600' }}>Date début</th>
-                    <th style={{ color: '#4b5563', backgroundColor: '#f9fafb', fontWeight: '600' }}>Date fin</th>
-                    <th style={{ color: '#4b5563', backgroundColor: '#f9fafb', fontWeight: '600' }}>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {assignedCalendriers.map((item, index) => (
-                    <tr key={index}>
-                      <td>
-                        <Form.Select
-                          value={item.calendrier_id}
-                          onChange={(e) => handleChangeCalendrier(index, e.target.value)}
-                          style={{
-                            height: 40,
-                            border: '1px solid #e0e0e0',
-                            borderRadius: '8px',
-                            fontSize: '0.9rem'
-                          }}
-                        >
-                          <option value="">-- Choisir --</option>
-                          {Array.isArray(calendriers) && calendriers.map((cal) => (
-                            <option key={cal.id} value={cal.id}>
-                              {cal.nom}
-                            </option>
-                          ))}
-                        </Form.Select>
-                      </td>
-                      <td>
-                        <Form.Control
-                          type="date"
-                          value={item.date_debut}
-                          onChange={(e) => handleChangeDate(index, "date_debut", e.target.value)}
-                          style={{
-                            height: 40,
-                            border: '1px solid #e0e0e0',
-                            borderRadius: '8px',
-                            fontSize: '0.9rem'
-                          }}
-                        />
-                      </td>
-                      <td>
-                        <Form.Control
-                          type="date"
-                          value={item.date_fin}
-                          onChange={(e) => handleChangeDate(index, "date_fin", e.target.value)}
-                          style={{
-                            height: 40,
-                            border: '1px solid #e0e0e0',
-                            borderRadius: '8px',
-                            fontSize: '0.9rem'
-                          }}
-                        />
-                      </td>
-                      <td>
+                {!showAddForm && (
+                  <>
+                    <Dropdown show={showDropdown} onToggle={(isOpen) => setShowDropdown(isOpen)} >
+                      <Dropdown.Toggle
+                        as="button"
+                        id="dropdown-visibility"
+                        title="Visibilité Colonnes"
+                        style={iconButtonStyle}
+                      >
                         <FontAwesomeIcon
-                          onClick={() => {
-                            const newList = [...assignedCalendriers];
-                            newList.splice(index, 1);
-                            setAssignedCalendriers(newList.length ? newList : [{
-                              calendrier_id: '',
-                              date_debut: '',
-                              date_fin: ''
-                            }]);
-                          }}
-                          icon={faTrash}
+                          icon={faSliders}
+                          style={{ width: 18, height: 18, color: "#4b5563" }}
+                        />
+                      </Dropdown.Toggle>
+                      <Dropdown.Menu as={CustomMenu} />
+                    </Dropdown>
+
+                    <Dropdown show={showDropdown} onToggle={(isOpen) => setShowDropdown(isOpen)}>
+                      <Dropdown.Toggle
+                        as="button"
+                        id="dropdown-planning"
+                        title="Affecter Planning"
+                        onClick={handleOpenPlanningModal}
+                        style={{
+                          ...iconButtonStyle,
+                          cursor: selectedEmployers.length === 0 ? "not-allowed" : "pointer",
+                          backgroundColor: selectedEmployers.length === 0 ? "#e5e7eb" : "#ffffff",
+                          borderColor: selectedEmployers.length === 0 ? "#d1d5db" : "#ccc"
+                        }}
+                        disabled={selectedEmployers.length === 0}
+                      >
+                        <FontAwesomeIcon
+                          icon={faCalendarAlt}
                           style={{
-                            color: "#ff4757",
-                            cursor: "pointer",
-                            fontSize: '1.1rem',
-                            transition: 'all 0.2s ease',
-                            marginLeft: '30px'
+                            width: 18,
+                            height: 18,
+                            color: selectedEmployers.length === 0 ? "#9ca3af" : "#4b5563"
                           }}
                         />
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </Table>
+                      </Dropdown.Toggle>
+                    </Dropdown>
+                    <Dropdown
+                      show={showRegleDropdown}
+                      onToggle={isOpen => setShowRegleDropdown(isOpen)}
+                    >
+                      <Dropdown.Toggle
+                        as="button"
+                        id="dropdown-regle"
+                        title="Affecter règle compensation"
+                        onClick={handleOpenRegleModal}
+                        style={{
+                          ...iconButtonStyle,
+                          cursor: selectedEmployers.length === 0 ? "not-allowed" : "pointer",
+                          backgroundColor: selectedEmployers.length === 0 ? "#e5e7eb" : "#ffffff",
+                          borderColor: selectedEmployers.length === 0 ? "#d1d5db" : "#ccc"
+                        }}
+                        disabled={selectedEmployers.length === 0}
+                      >
+                        <FontAwesomeIcon
+                          icon={faClipboardCheck}
+                          style={{
+                            width: 18,
+                            height: 18,
+                            color: selectedEmployers.length === 0 ? "#9ca3af" : "#4b5563"
+                          }}
+                        />
+                      </Dropdown.Toggle>
+                    </Dropdown>
+                    <Dropdown show={showImportDropdown} onToggle={(isOpen) => setShowImportDropdown(isOpen)}>
+                      <Dropdown.Toggle
+                        as="button"
+                        id="dropdown-import"
+                        title="Importer Employés"
+                        onClick={() => setShowImportModal(true)}
+                        style={iconButtonStyle}
+                      >
+                        <FontAwesomeIcon
+                          icon={faFileExcel}
+                          style={{ width: 18, height: 18, color: '#4b5563' }}
+                        />
+                      </Dropdown.Toggle>
+                    </Dropdown>
+                  </>
+                )}
 
-              {/* Info nombre de plannings */}
-              <div className="mt-3 text-end">
-                <small className="text-muted">
-                  {assignedCalendriers.length} planning(s) assigné(s)
-                </small>
+
+
               </div>
             </div>
           </div>
-        </Modal.Body>
-
-        <Modal.Footer className="border-0 pt-0 d-flex justify-content-center">
-          <button
-            className="btn px-4 py-2"
-            style={{
-              backgroundColor: '#00afaa',
-              color: 'white',
-              border: 'none',
-              borderRadius: '8px',
-              fontWeight: '500',
-              transition: 'all 0.2s ease'
-            }}
-            onClick={handleAffecterPlanning}
-          >
-            <i className="fas fa-check me-2"></i>
-            Valider
-          </button>
-
-          <button
-            className="btn px-4 py-2 me-3"
-            style={{
-              backgroundColor: 'white',
-              color: '#00afaa',
-              border: '1px solid #00afaa',
-              borderRadius: '8px',
-              fontWeight: '500',
-              transition: 'all 0.2s ease'
-            }}
-            onClick={() => setShowPlanningModal(false)}
-          >
-            Annuler
-          </button>
-        </Modal.Footer>
-      </Modal>
-      {/* Modal pour l'affectation de règle compensation */}
-      <Modal
-        show={showRegleModal}
-        onHide={() => setShowRegleModal(false)}
-        dialogClassName="custom-modal"
-        centered
-      >
-        <Modal.Body className="d-flex flex-column align-items-center justify-content-center pt-0">
-          {/* Conteneur pour l'affectation de règle */}
-          <div className="position-relative w-100" style={{ marginTop: '30px' }} >
-            {/* Titre flottant */}
-            <div
+        </div>
+        {/* Section des filtres */}
+        <AnimatePresence>
+          {filtersVisible && (
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.3 }}
+              className="filters-container"
               style={{
-                position: 'absolute',
-                top: '-12px',
-                left: '20px',
-                backgroundColor: 'white',
-                padding: '0 12px',
-                color: '#00afaa',
-                fontWeight: 'bold',
-                fontSize: '1.1rem',
-                zIndex: 1,
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '12px',
+                padding: '16px 20px',
+                minHeight: 0
               }}
             >
-              Affecter une règle de compensation
+              {/* Ligne 1: Icône et titre */}
+              <div className="filters-icon-section" style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                justifyContent: 'center',
+                marginLeft: '-8px',
+                marginRight: '14%',
+              }}>
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="#4a90a4"
+                  strokeWidth="2"
+                  className="filters-icon"
+                >
+                  <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+                </svg>
+                <span className="filters-title">Filtres</span>
+              </div>
+
+              {/* Ligne 2: Tous les filtres */}
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '1px',
+                flexWrap: 'wrap',
+                justifyContent: 'center',
+                width: '100%'
+              }}>
+                {filterOptions.filters.map((filter, index) => (
+                  <div key={index} style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    margin: 0,
+                    marginRight: '46px'
+                  }}>            <label className="filter-label" style={{
+                    fontSize: '0.9rem',
+                    margin: 0,
+                    marginRight: '-44px',
+                    whiteSpace: 'nowrap',
+                    minWidth: 'auto',
+                    fontWeight: 600,
+                    color: '#2c3e50'
+                  }}>
+                      {filter.label}
+                    </label>
+
+                    {filter.type === 'select' ? (
+                      <select
+                        value={filter.value}
+                        onChange={(e) => handleFilterChange(filter.key, e.target.value)}
+                        className="filter-input"
+                        style={{
+                          minWidth: 80,
+                          maxWidth: 110,
+                          height: 30,
+                          fontSize: '0.9rem',
+                          padding: '2px 6px',
+                          borderRadius: 6
+                        }}
+                      >
+                        <option value="">{filter.placeholder}</option>
+                        {filter.options?.map((option, optIndex) => (
+                          <option key={optIndex} value={option.value}>
+                            {option.label}
+                          </option>
+                        ))}
+                      </select>
+                    ) : filter.type === 'range' ? (
+                      <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '4px'
+                      }}>
+                        <input
+                          type="number"
+                          value={filter.min}
+                          onChange={(e) => handleRangeFilterChange(filter.key, 'min', e.target.value)}
+                          placeholder={filter.placeholderMin}
+                          className="filter-input filter-range-input"
+                          style={{
+                            minWidth: 50,
+                            maxWidth: 70,
+                            height: 30,
+                            fontSize: '0.9rem',
+                            padding: '2px 4px',
+                            borderRadius: 6
+                          }}
+                        />
+                        <span className="filter-range-separator" style={{
+                          margin: '0 2px',
+                          fontSize: '0.9rem',
+                          color: '#666'
+                        }}>
+                          -
+                        </span>
+                        <input
+                          type="number"
+                          value={filter.max}
+                          onChange={(e) => handleRangeFilterChange(filter.key, 'max', e.target.value)}
+                          placeholder={filter.placeholderMax}
+                          className="filter-input filter-range-input"
+                          style={{
+                            minWidth: 50,
+                            maxWidth: 70,
+                            height: 30,
+                            fontSize: '0.9rem',
+                            padding: '2px 4px',
+                            borderRadius: 6
+                          }}
+                        />
+                      </div>
+                    ) : null}
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+
+        {/* Modal pour l'affectation du planning */}
+        <Modal
+          show={showPlanningModal}
+          onHide={() => setShowPlanningModal(false)}
+          dialogClassName="custom-modal"
+          centered
+        >
+          <Modal.Body className="d-flex flex-column align-items-center justify-content-center pt-0">
+            <div className="position-relative w-100" style={{ marginTop: '30px' }}>
+              {/* Titre flottant */}
+              <div
+                style={{
+                  position: 'absolute',
+                  top: '-12px',
+                  left: '20px',
+                  backgroundColor: 'white',
+                  padding: '0 12px',
+                  color: '#00afaa',
+                  fontWeight: 'bold',
+                  fontSize: '1.1rem',
+                  zIndex: 1,
+                }}
+              >
+                Affecter un planning
+              </div>
+
+              {/* Contenu encadré */}
+              <div
+                style={{
+                  border: '1px solid #e0e0e0',
+                  borderRadius: '12px',
+                  padding: '30px 25px 10px',
+                  boxShadow: '0 2px 10px rgba(0,0,0,0.05)',
+                  backgroundColor: 'white',
+                  maxHeight: '400px',
+                  overflowY: 'auto',
+                }}
+              >
+                <Table className="custom-header" style={{ marginBottom: 0 }}>
+                  <thead>
+                    <tr style={{ textAlign: 'center' }}>
+                      <th style={{ color: '#4b5563', backgroundColor: '#f9fafb', fontWeight: '600' }}>Planning</th>
+                      <th style={{ color: '#4b5563', backgroundColor: '#f9fafb', fontWeight: '600' }}>Date début</th>
+                      <th style={{ color: '#4b5563', backgroundColor: '#f9fafb', fontWeight: '600' }}>Date fin</th>
+                      <th style={{ color: '#4b5563', backgroundColor: '#f9fafb', fontWeight: '600' }}>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {assignedCalendriers.map((item, index) => (
+                      <tr key={index}>
+                        <td>
+                          <Form.Select
+                            value={item.calendrier_id}
+                            onChange={(e) => handleChangeCalendrier(index, e.target.value)}
+                            style={{
+                              height: 40,
+                              border: '1px solid #e0e0e0',
+                              borderRadius: '8px',
+                              fontSize: '0.9rem'
+                            }}
+                          >
+                            <option value="">-- Choisir --</option>
+                            {Array.isArray(calendriers) && calendriers.map((cal) => (
+                              <option key={cal.id} value={cal.id}>
+                                {cal.nom}
+                              </option>
+                            ))}
+                          </Form.Select>
+                        </td>
+                        <td>
+                          <Form.Control
+                            type="date"
+                            value={item.date_debut}
+                            onChange={(e) => handleChangeDate(index, "date_debut", e.target.value)}
+                            style={{
+                              height: 40,
+                              border: '1px solid #e0e0e0',
+                              borderRadius: '8px',
+                              fontSize: '0.9rem'
+                            }}
+                          />
+                        </td>
+                        <td>
+                          <Form.Control
+                            type="date"
+                            value={item.date_fin}
+                            onChange={(e) => handleChangeDate(index, "date_fin", e.target.value)}
+                            style={{
+                              height: 40,
+                              border: '1px solid #e0e0e0',
+                              borderRadius: '8px',
+                              fontSize: '0.9rem'
+                            }}
+                          />
+                        </td>
+                        <td>
+                          <FontAwesomeIcon
+                            onClick={() => {
+                              const newList = [...assignedCalendriers];
+                              newList.splice(index, 1);
+                              setAssignedCalendriers(newList.length ? newList : [{
+                                calendrier_id: '',
+                                date_debut: '',
+                                date_fin: ''
+                              }]);
+                            }}
+                            icon={faTrash}
+                            style={{
+                              color: "#ff4757",
+                              cursor: "pointer",
+                              fontSize: '1.1rem',
+                              transition: 'all 0.2s ease',
+                              marginLeft: '30px'
+                            }}
+                          />
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </Table>
+
+                {/* Info nombre de plannings */}
+                <div className="mt-3 text-end">
+                  <small className="text-muted">
+                    {assignedCalendriers.length} planning(s) assigné(s)
+                  </small>
+                </div>
+              </div>
             </div>
+          </Modal.Body>
 
-            {/* Contenu encadré */}
-            <div
+          <Modal.Footer className="border-0 pt-0 d-flex justify-content-center">
+            <button
+              className="btn px-4 py-2"
               style={{
-                border: '1px solid #e0e0e0',
-                borderRadius: '12px',
-                padding: '30px 25px 10px',
-                boxShadow: '0 2px 10px rgba(0,0,0,0.05)',
-                backgroundColor: 'white',
-                maxHeight: '400px',
-                overflowY: 'auto',
+                backgroundColor: '#00afaa',
+                color: 'white',
+                border: 'none',
+                borderRadius: '8px',
+                fontWeight: '500',
+                transition: 'all 0.2s ease'
               }}
+              onClick={handleAffecterPlanning}
             >
-              {/* <div className="d-flex justify-content mb-3">
+              <i className="fas fa-check me-2"></i>
+              Valider
+            </button>
+
+            <button
+              className="btn px-4 py-2 me-3"
+              style={{
+                backgroundColor: 'white',
+                color: '#00afaa',
+                border: '1px solid #00afaa',
+                borderRadius: '8px',
+                fontWeight: '500',
+                transition: 'all 0.2s ease'
+              }}
+              onClick={() => setShowPlanningModal(false)}
+            >
+              Annuler
+            </button>
+          </Modal.Footer>
+        </Modal>
+        {/* Modal pour l'affectation de règle compensation */}
+        <Modal
+          show={showRegleModal}
+          onHide={() => setShowRegleModal(false)}
+          dialogClassName="custom-modal"
+          centered
+        >
+          <Modal.Body className="d-flex flex-column align-items-center justify-content-center pt-0">
+            {/* Conteneur pour l'affectation de règle */}
+            <div className="position-relative w-100" style={{ marginTop: '30px' }} >
+              {/* Titre flottant */}
+              <div
+                style={{
+                  position: 'absolute',
+                  top: '-12px',
+                  left: '20px',
+                  backgroundColor: 'white',
+                  padding: '0 12px',
+                  color: '#00afaa',
+                  fontWeight: 'bold',
+                  fontSize: '1.1rem',
+                  zIndex: 1,
+                }}
+              >
+                Affecter une règle de compensation
+              </div>
+
+              {/* Contenu encadré */}
+              <div
+                style={{
+                  border: '1px solid #e0e0e0',
+                  borderRadius: '12px',
+                  padding: '30px 25px 10px',
+                  boxShadow: '0 2px 10px rgba(0,0,0,0.05)',
+                  backgroundColor: 'white',
+                  maxHeight: '400px',
+                  overflowY: 'auto',
+                }}
+              >
+                {/* <div className="d-flex justify-content mb-3">
   <span
     style={{
       color: '#4b5563',
@@ -1827,155 +1875,155 @@ body {
   </span>
 </div> */}
 
-              <Table className="custom-header" style={{ marginBottom: 0 }}>
-                <thead>
-                  <tr style={{ textAlign: 'center' }}>
-                    <th style={{ color: '#4b5563', backgroundColor: '#f9fafb', fontWeight: '600' }}>Règle</th>
-                    <th style={{ color: '#4b5563', backgroundColor: '#f9fafb', fontWeight: '600' }}>Fréquence</th>
-                    <th style={{ color: '#4b5563', backgroundColor: '#f9fafb', fontWeight: '600' }}>Date début</th>
-                    <th style={{ color: '#4b5563', backgroundColor: '#f9fafb', fontWeight: '600' }}>Date fin</th>
-                    <th style={{ color: '#4b5563', backgroundColor: '#f9fafb', fontWeight: '600' }}>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {assignedRegles.map((it, idx) => (
-                    <tr key={idx}>
-                      {/* Sélecteur de règle */}
-                      <td>
-                        <Form.Select
-                          value={it.regle_id}
-                          onChange={e => handleChangeRegle(idx, e.target.value)}
-                          style={{
-                            height: 40,
-                            border: '1px solid #e0e0e0',
-                            borderRadius: '8px',
-                            fontSize: '0.9rem'
-                          }}
-                        >
-                          <option value="">-- Choisir --</option>
-                          {reglesComp.map(r => (
-                            <option key={r.id} value={r.id}>
-                              {r.description ?? r.nom ?? `Règle ${r.id}`}
-                            </option>
-                          ))}
-                        </Form.Select>
-                      </td>
-
-                      {/* Fréquence */}
-                      <td>
-                        <Form.Control
-                          plaintext
-                          readOnly
-                          value={it.frequence}
-                          style={{
-                            height: 40,
-                            fontSize: '0.9rem',
-                            border: '1px solid #e0e0e0',
-                            borderRadius: '8px',
-                            placeholder: 'Fréquence'
-                          }}
-                        />
-                      </td>
-
-                      {/* Date début */}
-                      <td>
-                        <Form.Control
-                          type="date"
-                          value={items[idx].date_debut || ''}
-                          onChange={(e) => handleChangeDateRegle(idx, 'date_debut', e.target.value)}
-                          style={{
-                            height: 40,
-                            border: '1px solid #e0e0e0',
-                            borderRadius: '8px',
-                            fontSize: '0.9rem',
-
-                          }}
-                        />
-                      </td>
-
-                      {/* Date fin */}
-                      <td>
-                        <Form.Control
-                          type="date"
-                          value={items[idx].date_fin || ''}
-                          onChange={(e) => handleChangeDateRegle(idx, 'date_fin', e.target.value)}
-                          style={{
-                            height: 40,
-                            border: '1px solid #e0e0e0',
-                            borderRadius: '8px',
-                            fontSize: '0.9rem'
-                          }}
-                        />
-                      </td>
-
-                      {/* Icône suppression */}
-                      <td>
-                        <FontAwesomeIcon
-                          icon={faTrash}
-                          style={{
-                            color: '#ff4757',
-                            cursor: 'pointer',
-                            fontSize: '1.1rem',
-                            transition: 'all 0.2s ease',
-                            marginLeft: '30px'
-                          }}
-                          onClick={() => {
-                            const copy = [...assignedRegles];
-                            copy.splice(idx, 1);
-                            setAssignedRegles(copy.length ? copy : [{ regle_id: '', frequence: '', date_debut: '', date_fin: '' }]);
-                          }}
-                        />
-                      </td>
+                <Table className="custom-header" style={{ marginBottom: 0 }}>
+                  <thead>
+                    <tr style={{ textAlign: 'center' }}>
+                      <th style={{ color: '#4b5563', backgroundColor: '#f9fafb', fontWeight: '600' }}>Règle</th>
+                      <th style={{ color: '#4b5563', backgroundColor: '#f9fafb', fontWeight: '600' }}>Fréquence</th>
+                      <th style={{ color: '#4b5563', backgroundColor: '#f9fafb', fontWeight: '600' }}>Date début</th>
+                      <th style={{ color: '#4b5563', backgroundColor: '#f9fafb', fontWeight: '600' }}>Date fin</th>
+                      <th style={{ color: '#4b5563', backgroundColor: '#f9fafb', fontWeight: '600' }}>Actions</th>
                     </tr>
-                  ))}
-                </tbody>
-              </Table>
+                  </thead>
+                  <tbody>
+                    {assignedRegles.map((it, idx) => (
+                      <tr key={idx}>
+                        {/* Sélecteur de règle */}
+                        <td>
+                          <Form.Select
+                            value={it.regle_id}
+                            onChange={e => handleChangeRegle(idx, e.target.value)}
+                            style={{
+                              height: 40,
+                              border: '1px solid #e0e0e0',
+                              borderRadius: '8px',
+                              fontSize: '0.9rem'
+                            }}
+                          >
+                            <option value="">-- Choisir --</option>
+                            {reglesComp.map(r => (
+                              <option key={r.id} value={r.id}>
+                                {r.description ?? r.nom ?? `Règle ${r.id}`}
+                              </option>
+                            ))}
+                          </Form.Select>
+                        </td>
 
-              {/* Information sur les règles assignées */}
-              <div className="mt-3 text-end">
-                <small className="text-muted">
-                  {assignedRegles.length} règle(s) assignée(s)
-                </small>
+                        {/* Fréquence */}
+                        <td>
+                          <Form.Control
+                            plaintext
+                            readOnly
+                            value={it.frequence}
+                            style={{
+                              height: 40,
+                              fontSize: '0.9rem',
+                              border: '1px solid #e0e0e0',
+                              borderRadius: '8px',
+                              placeholder: 'Fréquence'
+                            }}
+                          />
+                        </td>
+
+                        {/* Date début */}
+                        <td>
+                          <Form.Control
+                            type="date"
+                            value={items[idx].date_debut || ''}
+                            onChange={(e) => handleChangeDateRegle(idx, 'date_debut', e.target.value)}
+                            style={{
+                              height: 40,
+                              border: '1px solid #e0e0e0',
+                              borderRadius: '8px',
+                              fontSize: '0.9rem',
+
+                            }}
+                          />
+                        </td>
+
+                        {/* Date fin */}
+                        <td>
+                          <Form.Control
+                            type="date"
+                            value={items[idx].date_fin || ''}
+                            onChange={(e) => handleChangeDateRegle(idx, 'date_fin', e.target.value)}
+                            style={{
+                              height: 40,
+                              border: '1px solid #e0e0e0',
+                              borderRadius: '8px',
+                              fontSize: '0.9rem'
+                            }}
+                          />
+                        </td>
+
+                        {/* Icône suppression */}
+                        <td>
+                          <FontAwesomeIcon
+                            icon={faTrash}
+                            style={{
+                              color: '#ff4757',
+                              cursor: 'pointer',
+                              fontSize: '1.1rem',
+                              transition: 'all 0.2s ease',
+                              marginLeft: '30px'
+                            }}
+                            onClick={() => {
+                              const copy = [...assignedRegles];
+                              copy.splice(idx, 1);
+                              setAssignedRegles(copy.length ? copy : [{ regle_id: '', frequence: '', date_debut: '', date_fin: '' }]);
+                            }}
+                          />
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </Table>
+
+                {/* Information sur les règles assignées */}
+                <div className="mt-3 text-end">
+                  <small className="text-muted">
+                    {assignedRegles.length} règle(s) assignée(s)
+                  </small>
+                </div>
               </div>
             </div>
-          </div>
-        </Modal.Body>
+          </Modal.Body>
 
-        <Modal.Footer className="border-0 pt-0 d-flex justify-content-center">
-          <button
-            className="btn px-4 py-2"
-            style={{
-              backgroundColor: '#00afaa',
-              color: 'white',
-              border: 'none',
-              borderRadius: '8px',
-              fontWeight: '500',
-              transition: 'all 0.2s ease'
-            }}
-            onClick={handleAffecterRegle}
-          >
-            <i className="fas fa-check me-2"></i>
-            Valider
-          </button>
+          <Modal.Footer className="border-0 pt-0 d-flex justify-content-center">
+            <button
+              className="btn px-4 py-2"
+              style={{
+                backgroundColor: '#00afaa',
+                color: 'white',
+                border: 'none',
+                borderRadius: '8px',
+                fontWeight: '500',
+                transition: 'all 0.2s ease'
+              }}
+              onClick={handleAffecterRegle}
+            >
+              <i className="fas fa-check me-2"></i>
+              Valider
+            </button>
 
-          <button
-            className="btn px-4 py-2 me-3"
-            style={{
-              backgroundColor: 'white',
-              color: '#00afaa',
-              border: '1px solid #00afaa',
-              borderRadius: '8px',
-              fontWeight: '500',
-              transition: 'all 0.2s ease'
-            }}
-            onClick={() => setShowRegleModal(false)}
-          >
-            Annuler
-          </button>
-        </Modal.Footer>
-      </Modal>
+            <button
+              className="btn px-4 py-2 me-3"
+              style={{
+                backgroundColor: 'white',
+                color: '#00afaa',
+                border: '1px solid #00afaa',
+                borderRadius: '8px',
+                fontWeight: '500',
+                transition: 'all 0.2s ease'
+              }}
+              onClick={() => setShowRegleModal(false)}
+            >
+              Annuler
+            </button>
+          </Modal.Footer>
+        </Modal>
 
-      <style jsx>{`
+        <style jsx>{`
         // .custom-checkbox1 .form-check-input:checked {
         //   background-color: #00afaa;
         //   border-color: #00afaa;
@@ -2030,283 +2078,283 @@ body {
 
       `}</style>
 
-      {/* Modal pour insertion des données excel  */}
+        {/* Modal pour insertion des données excel  */}
 
-      <Modal
-        show={showImportModal}
-        onHide={() => setShowImportModal(false)}
-        dialogClassName="custom-modal-excel"
-        centered
+        <Modal
+          show={showImportModal}
+          onHide={() => setShowImportModal(false)}
+          dialogClassName="custom-modal-excel"
+          centered
 
-      >
-        {/* <Modal.Header closeButton>
+        >
+          {/* <Modal.Header closeButton>
     <Modal.Title>Importer des employés depuis Excel</Modal.Title>
   </Modal.Header> */}
 
-        <Modal.Body className="d-flex flex-column align-items-center justify-content-center pt-0">
-          <Form.Group className="mb-4 " style={{
-            marginRight: '530px',
-            marginTop: '40px'
-          }}>
+          <Modal.Body className="d-flex flex-column align-items-center justify-content-center pt-0">
+            <Form.Group className="mb-4 " style={{
+              marginRight: '530px',
+              marginTop: '40px'
+            }}>
 
-            <div
-              className="import-file-container px-4 py-3"
-              style={{
-                border: '2px dashed #00afaa',
-                borderRadius: '8px',
-                backgroundColor: 'rgba(0, 175, 170, 0.05)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '16px',
-                marginTop: '15 px',
-                width: '182%',
-                marginLeft: 'none'
+              <div
+                className="import-file-container px-4 py-3"
+                style={{
+                  border: '2px dashed #00afaa',
+                  borderRadius: '8px',
+                  backgroundColor: 'rgba(0, 175, 170, 0.05)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '16px',
+                  marginTop: '15 px',
+                  width: '182%',
+                  marginLeft: 'none'
 
-              }}
-            >
-              <i
-                className="fas fa-cloud-upload-alt"
-                style={{ fontSize: '1.5rem', color: '#00afaa' }}
-              ></i>
-              <h6 className="mb-0" style={{ whiteSpace: 'nowrap' }}>
-                Déposez votre fichier :
-              </h6>
-              <Form.Control
-                type="file"
-                accept=".xlsx, .xls"
-                onChange={handleFileChange}
-                style={{ maxWidth: '400px' }}
-              />
+                }}
+              >
+                <i
+                  className="fas fa-cloud-upload-alt"
+                  style={{ fontSize: '1.5rem', color: '#00afaa' }}
+                ></i>
+                <h6 className="mb-0" style={{ whiteSpace: 'nowrap' }}>
+                  Déposez votre fichier :
+                </h6>
+                <Form.Control
+                  type="file"
+                  accept=".xlsx, .xls"
+                  onChange={handleFileChange}
+                  style={{ maxWidth: '400px' }}
+                />
+              </div>
+            </Form.Group>
+
+            {/* Conteneur pour les champs à importer */}
+            <div className="position-relative mb-4 w-100">
+              {/* Titre flottant */}
+              <div
+                style={{
+                  position: 'absolute',
+                  top: '-12px',
+                  left: '20px',
+                  backgroundColor: 'white',
+                  padding: '0 12px',
+                  color: '#00afaa',
+                  fontWeight: 'bold',
+                  fontSize: '1.1rem',
+                  zIndex: 1
+                }}
+              >
+                Champs à importer
+              </div>
+
+              {/* Contenu encadré */}
+              <div
+                style={{
+                  border: '1px solid #e0e0e0',
+                  borderRadius: '12px',
+                  padding: '30px 25px 20px',
+                  boxShadow: '0 2px 10px rgba(0,0,0,0.05)',
+                  backgroundColor: 'white',
+                }}
+              >
+                <div className="d-flex justify-content-between flex-wrap">
+                  {/* Colonne 1 */}
+                  <div className="d-flex flex-column me-2" style={{ minWidth: '120px' }}>
+                    {allEmployeFields.slice(0, 11).map(field => (
+                      <div className="d-flex align-items-center mb-2">
+                        <Form.Check
+                          type="checkbox"
+                          id={`field-${field}`}
+                          label={field}
+                          className="me-2 custom-checkbox1"
+                          checked={selectedFields.includes(field)}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setSelectedFields([...selectedFields, field]);
+                            } else {
+                              setSelectedFields(selectedFields.filter((f) => f !== field));
+                              const updatedMapping = { ...fieldMappings };
+                              delete updatedMapping[field];
+                              setFieldMappings(updatedMapping);
+                            }
+                          }}
+                        />
+
+                        {selectedFields.includes(field) && (
+                          <Form.Control
+                            type="text"
+                            placeholder="ex: A, B, M1..."
+                            value={fieldMappings[field] || ''}
+                            onChange={(e) =>
+                              setFieldMappings({ ...fieldMappings, [field]: e.target.value })
+                            }
+                            style={{ width: '70px', fontSize: '0.8rem' }}
+                          />
+                        )}
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Colonne 2 */}
+                  <div className="d-flex flex-column me-2" style={{ minWidth: '120px' }}>
+                    {allEmployeFields.slice(11, 22).map(field => (
+                      <div className="d-flex align-items-center mb-2">
+                        <Form.Check
+                          type="checkbox"
+                          id={`field-${field}`}
+                          label={field}
+                          className="me-2 custom-checkbox1"
+                          checked={selectedFields.includes(field)}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setSelectedFields([...selectedFields, field]);
+                            } else {
+                              setSelectedFields(selectedFields.filter((f) => f !== field));
+                              const updatedMapping = { ...fieldMappings };
+                              delete updatedMapping[field];
+                              setFieldMappings(updatedMapping);
+                            }
+                          }}
+                        />
+
+                        {selectedFields.includes(field) && (
+                          <Form.Control
+                            type="text"
+                            placeholder="ex: A, B, M1..."
+                            value={fieldMappings[field] || ''}
+                            onChange={(e) =>
+                              setFieldMappings({ ...fieldMappings, [field]: e.target.value })
+                            }
+                            style={{ width: '70px', fontSize: '0.8rem' }}
+                          />
+                        )}
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Colonne 3 */}
+                  <div className="d-flex flex-column me-2" style={{ minWidth: '120px' }}>
+                    {allEmployeFields.slice(22, 33).map(field => (
+                      <div className="d-flex align-items-center mb-2">
+                        <Form.Check
+                          type="checkbox"
+                          id={`field-${field}`}
+                          label={field}
+                          className="me-2 custom-checkbox1"
+                          checked={selectedFields.includes(field)}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setSelectedFields([...selectedFields, field]);
+                            } else {
+                              setSelectedFields(selectedFields.filter((f) => f !== field));
+                              const updatedMapping = { ...fieldMappings };
+                              delete updatedMapping[field];
+                              setFieldMappings(updatedMapping);
+                            }
+                          }}
+                        />
+
+                        {selectedFields.includes(field) && (
+                          <Form.Control
+                            type="text"
+                            placeholder="ex: A, B, M1..."
+                            value={fieldMappings[field] || ''}
+                            onChange={(e) =>
+                              setFieldMappings({ ...fieldMappings, [field]: e.target.value })
+                            }
+                            style={{ width: '70px', fontSize: '0.8rem' }}
+                          />
+                        )}
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Colonne 4 */}
+                  <div className="d-flex flex-column" style={{ minWidth: '120px' }}>
+                    {allEmployeFields.slice(33).map(field => (
+                      <div className="d-flex align-items-center mb-2">
+                        <Form.Check
+                          type="checkbox"
+                          id={`field-${field}`}
+                          label={field}
+                          className="me-2 custom-checkbox1"
+                          checked={selectedFields.includes(field)}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setSelectedFields([...selectedFields, field]);
+                            } else {
+                              setSelectedFields(selectedFields.filter((f) => f !== field));
+                              const updatedMapping = { ...fieldMappings };
+                              delete updatedMapping[field];
+                              setFieldMappings(updatedMapping);
+                            }
+                          }}
+                        />
+
+                        {selectedFields.includes(field) && (
+                          <Form.Control
+                            type="text"
+                            placeholder="ex: A, B, M1..."
+                            value={fieldMappings[field] || ''}
+                            onChange={(e) =>
+                              setFieldMappings({ ...fieldMappings, [field]: e.target.value })
+                            }
+                            style={{ width: '70px', fontSize: '0.8rem' }}
+                          />
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Information sur les champs sélectionnés */}
+                <div className="mt-3 text-end">
+                  <small className="text-muted">
+                    {selectedFields.length} champ(s) sélectionné(s)
+                  </small>
+                </div>
+              </div>
             </div>
-          </Form.Group>
+          </Modal.Body>
 
-          {/* Conteneur pour les champs à importer */}
-          <div className="position-relative mb-4 w-100">
-            {/* Titre flottant */}
-            <div
+          <Modal.Footer className="border-0 pt-0 d-flex justify-content-center">
+            <button
+              className="btn px-4 py-2 me-3"
               style={{
-                position: 'absolute',
-                top: '-12px',
-                left: '20px',
                 backgroundColor: 'white',
-                padding: '0 12px',
                 color: '#00afaa',
-                fontWeight: 'bold',
-                fontSize: '1.1rem',
-                zIndex: 1
+                border: '1px solid #00afaa',
+                borderRadius: '8px',
+                fontWeight: '500',
+                transition: 'all 0.2s ease'
+              }}
+              onClick={() => {
+                setShowImportModal(false);
+                setShowDropdown(false);
               }}
             >
-              Champs à importer
-            </div>
-
-            {/* Contenu encadré */}
-            <div
+              Annuler
+            </button>
+            <button
+              className="btn px-4 py-2"
               style={{
-                border: '1px solid #e0e0e0',
-                borderRadius: '12px',
-                padding: '30px 25px 20px',
-                boxShadow: '0 2px 10px rgba(0,0,0,0.05)',
-                backgroundColor: 'white',
+                backgroundColor: '#00afaa',
+                color: 'white',
+                border: 'none',
+                borderRadius: '8px',
+                fontWeight: '500',
+                transition: 'all 0.2s ease'
               }}
+              onClick={handleImportValidation}
             >
-              <div className="d-flex justify-content-between flex-wrap">
-                {/* Colonne 1 */}
-                <div className="d-flex flex-column me-2" style={{ minWidth: '120px' }}>
-                  {allEmployeFields.slice(0, 11).map(field => (
-                    <div className="d-flex align-items-center mb-2">
-                      <Form.Check
-                        type="checkbox"
-                        id={`field-${field}`}
-                        label={field}
-                        className="me-2 custom-checkbox1"
-                        checked={selectedFields.includes(field)}
-                        onChange={(e) => {
-                          if (e.target.checked) {
-                            setSelectedFields([...selectedFields, field]);
-                          } else {
-                            setSelectedFields(selectedFields.filter((f) => f !== field));
-                            const updatedMapping = { ...fieldMappings };
-                            delete updatedMapping[field];
-                            setFieldMappings(updatedMapping);
-                          }
-                        }}
-                      />
-
-                      {selectedFields.includes(field) && (
-                        <Form.Control
-                          type="text"
-                          placeholder="ex: A, B, M1..."
-                          value={fieldMappings[field] || ''}
-                          onChange={(e) =>
-                            setFieldMappings({ ...fieldMappings, [field]: e.target.value })
-                          }
-                          style={{ width: '70px', fontSize: '0.8rem' }}
-                        />
-                      )}
-                    </div>
-                  ))}
-                </div>
-
-                {/* Colonne 2 */}
-                <div className="d-flex flex-column me-2" style={{ minWidth: '120px' }}>
-                  {allEmployeFields.slice(11, 22).map(field => (
-                    <div className="d-flex align-items-center mb-2">
-                      <Form.Check
-                        type="checkbox"
-                        id={`field-${field}`}
-                        label={field}
-                        className="me-2 custom-checkbox1"
-                        checked={selectedFields.includes(field)}
-                        onChange={(e) => {
-                          if (e.target.checked) {
-                            setSelectedFields([...selectedFields, field]);
-                          } else {
-                            setSelectedFields(selectedFields.filter((f) => f !== field));
-                            const updatedMapping = { ...fieldMappings };
-                            delete updatedMapping[field];
-                            setFieldMappings(updatedMapping);
-                          }
-                        }}
-                      />
-
-                      {selectedFields.includes(field) && (
-                        <Form.Control
-                          type="text"
-                          placeholder="ex: A, B, M1..."
-                          value={fieldMappings[field] || ''}
-                          onChange={(e) =>
-                            setFieldMappings({ ...fieldMappings, [field]: e.target.value })
-                          }
-                          style={{ width: '70px', fontSize: '0.8rem' }}
-                        />
-                      )}
-                    </div>
-                  ))}
-                </div>
-
-                {/* Colonne 3 */}
-                <div className="d-flex flex-column me-2" style={{ minWidth: '120px' }}>
-                  {allEmployeFields.slice(22, 33).map(field => (
-                    <div className="d-flex align-items-center mb-2">
-                      <Form.Check
-                        type="checkbox"
-                        id={`field-${field}`}
-                        label={field}
-                        className="me-2 custom-checkbox1"
-                        checked={selectedFields.includes(field)}
-                        onChange={(e) => {
-                          if (e.target.checked) {
-                            setSelectedFields([...selectedFields, field]);
-                          } else {
-                            setSelectedFields(selectedFields.filter((f) => f !== field));
-                            const updatedMapping = { ...fieldMappings };
-                            delete updatedMapping[field];
-                            setFieldMappings(updatedMapping);
-                          }
-                        }}
-                      />
-
-                      {selectedFields.includes(field) && (
-                        <Form.Control
-                          type="text"
-                          placeholder="ex: A, B, M1..."
-                          value={fieldMappings[field] || ''}
-                          onChange={(e) =>
-                            setFieldMappings({ ...fieldMappings, [field]: e.target.value })
-                          }
-                          style={{ width: '70px', fontSize: '0.8rem' }}
-                        />
-                      )}
-                    </div>
-                  ))}
-                </div>
-
-                {/* Colonne 4 */}
-                <div className="d-flex flex-column" style={{ minWidth: '120px' }}>
-                  {allEmployeFields.slice(33).map(field => (
-                    <div className="d-flex align-items-center mb-2">
-                      <Form.Check
-                        type="checkbox"
-                        id={`field-${field}`}
-                        label={field}
-                        className="me-2 custom-checkbox1"
-                        checked={selectedFields.includes(field)}
-                        onChange={(e) => {
-                          if (e.target.checked) {
-                            setSelectedFields([...selectedFields, field]);
-                          } else {
-                            setSelectedFields(selectedFields.filter((f) => f !== field));
-                            const updatedMapping = { ...fieldMappings };
-                            delete updatedMapping[field];
-                            setFieldMappings(updatedMapping);
-                          }
-                        }}
-                      />
-
-                      {selectedFields.includes(field) && (
-                        <Form.Control
-                          type="text"
-                          placeholder="ex: A, B, M1..."
-                          value={fieldMappings[field] || ''}
-                          onChange={(e) =>
-                            setFieldMappings({ ...fieldMappings, [field]: e.target.value })
-                          }
-                          style={{ width: '70px', fontSize: '0.8rem' }}
-                        />
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Information sur les champs sélectionnés */}
-              <div className="mt-3 text-end">
-                <small className="text-muted">
-                  {selectedFields.length} champ(s) sélectionné(s)
-                </small>
-              </div>
-            </div>
-          </div>
-        </Modal.Body>
-
-        <Modal.Footer className="border-0 pt-0 d-flex justify-content-center">
-          <button
-            className="btn px-4 py-2 me-3"
-            style={{
-              backgroundColor: 'white',
-              color: '#00afaa',
-              border: '1px solid #00afaa',
-              borderRadius: '8px',
-              fontWeight: '500',
-              transition: 'all 0.2s ease'
-            }}
-            onClick={() => {
-              setShowImportModal(false);
-              setShowDropdown(false);
-            }}
-          >
-            Annuler
-          </button>
-          <button
-            className="btn px-4 py-2"
-            style={{
-              backgroundColor: '#00afaa',
-              color: 'white',
-              border: 'none',
-              borderRadius: '8px',
-              fontWeight: '500',
-              transition: 'all 0.2s ease'
-            }}
-            onClick={handleImportValidation}
-          >
-            <i className="fas fa-check me-2"></i>
-            Valider
-          </button>
-        </Modal.Footer>
+              <i className="fas fa-check me-2"></i>
+              Valider
+            </button>
+          </Modal.Footer>
 
 
-        <style jsx>{`
+          <style jsx>{`
     .custom-checkbox1 .form-check-input:checked {
       background-color: #00afaa;
       border-color: #00afaa;
@@ -2336,50 +2384,62 @@ body {
   `}</style>
 
 
-      </Modal>
+        </Modal>
 
 
 
 
 
 
-      <ExpandRTable
-        columns={visibleColumns}
-        data={filteredEmployees}
-        searchTerm={globalSearch.toLowerCase()}
-        highlightText={highlightText}
-        selectAll={selectedEmployers.length === filteredEmployers.length && filteredEmployers.length > 0}
-        selectedItems={selectedEmployers}
-        handleSelectAllChange={handleSelectAllChange}
-        handleCheckboxChange={handleCheckboxChange}
-        handleEdit={handleEditEmployer}
-        handleDelete={handleDeleteEmployer}
-        handleDeleteSelected={handleDeleteSelected}
-        rowsPerPage={employeesPerPage}
-        page={currentPage}
-        handleChangePage={handleChangePage}
-        handleChangeRowsPerPage={handleChangeRowsPerPage}
-        expandedRows={expandedRows}
-        toggleRowExpansion={toggleRowExpansion}
-        renderExpandedRow={renderExpandedRow}
-        renderCustomActions={renderCustomActions}
-      />
-
-      <EmployeFichePrint
-        show={showFicheModal}
-        onHide={() => { setShowFicheModal(false); setSelectedEmployeeForPrint(null); }}
-        employee={selectedEmployeeForPrint}
-      />
-
-      {showAddForm && (
-        <AddEmp
-          toggleEmpForm={handleCloseForm}
-          selectedDepartementId={departementId}
-          onEmployeAdded={handleEmployerAdded}
-          selectedEmployer={selectedEmployer}
-          onEmployeUpdated={handleEmployerUpdated}
-          fetchEmployers={fetchEmployersWithContracts}
+        <ExpandRTable
+          columns={visibleColumns}
+          data={filteredEmployees}
+          searchTerm={globalSearch.toLowerCase()}
+          highlightText={highlightText}
+          selectAll={selectedEmployers.length === filteredEmployers.length && filteredEmployers.length > 0}
+          selectedItems={selectedEmployers}
+          handleSelectAllChange={handleSelectAllChange}
+          handleCheckboxChange={handleCheckboxChange}
+          handleEdit={handleEditEmployer}
+          handleDelete={handleDeleteEmployer}
+          handleDeleteSelected={handleDeleteSelected}
+          rowsPerPage={employeesPerPage}
+          page={currentPage}
+          handleChangePage={handleChangePage}
+          handleChangeRowsPerPage={handleChangeRowsPerPage}
+          expandedRows={expandedRows}
+          toggleRowExpansion={toggleRowExpansion}
+          renderExpandedRow={renderExpandedRow}
+          renderCustomActions={renderCustomActions}
         />
+
+        <EmployeFichePrint
+          show={showFicheModal}
+          onHide={() => { setShowFicheModal(false); setSelectedEmployeeForPrint(null); }}
+          employee={selectedEmployeeForPrint}
+        />
+
+      </div> {/* Fin Colonne Gauche */}
+
+      {/* Colonne Droite: Formulaire */}
+      {showAddForm && (
+        <div style={{
+          flex: '0 0 45%',
+          overflowY: 'auto',
+          height: '100%',
+          backgroundColor: '#fdfdfd',
+          boxShadow: '-4px 0 15px rgba(0,0,0,0.05)',
+          borderLeft: '1px solid #e0e0e0'
+        }}>
+          <AddEmp
+            toggleEmpForm={handleCloseForm}
+            selectedDepartementId={departementId}
+            onEmployeAdded={handleEmployerAdded}
+            selectedEmployer={selectedEmployer}
+            onEmployeUpdated={handleEmployerUpdated}
+            fetchEmployers={fetchEmployersWithContracts}
+          />
+        </div>
       )}
 
     </div>

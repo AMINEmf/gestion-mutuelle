@@ -34,6 +34,7 @@ const ExpandRAffiliationTable = ({
   renderExpandedRow,
   renderCustomActions,
   expansionType = "default",
+  emptyMessage = "Aucune affiliation mutuelle trouvée",
 }) => {
   const hasActions = !!handleEdit || !!handleDelete || !!renderCustomActions;
 
@@ -211,7 +212,7 @@ const ExpandRAffiliationTable = ({
                     }}
                   >
                     <div style={{ color: "#6b7280", fontSize: "1rem" }}>
-                      Aucune affiliation mutuelle trouvée
+                      {emptyMessage}
                     </div>
                   </TableCell>
                 </TableRow>

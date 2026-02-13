@@ -8,6 +8,7 @@ export function HeaderProvider({ children }) {
   const [onPrint, setOnPrint] = useState(undefined);
   const [onExportPDF, setOnExportPDF] = useState(undefined);
   const [onExportExcel, setOnExportExcel] = useState(undefined);
+  const [showSearch, setShowSearch] = useState(true);
 
   const clearActions = useCallback(() => {
     setOnPrint(undefined);
@@ -27,9 +28,11 @@ export function HeaderProvider({ children }) {
       setOnExportPDF,
       onExportExcel,
       setOnExportExcel,
+      showSearch,
+      setShowSearch,
       clearActions,
     }),
-    [title, searchQuery, onPrint, onExportPDF, onExportExcel, clearActions]
+    [title, searchQuery, onPrint, onExportPDF, onExportExcel, showSearch, clearActions]
   );
 
   return <HeaderContext.Provider value={value}>{children}</HeaderContext.Provider>;

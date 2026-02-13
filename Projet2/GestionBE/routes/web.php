@@ -1,8 +1,8 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\GroupeClientController; //new 
-use App\Http\Controllers\ClientController;
+// use App\Http\Controllers\GroupeClientController; //new 
+// use App\Http\Controllers\ClientController;
 
 /*
 |--------------------------------------------------------------------------
@@ -18,5 +18,5 @@ use App\Http\Controllers\ClientController;
 Route::get('/', function () {
     return view('welcome');
 });
-Route::apiResource('/groupes', GroupeClientController::class);
-Route::apiResource('/clients', GroupeClientController::class);
+// Route::apiResource('/groupes', GroupeClientController::class);
+// Route::apiResource('/clients', GroupeClientController::class);

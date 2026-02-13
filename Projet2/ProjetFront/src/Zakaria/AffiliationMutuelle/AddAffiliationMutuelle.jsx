@@ -2,15 +2,15 @@ import React, { useState, useEffect } from 'react';
 import Select from 'react-select';
 import axios from 'axios';
 import { Form } from 'react-bootstrap';
-import { Box, Typography, Divider, IconButton, Button as MuiButton } from '@mui/material';
+import { Box, Typography, IconButton, Button as MuiButton } from '@mui/material';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { User, CreditCard, Tag, Calendar, CalendarX, Flag, Users, MessageSquare, Save, X, Info, FileText } from "lucide-react";
+import { User, CreditCard, Calendar, MessageSquare, X, FileText } from "lucide-react";
 import './AddAffiliationMutuelle.css';
 
 // Configuration de l'instance axios avec credentials
 const api = axios.create({
-  baseURL: "http://127.0.0.1:8000/api",
+  baseURL: "http://localhost:8000/api",
   withCredentials: true,
 });
 
@@ -37,16 +37,13 @@ const loaderCSS = `
 `;
 
 function AddAffiliationMutuelle({
-  toggleAffiliationForm, 
+  toggleAffiliationForm,
   onAffiliationAdded = () => { },
   selectedAffiliation,
   onAffiliationUpdated,
   fetchAffiliations,
   isSidebar = false
 }) {
-  const [key, setKey] = useState('home');
-  const [loading, setLoading] = useState(false);
-
   // États pour les champs d'affiliation mutuelle
   const [formData, setFormData] = useState({
     employe_id: '',
@@ -68,17 +65,18 @@ function AddAffiliationMutuelle({
   const [selectedEmploye, setSelectedEmploye] = useState(null);
   const [selectedMutuelle, setSelectedMutuelle] = useState(null);
   const [selectedRegime, setSelectedRegime] = useState(null);
-  
+
   // État pour les détails de l'employé sélectionné (enfants, situation)
   const [employeDetails, setEmployeDetails] = useState(null);
 
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     fetchEmployes();
     fetchMutuelles();
-    
+
     if (selectedAffiliation) {
       // Mode édition
       setFormData({
@@ -99,14 +97,14 @@ function AddAffiliationMutuelle({
           value: selectedAffiliation.employe_id,
           label: `${selectedAffiliation.employe.matricule} - ${selectedAffiliation.employe.nom} ${selectedAffiliation.employe.prenom}`
         });
-        
+
         // Charger les détails de l'employé pour l'UI conditionnelle
         setEmployeDetails({
           nb_enfants: selectedAffiliation.employe.nb_enfants || 0,
           situation_fm: selectedAffiliation.employe.situation_fm || ''
         });
       }
-      
+
       if (selectedAffiliation.mutuelle) {
         setSelectedMutuelle({
           value: selectedAffiliation.mutuelle_id,
@@ -142,7 +140,7 @@ function AddAffiliationMutuelle({
     try {
       const response = await api.get('/mutuelles');
       console.log('Réponse API mutuelles:', response.data);
-      
+
       if (response.data && response.data.success && Array.isArray(response.data.data)) {
         setMutuelles(response.data.data);
         console.log('Mutuelles chargées:', response.data.data);
@@ -163,7 +161,7 @@ function AddAffiliationMutuelle({
     try {
       const response = await api.get(`/mutuelles/${mutuelleId}/regimes`);
       console.log('Réponse API régimes:', response.data);
-      
+
       if (response.data && response.data.success && Array.isArray(response.data.data)) {
         setRegimes(response.data.data);
         console.log('Régimes chargés:', response.data.data);
@@ -228,7 +226,7 @@ function AddAffiliationMutuelle({
     setSelectedMutuelle(selectedOption);
     setSelectedRegime(null);
     setRegimes([]);
-    
+
     if (selectedOption) {
       setFormData(prev => ({
         ...prev,
@@ -279,7 +277,7 @@ function AddAffiliationMutuelle({
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       toast.error('Veuillez corriger les erreurs du formulaire');
       return;
@@ -298,7 +296,7 @@ function AddAffiliationMutuelle({
         onAffiliationAdded(response.data);
         toast.success('Affiliation créée avec succès');
       }
-      
+
       toggleAffiliationForm();
     } catch (error) {
       console.error('Erreur lors de la sauvegarde:', error);
@@ -330,7 +328,7 @@ function AddAffiliationMutuelle({
   const regimeOptions = regimes.map(reg => {
     const taux = reg.taux_couverture || reg.taux_remboursement;
     const montant = reg.cotisation_mensuelle || reg.montant;
-    
+
     let label = reg.libelle;
     if (taux) {
       label += ` – ${taux}%`;
@@ -338,7 +336,7 @@ function AddAffiliationMutuelle({
     if (montant) {
       label += ` – ${montant} DH/mois`;
     }
-    
+
     return {
       value: reg.id,
       label: label
@@ -349,67 +347,54 @@ function AddAffiliationMutuelle({
     <>
       <style>{loaderCSS}</style>
       <ToastContainer position="top-right" autoClose={3000} />
-      
-      <div className={isSidebar ? "add-affiliation-sidebar" : "add-affiliation-overlay"}>
-        <button
-            type="button"
-            onClick={toggleAffiliationForm}
-            style={{
-              position: isSidebar ? "absolute" : "fixed",
-              top: isSidebar ? "15px" : "10%",
-              right: isSidebar ? "15px" : "20px",
-              background: "transparent",
-              border: "none",
-              fontSize: "2rem",
-              color: "#4b5563",
-              cursor: "pointer",
-              zIndex: 9999,
-            }}
-            aria-label="Fermer le formulaire"
-            title="Fermer"
-          >
-            &times;
-        </button>
 
-        <div className="addper">
-          <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column', backgroundColor: '#fff' }}>
+      <div className={isSidebar ? "add-affiliation-sidebar" : "add-affiliation-panel"}>
+        <div className="panel-container">
+          <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column', backgroundColor: '#fff', minHeight: 0 }}>
             {/* Header */}
-            <Box sx={{ 
-              p: 3, 
+            <Box className="panel-header" sx={{
+              p: 2.5,
               borderBottom: '1px solid #e5e7eb',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
-              backgroundColor: '#f8f9fa'
+              backgroundColor: '#fff',
+              flexShrink: 0
             }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <FileText size={24} color="#00afaa" />
-                <Typography variant="h6" sx={{ fontWeight: 600, color: '#1f2937' }}>
-                  {selectedAffiliation ? 'Modifier l\'affiliation' : 'Nouvelle affiliation'}
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                <FileText size={20} color="#3a8a90" />
+                <Typography variant="h6" sx={{ fontWeight: 600, color: '#3a8a90', fontSize: '1.1rem' }}>
+                  {selectedAffiliation ? 'Modifier Affiliation' : 'Nouvelle Affiliation'}
                 </Typography>
               </Box>
+              <IconButton
+                onClick={toggleAffiliationForm}
+                size="small"
+                sx={{
+                  color: '#6b7280',
+                  '&:hover': { backgroundColor: '#f3f4f6' }
+                }}
+                aria-label="Fermer"
+              >
+                <X size={20} />
+              </IconButton>
             </Box>
 
             {/* Body - Scrollable */}
-            <Box sx={{ flex: 1, overflowY: 'auto', p: 3 }}>
+            <Box className="panel-body" sx={{ flex: 1, overflowY: 'auto', p: 3, minHeight: 0 }}>
               <Form onSubmit={handleSubmit}>
-                
-                {/* Section: Informations Employé */}
+
+                {/* Section: INFORMATIONS EMPLOYÉ */}
                 <Box sx={{ mb: 3 }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-                    <User size={18} color="#00afaa" />
-                    <Typography variant="subtitle1" sx={{ fontWeight: 600, color: '#374151' }}>
+                  <Box className="section-header" sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2, pb: 1, borderBottom: '1px solid #e5e7eb' }}>
+                    <User size={16} color="#3a8a90" />
+                    <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#3a8a90', fontSize: '0.75rem', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
                       Informations Employé
                     </Typography>
                   </Box>
-                  <Box sx={{ 
-                    p: 2, 
-                    backgroundColor: '#f9fafb', 
-                    borderRadius: '8px',
-                    border: '1px solid #e5e7eb'
-                  }}>
+                  <Box sx={{ px: 0 }}>
                     <Form.Group className="mb-3">
-                      <Form.Label style={{ fontSize: '0.875rem', fontWeight: 500, color: '#6b7280' }}>
+                      <Form.Label style={{ fontSize: '0.75rem', fontWeight: 500, color: '#6b7280', marginBottom: '0.5rem' }}>
                         Employé *
                       </Form.Label>
                       <Select
@@ -424,8 +409,10 @@ function AddAffiliationMutuelle({
                         styles={{
                           control: (base) => ({
                             ...base,
-                            borderColor: errors.employe_id ? '#dc2626' : '#d1d5db',
-                            '&:hover': { borderColor: '#00afaa' }
+                            borderColor: errors.employe_id ? '#dc2626' : '#e5e7eb',
+                            fontSize: '0.875rem',
+                            minHeight: '38px',
+                            '&:hover': { borderColor: '#14b8a6' }
                           })
                         }}
                       />
@@ -436,24 +423,17 @@ function AddAffiliationMutuelle({
                   </Box>
                 </Box>
 
-                <Divider sx={{ my: 2 }} />
-
-                {/* Section: Mutuelle et Régime */}
+                {/* Section: MUTUELLE ET RÉGIME */}
                 <Box sx={{ mb: 3 }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-                    <CreditCard size={18} color="#00afaa" />
-                    <Typography variant="subtitle1" sx={{ fontWeight: 600, color: '#374151' }}>
+                  <Box className="section-header" sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2, pb: 1, borderBottom: '1px solid #e5e7eb' }}>
+                    <CreditCard size={16} color="#3a8a90" />
+                    <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#3a8a90', fontSize: '0.75rem', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
                       Mutuelle et Régime
                     </Typography>
                   </Box>
-                  <Box sx={{ 
-                    p: 2, 
-                    backgroundColor: '#f9fafb', 
-                    borderRadius: '8px',
-                    border: '1px solid #e5e7eb'
-                  }}>
+                  <Box sx={{ px: 0 }}>
                     <Form.Group className="mb-3">
-                      <Form.Label style={{ fontSize: '0.875rem', fontWeight: 500, color: '#6b7280' }}>
+                      <Form.Label style={{ fontSize: '0.75rem', fontWeight: 500, color: '#6b7280', marginBottom: '0.5rem' }}>
                         Mutuelle *
                       </Form.Label>
                       <Select
@@ -467,8 +447,10 @@ function AddAffiliationMutuelle({
                         styles={{
                           control: (base) => ({
                             ...base,
-                            borderColor: errors.mutuelle_id ? '#dc2626' : '#d1d5db',
-                            '&:hover': { borderColor: '#00afaa' }
+                            borderColor: errors.mutuelle_id ? '#dc2626' : '#e5e7eb',
+                            fontSize: '0.875rem',
+                            minHeight: '38px',
+                            '&:hover': { borderColor: '#14b8a6' }
                           })
                         }}
                       />
@@ -477,8 +459,8 @@ function AddAffiliationMutuelle({
                       )}
                     </Form.Group>
 
-                    <Form.Group>
-                      <Form.Label style={{ fontSize: '0.875rem', fontWeight: 500, color: '#6b7280' }}>
+                    <Form.Group className="mb-3">
+                      <Form.Label style={{ fontSize: '0.75rem', fontWeight: 500, color: '#6b7280', marginBottom: '0.5rem' }}>
                         Régime *
                       </Form.Label>
                       <Select
@@ -493,8 +475,10 @@ function AddAffiliationMutuelle({
                         styles={{
                           control: (base) => ({
                             ...base,
-                            borderColor: errors.regime_mutuelle_id ? '#dc2626' : '#d1d5db',
-                            '&:hover': { borderColor: '#00afaa' }
+                            borderColor: errors.regime_mutuelle_id ? '#dc2626' : '#e5e7eb',
+                            fontSize: '0.875rem',
+                            minHeight: '38px',
+                            '&:hover': { borderColor: '#14b8a6' }
                           })
                         }}
                       />
@@ -503,8 +487,8 @@ function AddAffiliationMutuelle({
                       )}
                     </Form.Group>
 
-                    <Form.Group className="mb-3">
-                      <Form.Label style={{ fontSize: '0.875rem', fontWeight: 500, color: '#6b7280' }}>
+                    <Form.Group>
+                      <Form.Label style={{ fontSize: '0.75rem', fontWeight: 500, color: '#6b7280', marginBottom: '0.5rem' }}>
                         Numéro d'adhérent
                       </Form.Label>
                       <Form.Control
@@ -513,6 +497,7 @@ function AddAffiliationMutuelle({
                         onChange={(e) => handleInputChange('numero_adherent', e.target.value)}
                         placeholder="Ex: 12345678"
                         className={errors.numero_adherent ? 'is-invalid' : ''}
+                        style={{ fontSize: '0.875rem', height: '38px' }}
                       />
                       {errors.numero_adherent && (
                         <small className="text-danger">{errors.numero_adherent}</small>
@@ -521,108 +506,99 @@ function AddAffiliationMutuelle({
                   </Box>
                 </Box>
 
-                <Divider sx={{ my: 2 }} />
-
-                {/* Section: Dates d'affiliation */}
+                {/* Section: DATES D'AF FILIATION */}
                 <Box sx={{ mb: 3 }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-                    <Calendar size={18} color="#00afaa" />
-                    <Typography variant="subtitle1" sx={{ fontWeight: 600, color: '#374151' }}>
+                  <Box className="section-header" sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2, pb: 1, borderBottom: '1px solid #e5e7eb' }}>
+                    <Calendar size={16} color="#3a8a90" />
+                    <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#3a8a90', fontSize: '0.75rem', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
                       Dates d'affiliation
                     </Typography>
                   </Box>
-                  <Box sx={{ 
-                    p: 2, 
-                    backgroundColor: '#f9fafb', 
-                    borderRadius: '8px',
-                    border: '1px solid #e5e7eb'
-                  }}>
-                    <Form.Group className="mb-3">
-                      <Form.Label style={{ fontSize: '0.875rem', fontWeight: 500, color: '#6b7280' }}>
-                        Date d'adhésion *
-                      </Form.Label>
-                      <Form.Control
-                        type="date"
-                        value={formData.date_adhesion}
-                        onChange={(e) => handleInputChange('date_adhesion', e.target.value)}
-                        className={errors.date_adhesion ? 'is-invalid' : ''}
-                      />
-                      {errors.date_adhesion && (
-                        <small className="text-danger">{errors.date_adhesion}</small>
-                      )}
-                    </Form.Group>
+                  <Box sx={{ px: 0 }}>
+                    <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 2 }}>
+                      <Form.Group>
+                        <Form.Label style={{ fontSize: '0.75rem', fontWeight: 500, color: '#6b7280', marginBottom: '0.5rem' }}>
+                          Date d'adhésion *
+                        </Form.Label>
+                        <Form.Control
+                          type="date"
+                          value={formData.date_adhesion}
+                          onChange={(e) => handleInputChange('date_adhesion', e.target.value)}
+                          className={errors.date_adhesion ? 'is-invalid' : ''}
+                          style={{ fontSize: '0.875rem', height: '38px' }}
+                        />
+                        {errors.date_adhesion && (
+                          <small className="text-danger">{errors.date_adhesion}</small>
+                        )}
+                      </Form.Group>
 
-                    <Form.Group>
-                      <Form.Label style={{ fontSize: '0.875rem', fontWeight: 500, color: '#6b7280' }}>
-                        Date de résiliation
-                      </Form.Label>
-                      <Form.Control
-                        type="date"
-                        value={formData.date_resiliation}
-                        onChange={(e) => {
-                          handleInputChange('date_resiliation', e.target.value);
-                          // Mettre à jour le statut automatiquement
-                          if (e.target.value) {
-                            handleInputChange('statut', 'RESILIE');
-                          } else {
-                            handleInputChange('statut', 'ACTIVE');
-                          }
-                        }}
-                        min={formData.date_adhesion}
-                        className={errors.date_resiliation ? 'is-invalid' : ''}
-                      />
-                      <small className="text-muted" style={{ fontSize: '0.75rem' }}>
-                        Laisser vide si l'affiliation est toujours active
-                      </small>
-                      {errors.date_resiliation && (
-                        <small className="text-danger d-block">{errors.date_resiliation}</small>
-                      )}
-                    </Form.Group>
+                      <Form.Group>
+                        <Form.Label style={{ fontSize: '0.75rem', fontWeight: 500, color: '#6b7280', marginBottom: '0.5rem' }}>
+                          Date de résiliation
+                        </Form.Label>
+                        <Form.Control
+                          type="date"
+                          value={formData.date_resiliation}
+                          onChange={(e) => {
+                            handleInputChange('date_resiliation', e.target.value);
+                            if (e.target.value) {
+                              handleInputChange('statut', 'RESILIE');
+                            } else {
+                              handleInputChange('statut', 'ACTIVE');
+                            }
+                          }}
+                          min={formData.date_adhesion}
+                          className={errors.date_resiliation ? 'is-invalid' : ''}
+                          style={{ fontSize: '0.875rem', height: '38px' }}
+                        />
+                        {errors.date_resiliation && (
+                          <small className="text-danger d-block">{errors.date_resiliation}</small>
+                        )}
+                      </Form.Group>
+                    </Box>
+                    <small className="text-muted" style={{ fontSize: '0.7rem', display: 'block', marginTop: '0.5rem' }}>
+                      Laisser la date de résiliation vide si l'affiliation est toujours active
+                    </small>
                   </Box>
                 </Box>
 
-                <Divider sx={{ my: 2 }} />
-
-                {/* Section: Statut et Ayants Droit */}
+                {/* Section: STATUT ET AYANTS DROIT */}
                 <Box sx={{ mb: 3 }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-                    <Info size={18} color="#00afaa" />
-                    <Typography variant="subtitle1" sx={{ fontWeight: 600, color: '#374151' }}>
+                  <Box className="section-header" sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2, pb: 1, borderBottom: '1px solid #e5e7eb' }}>
+                    <FileText size={16} color="#3a8a90" />
+                    <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#3a8a90', fontSize: '0.75rem', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
                       Statut et Ayants Droit
                     </Typography>
                   </Box>
-                  <Box sx={{ 
-                    p: 2, 
-                    backgroundColor: '#f9fafb', 
-                    borderRadius: '8px',
-                    border: '1px solid #e5e7eb'
-                  }}>
+                  <Box sx={{ px: 0 }}>
                     <Form.Group className="mb-3">
-                      <Form.Label style={{ fontSize: '0.875rem', fontWeight: 500, color: '#6b7280' }}>
+                      <Form.Label style={{ fontSize: '0.75rem', fontWeight: 500, color: '#6b7280', marginBottom: '0.5rem' }}>
                         Statut
                       </Form.Label>
                       <Form.Control
                         type="text"
                         value={formData.date_resiliation ? 'RESILIE' : 'ACTIVE'}
                         disabled
-                        style={{ 
+                        style={{
                           backgroundColor: formData.date_resiliation ? '#fef2f2' : '#f0fdf4',
                           color: formData.date_resiliation ? '#dc2626' : '#16a34a',
-                          fontWeight: 600
+                          fontWeight: 600,
+                          fontSize: '0.875rem',
+                          height: '38px'
                         }}
                       />
-                      <small className="text-muted" style={{ fontSize: '0.75rem' }}>
+                      <small className="text-muted" style={{ fontSize: '0.7rem', display: 'block', marginTop: '0.25rem' }}>
                         Le statut est automatique selon la date de résiliation
                       </small>
                     </Form.Group>
 
                     {/* Section Ayants Droit (Enfants) */}
                     {employeDetails && employeDetails.nb_enfants > 0 && (
-                      <div className="mb-3 p-3 bg-white border rounded">
-                        <h6 className="text-primary mb-2" style={{ fontSize: '0.9rem', fontWeight: 600 }}>
+                      <div className="mb-3 p-2 bg-white border rounded" style={{ borderColor: '#e5e7eb' }}>
+                        <h6 className="mb-2" style={{ fontSize: '0.8rem', fontWeight: 600, color: '#374151' }}>
                           Ayants droits (Enfants)
                         </h6>
-                        <p className="mb-2 text-muted" style={{ fontSize: '0.85rem' }}>
+                        <p className="mb-2 text-muted" style={{ fontSize: '0.75rem' }}>
                           Nombre d'enfants : <strong>{employeDetails.nb_enfants}</strong>
                         </p>
                         <Form.Check
@@ -631,18 +607,18 @@ function AddAffiliationMutuelle({
                           label="Inclure les enfants dans l'affiliation"
                           checked={formData.ayant_droit == 1 || formData.ayant_droit === true}
                           onChange={(e) => handleInputChange('ayant_droit', e.target.checked ? 1 : 0)}
-                          style={{ fontWeight: 500 }}
+                          style={{ fontWeight: 500, fontSize: '0.8rem' }}
                         />
                       </div>
                     )}
 
                     {/* Section Situation Familiale (Conjoint) */}
                     {employeDetails && employeDetails.situation_fm === 'married' && employeDetails.nb_enfants === 0 && (
-                      <div className="mb-3 p-3 bg-white border rounded">
-                        <h6 className="text-primary mb-2" style={{ fontSize: '0.9rem', fontWeight: 600 }}>
+                      <div className="mb-3 p-2 bg-white border rounded" style={{ borderColor: '#e5e7eb' }}>
+                        <h6 className="mb-2" style={{ fontSize: '0.8rem', fontWeight: 600, color: '#374151' }}>
                           Situation Familiale
                         </h6>
-                        <p className="mb-2 text-muted" style={{ fontSize: '0.85rem' }}>
+                        <p className="mb-2 text-muted" style={{ fontSize: '0.75rem' }}>
                           Situation : <strong>Marié(e)</strong>
                         </p>
                         <Form.Check
@@ -651,33 +627,22 @@ function AddAffiliationMutuelle({
                           label="Inclure le conjoint dans l'affiliation"
                           checked={formData.conjoint_ayant_droit == 1 || formData.conjoint_ayant_droit === true}
                           onChange={(e) => handleInputChange('conjoint_ayant_droit', e.target.checked ? 1 : 0)}
-                          style={{ fontWeight: 500 }}
+                          style={{ fontWeight: 500, fontSize: '0.8rem' }}
                         />
                       </div>
                     )}
-                    
-                    {/* Fallback si pas de données spécifiques mais peut-être modification manuelle voulue
-                        Ou laisser vide. Le prompt dit "Si single ET nb_enfants === 0 => pas de sections automatiques".
-                    */}
                   </Box>
                 </Box>
 
-                <Divider sx={{ my: 2 }} />
-
-                {/* Section: Commentaire */}
+                {/* Section: COMMENTAIRE */}
                 <Box sx={{ mb: 3 }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-                    <MessageSquare size={18} color="#00afaa" />
-                    <Typography variant="subtitle1" sx={{ fontWeight: 600, color: '#374151' }}>
+                  <Box className="section-header" sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2, pb: 1, borderBottom: '1px solid #e5e7eb' }}>
+                    <MessageSquare size={16} color="#3a8a90" />
+                    <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#3a8a90', fontSize: '0.75rem', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
                       Commentaire
                     </Typography>
                   </Box>
-                  <Box sx={{ 
-                    p: 2, 
-                    backgroundColor: '#f9fafb', 
-                    borderRadius: '8px',
-                    border: '1px solid #e5e7eb'
-                  }}>
+                  <Box sx={{ px: 0 }}>
                     <Form.Control
                       as="textarea"
                       rows={3}
@@ -685,6 +650,7 @@ function AddAffiliationMutuelle({
                       onChange={(e) => handleInputChange('commentaire', e.target.value)}
                       placeholder="Commentaire optionnel..."
                       className={errors.commentaire ? 'is-invalid' : ''}
+                      style={{ fontSize: '0.875rem' }}
                     />
                     {errors.commentaire && (
                       <small className="text-danger">{errors.commentaire}</small>
@@ -694,29 +660,30 @@ function AddAffiliationMutuelle({
               </Form>
             </Box>
 
-            {/* Footer - Actions */}
-            <Box sx={{ 
-              p: 2, 
+            {/* Footer - Sticky Actions */}
+            <Box className="panel-footer" sx={{
+              position: 'sticky',
+              bottom: 0,
+              p: 2.5,
               borderTop: '1px solid #e5e7eb',
               display: 'flex',
               gap: 2,
               justifyContent: 'flex-end',
-              backgroundColor: '#f8f9fa'
+              backgroundColor: '#ffffff',
+              boxShadow: '0 -2px 8px rgba(0,0,0,0.05)',
+              zIndex: 10
             }}>
               <MuiButton
-                variant="outlined"
+                variant="text"
                 onClick={handleCancel}
                 disabled={isSubmitting}
                 sx={{
-                  borderColor: '#d1d5db',
                   color: '#6b7280',
                   '&:hover': {
-                    borderColor: '#9ca3af',
-                    backgroundColor: '#f9fafb'
+                    backgroundColor: '#f3f4f6'
                   }
                 }}
               >
-                <X size={16} style={{ marginRight: '8px' }} />
                 Annuler
               </MuiButton>
               <MuiButton
@@ -724,9 +691,11 @@ function AddAffiliationMutuelle({
                 onClick={handleSubmit}
                 disabled={isSubmitting}
                 sx={{
-                  backgroundColor: '#00afaa',
+                  backgroundColor: '#007580ff',
+                  color: '#ffffff',
+                  px: 3,
                   '&:hover': {
-                    backgroundColor: '#009691'
+                    backgroundColor: '#3a8a90'
                   },
                   '&:disabled': {
                     backgroundColor: '#9ca3af'
@@ -740,8 +709,7 @@ function AddAffiliationMutuelle({
                   </>
                 ) : (
                   <>
-                    <Save size={16} style={{ marginRight: '8px' }} />
-                    {selectedAffiliation ? 'Mettre à jour' : 'Créer'}
+                    {selectedAffiliation ? 'Mettre à jour' : 'Enregistrer'}
                   </>
                 )}
               </MuiButton>

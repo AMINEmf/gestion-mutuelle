@@ -29,7 +29,7 @@ class EmployeDepartementController extends Controller
     
     public function store(Request $request)
     {
-        Gate::authorize('create_employee_histories');
+        // Gate::authorize('create_employee_histories');
         Log::info('Incoming request data:', $request->all());
 
         try {

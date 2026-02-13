@@ -93,16 +93,16 @@ const AffiliationMutuelleTable = forwardRef((props, ref) => {
     return storedVisibility
       ? JSON.parse(storedVisibility)
       : {
-          matricule: true,
-          nom: true,
-          prenom: true,
-          mutuelle: true,
-          regime: true,
-          date_adhesion: true,
-          date_resiliation: true,
-          statut: true,
-          ayant_droit: true,
-        };
+        matricule: true,
+        nom: true,
+        prenom: true,
+        mutuelle: true,
+        regime: true,
+        date_adhesion: true,
+        date_resiliation: true,
+        statut: true,
+        ayant_droit: true,
+      };
   };
 
   // --------------------------
@@ -134,52 +134,36 @@ const AffiliationMutuelleTable = forwardRef((props, ref) => {
   const [filtresMutuelle, setFiltresMutuelle] = useState([]);
   const [selectedMutuelleFilter, setSelectedMutuelleFilter] = useState("");
 
-  // Filters
-  const [filterOptions, setFilterOptions] = useState({
-    filters: [
-      {
-        key: "statut",
-        label: "Statut",
-        value: "",
-        placeholder: "Statut",
-        type: "select",
-      },
-      {
-        key: "nom_mutuelle",
-        label: "Mutuelle",
-        value: "",
-        placeholder: "Mutuelle",
-        type: "select",
-      },
-      {
-        key: "date_affiliation",
-        label: "Date Affiliation",
-        type: "range",
-        min: "",
-        max: "",
-        placeholderMin: "Du",
-        placeholderMax: "Au",
-      },
-      {
-        key: "part_employeur",
-        label: "Part Employeur",
-        type: "range",
-        min: "",
-        max: "",
-        placeholderMin: "Min",
-        placeholderMax: "Max",
-      },
-      {
-        key: "part_employe",
-        label: "Part Employé",
-        type: "range",
-        min: "",
-        max: "",
-        placeholderMin: "Min",
-        placeholderMax: "Max",
-      },
-    ],
-  });
+  // Filters STATE
+  const [filterSearch, setFilterSearch] = useState("");
+  const [filterStatut, setFilterStatut] = useState(""); // "" means all
+  // Date Adhesion
+  const [dateAdhesionFrom, setDateAdhesionFrom] = useState("");
+  const [dateAdhesionTo, setDateAdhesionTo] = useState("");
+  // Date Resiliation
+  const [dateResiliationFrom, setDateResiliationFrom] = useState("");
+  const [dateResiliationTo, setDateResiliationTo] = useState("");
+
+  // Debounced Search
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearch(filterSearch);
+    }, 500);
+    return () => clearTimeout(handler);
+  }, [filterSearch]);
+
+  const resetFilters = () => {
+    setSelectedMutuelleFilter("");
+    setFilterSearch("");
+    setFilterStatut("");
+    setDateAdhesionFrom("");
+    setDateAdhesionTo("");
+    setDateResiliationFrom("");
+    setDateResiliationTo("");
+    setCurrentPage(0);
+  };
 
   // --------------------------
   // FETCH (mutuelles + affiliations) - table vide si pas de departement
@@ -208,8 +192,16 @@ const AffiliationMutuelleTable = forwardRef((props, ref) => {
     }
 
     try {
-      const params = { departement_id: departementId };
-      if (selectedMutuelleFilter) params.mutuelle_id = selectedMutuelleFilter;
+      const params = {
+        departement_id: departementId,
+        mutuelle_id: selectedMutuelleFilter || undefined,
+        statut: filterStatut || undefined,
+        search: debouncedSearch || undefined,
+        date_adhesion_from: dateAdhesionFrom || undefined,
+        date_adhesion_to: dateAdhesionTo || undefined,
+        date_resiliation_from: dateResiliationFrom || undefined,
+        date_resiliation_to: dateResiliationTo || undefined,
+      };
 
       const response = await api.get("/affiliations-mutuelle", { params });
 
@@ -227,7 +219,17 @@ const AffiliationMutuelleTable = forwardRef((props, ref) => {
       console.error("Erreur lors de la récupération des affiliations:", e);
       setAffiliationsWithDetails([]);
     }
-  }, [departementId, selectedMutuelleFilter]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    departementId,
+    selectedMutuelleFilter,
+    filterStatut,
+    debouncedSearch,
+    dateAdhesionFrom,
+    dateAdhesionTo,
+    dateResiliationFrom,
+    dateResiliationTo
+  ]);
 
   useEffect(() => {
     if (!departementId) {
@@ -248,6 +250,15 @@ const AffiliationMutuelleTable = forwardRef((props, ref) => {
     }
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  // Date formatter (French format) (centralized)
+  const formatDate = useCallback((dateStr) => {
+    if (!dateStr) return "-";
+    // Check if it's already formatted (dd/mm/yyyy) or just a simple check
+    if (dateStr === "N/A" || dateStr === "-") return dateStr;
+    const d = new Date(dateStr);
+    return isNaN(d.getTime()) ? dateStr : d.toLocaleDateString("fr-FR");
   }, []);
 
   // --------------------------
@@ -283,10 +294,7 @@ const AffiliationMutuelleTable = forwardRef((props, ref) => {
       {
         key: "date_adhesion",
         label: "Date Adhésion",
-        render: (item) => {
-          if (!item.date_adhesion) return "N/A";
-          return new Date(item.date_adhesion).toLocaleDateString("fr-FR");
-        },
+        render: (item) => formatDate(item.date_adhesion),
       },
       {
         key: "date_resiliation",
@@ -297,10 +305,9 @@ const AffiliationMutuelleTable = forwardRef((props, ref) => {
               <span style={{ color: "#6b7280", fontStyle: "italic" }}>-</span>
             );
           }
-          const date = new Date(item.date_resiliation);
           return (
             <span style={{ color: "#dc2626", fontWeight: 500 }}>
-              {date.toLocaleDateString("fr-FR")}
+              {formatDate(item.date_resiliation)}
             </span>
           );
         },
@@ -310,9 +317,8 @@ const AffiliationMutuelleTable = forwardRef((props, ref) => {
         label: "Statut",
         render: (item) => (
           <span
-            className={`badge ${
-              item.statut === "ACTIVE" ? "bg-success" : "bg-danger"
-            }`}
+            className={`badge ${item.statut === "ACTIVE" ? "bg-success" : "bg-danger"
+              }`}
             style={{
               padding: "6px 12px",
               borderRadius: "20px",
@@ -328,9 +334,8 @@ const AffiliationMutuelleTable = forwardRef((props, ref) => {
         label: "Ayant Droit",
         render: (item) => (
           <span
-            className={`badge ${
-              item.ayant_droit ? "bg-primary" : "bg-secondary"
-            }`}
+            className={`badge ${item.ayant_droit ? "bg-primary" : "bg-secondary"
+              }`}
             style={{
               padding: "6px 12px",
               borderRadius: "20px",
@@ -342,7 +347,7 @@ const AffiliationMutuelleTable = forwardRef((props, ref) => {
         ),
       },
     ],
-    []
+    [formatDate]
   );
 
   const visibleColumns = useMemo(() => {
@@ -451,7 +456,7 @@ const AffiliationMutuelleTable = forwardRef((props, ref) => {
           input: "date",
           inputLabel: "Date de résiliation",
           // Utiliser la date locale pour éviter les problèmes de fuseau horaire UTC
-          inputValue: new Date().toLocaleDateString('en-CA'), 
+          inputValue: new Date().toLocaleDateString('en-CA'),
           inputAttributes: { required: true },
         });
 
@@ -484,7 +489,7 @@ const AffiliationMutuelleTable = forwardRef((props, ref) => {
             });
           }
         }
-      } 
+      }
       // 2. Si non active (donc RESILIÉ) => on propose la SUPPRESSION DEFINITIVE (DELETE)
       else {
         const result = await Swal.fire({
@@ -516,7 +521,7 @@ const AffiliationMutuelleTable = forwardRef((props, ref) => {
           } catch (error) {
             console.error("Erreur suppression:", error);
             const msg = error.response?.data?.message || error.response?.data?.error || "Impossible de supprimer cette affiliation.";
-             Swal.fire({
+            Swal.fire({
               icon: "error",
               title: `Erreur ${error.response?.status || ""}`,
               text: msg,
@@ -528,151 +533,26 @@ const AffiliationMutuelleTable = forwardRef((props, ref) => {
     [fetchAffiliationsWithDetails, affiliationsWithDetails]
   );
 
+
   // --------------------------
-  // FILTERS + SEARCH
+  // SEARCH & FILTER HELPERS
   // --------------------------
-  const handleFilterChange = (key, value) => {
-    setFilterOptions((prev) => {
-      const newFilters = prev.filters.map((filter) => {
-        if (filter.key === key && filter.type === "select") {
-          return { ...filter, value };
-        }
-        return filter;
-      });
-      return { ...prev, filters: newFilters };
-    });
-  };
 
-  const handleRangeFilterChange = (key, type, value) => {
-    setFilterOptions((prev) => {
-      const newFilters = prev.filters.map((filter) => {
-        if (filter.key === key && filter.type === "range") {
-          return { ...filter, [type]: value };
-        }
-        return filter;
-      });
-      return { ...prev, filters: newFilters };
-    });
-  };
-
-  const applyFilters = (affiliations) => {
-    return affiliations.filter((affiliation) => {
-      const statutFilter = filterOptions.filters.find((f) => f.key === "statut");
-      const mutuelleFilter = filterOptions.filters.find(
-        (f) => f.key === "nom_mutuelle"
-      );
-      const dateFilter = filterOptions.filters.find(
-        (f) => f.key === "date_affiliation"
-      );
-      const partEmployeurFilter = filterOptions.filters.find(
-        (f) => f.key === "part_employeur"
-      );
-      const partEmployeFilter = filterOptions.filters.find(
-        (f) => f.key === "part_employe"
-      );
-
-      const matchesStatut =
-        !statutFilter?.value ||
-        affiliation.statut?.toLowerCase() === statutFilter.value.toLowerCase();
-
-      // ✅ rendu plus robuste : mutuelle?.nom OU nom_mutuelle
-      const mutuelleName =
-        affiliation.mutuelle?.nom || affiliation.nom_mutuelle || "";
-
-      const matchesMutuelle =
-        !mutuelleFilter?.value ||
-        String(mutuelleName)
-          .toLowerCase()
-          .includes(mutuelleFilter.value.toLowerCase());
-
-      const matchesDate = (() => {
-        if (!dateFilter?.min && !dateFilter?.max) return true;
-        if (!affiliation.date_affiliation) return false;
-
-        const d = new Date(affiliation.date_affiliation);
-        const minD = dateFilter.min
-          ? new Date(dateFilter.min)
-          : new Date("1900-01-01");
-        const maxD = dateFilter.max
-          ? new Date(dateFilter.max)
-          : new Date("2100-12-31");
-        return d >= minD && d <= maxD;
-      })();
-
-      const matchesPartEmployeur = (() => {
-        if (!partEmployeurFilter?.min && !partEmployeurFilter?.max) return true;
-        const part = parseFloat(affiliation.part_employeur) || 0;
-        const min = partEmployeurFilter.min
-          ? parseFloat(partEmployeurFilter.min)
-          : 0;
-        const max = partEmployeurFilter.max
-          ? parseFloat(partEmployeurFilter.max)
-          : 100;
-        return part >= min && part <= max;
-      })();
-
-      const matchesPartEmploye = (() => {
-        if (!partEmployeFilter?.min && !partEmployeFilter?.max) return true;
-        const part = parseFloat(affiliation.part_employe) || 0;
-        const min = partEmployeFilter.min
-          ? parseFloat(partEmployeFilter.min)
-          : 0;
-        const max = partEmployeFilter.max
-          ? parseFloat(partEmployeFilter.max)
-          : 100;
-        return part >= min && part <= max;
-      })();
-
-      return (
-        matchesStatut &&
-        matchesMutuelle &&
-        matchesDate &&
-        matchesPartEmployeur &&
-        matchesPartEmploye
-      );
-    });
-  };
-
-  useEffect(() => {
-    const getUniqueValues = (data, key) => {
-      return [...new Set(data.map((x) => x?.[key]).filter(Boolean))];
-    };
-
-    setFilterOptions((prev) => ({
-      filters: prev.filters.map((filter) => {
-        if (filter.type !== "select") return filter;
-
-        let options = [];
-        if (filter.key === "statut") {
-          options = getUniqueValues(affiliationsWithDetails, "statut").map((v) => ({
-            label: v,
-            value: v,
-          }));
-        } else if (filter.key === "nom_mutuelle") {
-          // ✅ robuste
-          const values = affiliationsWithDetails
-            .map((a) => a?.mutuelle?.nom || a?.nom_mutuelle)
-            .filter(Boolean);
-          options = [...new Set(values)].map((v) => ({ label: v, value: v }));
-        }
-
-        return { ...filter, options };
-      }),
-    }));
-  }, [affiliationsWithDetails]);
-
-  // base list : departement + search
+  // filteredAffiliations handles:
+  // 1. Department filtering (client-side safety / sub-departments)
+  // 2. Global Search (top-bar search)
+  // Note: Specific filters (search field, status, dates) are handled server-side
   const filteredAffiliations = useMemo(() => {
     if (!departementId) return [];
 
     let result = includeSubDepartments
       ? affiliationsWithDetails.filter((a) => {
-          const subIds = getSubDepartmentIds(departements, departementId);
-          return subIds.includes(a.employe?.departement_id);
-        })
+        const subIds = getSubDepartmentIds(departements, departementId);
+        return subIds.includes(a.employe?.departement_id);
+      })
       : affiliationsWithDetails.filter(
-          (a) => a.employe?.departement_id === departementId
-        );
+        (a) => a.employe?.departement_id === departementId
+      );
 
     if (globalSearch.trim()) {
       const s = globalSearch.toLowerCase().trim();
@@ -706,23 +586,11 @@ const AffiliationMutuelleTable = forwardRef((props, ref) => {
     globalSearch,
   ]);
 
-  const normalizeValue = (value) => String(value).toLowerCase().trim();
-
+  // Use the result of global search filtering as the final list for pagination/rendering
   const filteredAffiliationsWithFilters = useMemo(() => {
-    const searched = filteredAffiliations.filter((a) =>
-      globalSearch
-        .toLowerCase()
-        .split(/\s+/)
-        .every((term) =>
-          Object.values(a).some((value) => {
-            if (value === null || value === undefined) return false;
-            return normalizeValue(value.toString()).includes(normalizeValue(term));
-          })
-        )
-    );
+    return filteredAffiliations;
+  }, [filteredAffiliations]);
 
-    return applyFilters(searched);
-  }, [filteredAffiliations, globalSearch, filterOptions]);
 
   // highlightText JSX (comme EmployeTable)
   const highlightText = useCallback((text, searchTerm) => {
@@ -772,7 +640,7 @@ const AffiliationMutuelleTable = forwardRef((props, ref) => {
                 </p>
                 <p>
                   <strong>Date d'affiliation:</strong>{" "}
-                  {affiliation.date_adhesion || "-"}
+                  {formatDate(affiliation.date_adhesion)}
                 </p>
                 <p>
                   <strong>Statut:</strong> {affiliation.statut || "-"}
@@ -894,7 +762,7 @@ const AffiliationMutuelleTable = forwardRef((props, ref) => {
     if (selectedAffiliations.length === 0) return;
 
     // Récupérer les objets complets pour vérifier le statut
-    const selectedObjects = selectedAffiliations.map(id => 
+    const selectedObjects = selectedAffiliations.map(id =>
       affiliationsWithDetails.find(a => a.id === id)
     ).filter(Boolean);
 
@@ -1092,11 +960,11 @@ const AffiliationMutuelleTable = forwardRef((props, ref) => {
             </thead>
             <tbody>
               ${tableRows
-                .map(
-                  (row) =>
-                    `<tr>${row.map((cell) => `<td>${cell ?? ""}</td>`).join("")}</tr>`
-                )
-                .join("")}
+        .map(
+          (row) =>
+            `<tr>${row.map((cell) => `<td>${cell ?? ""}</td>`).join("")}</tr>`
+        )
+        .join("")}
             </tbody>
           </table>
         </body>
@@ -1160,6 +1028,27 @@ const AffiliationMutuelleTable = forwardRef((props, ref) => {
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
+    flex: "0 0 auto",
+  };
+
+  const headerRowStyle = {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: "12px",
+    flexWrap: "wrap",
+    overflow: "visible",
+  };
+
+  const actionsRowStyle = {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "flex-end",
+    gap: "10px",
+    flexWrap: "wrap",
+    flex: "1 1 auto",
+    minWidth: 0,
+    overflow: "visible",
   };
 
   // --------------------------
@@ -1167,375 +1056,332 @@ const AffiliationMutuelleTable = forwardRef((props, ref) => {
   // --------------------------
   return (
     <div
+      ref={ref}
       style={{
         position: "relative",
-        top: "0",
+        top: 0,
         height: "calc(100vh - 120px)",
-        flex: 1,
         width: "100%",
-        minWidth: 0,
         overflow: "hidden",
-        transition: "all 0.3s ease-in-out",
-        display: "flex", 
-        flexDirection: "column"
+        display: "flex",
+        flexDirection: "column",
       }}
-      className="container_employee"
+      className={showAddForm ? "container_employee with-split-view" : "container_employee"}
     >
-      <div className="mt-4">
-        <div className="section-header mb-3">
-          <div
-            className="d-flex align-items-center justify-content-between flex-wrap"
-            style={{ gap: "16px" }}
-          >
-            {/* Bloc titre */}
-            <div style={{ flex: "1 1 300px", minWidth: 0 }}>
-              <span
-                className="section-title mb-1"
-                style={{
-                  fontSize: "1.2rem",
-                  fontWeight: "bold",
-                  color: "#2c767c",
-                }}
-              >
-                <i className="fas fa-users me-2"></i>
-                Affiliations Mutuelle
-              </span>
+      <style>
+        {`
+          .with-split-view .add-affiliation-sidebar {
+              position: relative !important;
+              top: 0 !important;
+              left: 0 !important;
+              right: auto !important;
+              width: 100% !important;
+              height: 100% !important;
+              box-shadow: none !important;
+              animation: none !important;
+              border-radius: 0 !important;
+          }
+          .custom-affiliation-header {
+              border-bottom: none !important;
+              padding-bottom: 15px;
+              margin-bottom: 25px;
+          }
+          .custom-affiliation-title {
+              color: #2c767c;
+              font-weight: bold;
+              font-size: 1.2rem;
+              display: flex;
+              align-items: center;
+          }
+          .custom-affiliation-desc {
+              color: #6c757d;
+              font-size: 0.9rem;
+              margin-bottom: 0;
+          }
+        `}
+      </style>
+      <div style={{ display: 'flex', transition: 'all 0.3s', flex: 1, minHeight: 0, overflow: 'hidden', gap: showAddForm ? '20px' : '0' }}>
+        <div style={{
+          flex: showAddForm ? '0 0 48%' : '1 1 100%',
+          overflow: 'auto',
+          height: '100%',
+          borderRight: 'none',
+          paddingRight: '0',
+          transition: 'all 0.3s ease-in-out'
+        }}>
+          {/* Header Moved Here */}
+          <div className="mt-4">
+            <div className="custom-affiliation-header mb-3">
+              <div className="d-flex align-items-center justify-content-between flex-wrap" style={{ gap: '16px' }}>
+                {/* Bloc titre */}
+                <div style={{ flex: "1 1 300px", minWidth: 0 }}>
+                  <span
+                    className="custom-affiliation-title mb-1"
+                  >
+                    <i className="fas fa-users me-2"></i>
+                    Affiliations Mutuelle
+                  </span>
 
-              {!showAddForm && (
-                <p className="section-description text-muted mb-0">
-                  {departementId ? filteredAffiliationsWithFilters.length : 0}{" "}
-                  affiliation
-                  {filteredAffiliationsWithFilters.length > 1 ? "s" : ""}{" "}
-                  actuellement affichée
-                  {filteredAffiliationsWithFilters.length > 1 ? "s" : ""}
-                </p>
-              )}
-            </div>
+                  <p className="custom-affiliation-desc mb-0">
+                    {departementId ? filteredAffiliationsWithFilters.length : 0}{" "}
+                    affiliation
+                    {filteredAffiliationsWithFilters.length > 1 ? "s" : ""}{" "}
+                    actuellement affichée
+                    {filteredAffiliationsWithFilters.length > 1 ? "s" : ""}
+                  </p>
+                </div>
 
-            {/* Bloc actions */}
-            <div
-              style={{
-                display: "flex",
-                gap: "10px",
-                alignItems: "center",
-                flexWrap: "wrap",
-              }}
-            >
-              <FontAwesomeIcon
-                onClick={() =>
-                  handleFiltersToggle && handleFiltersToggle(!filtersVisible)
-                }
-                icon={filtersVisible ? faClose : faFilter}
-                color={filtersVisible ? "green" : ""}
-                style={{
-                  cursor: "pointer",
-                  fontSize: "1.9rem",
-                  color: "#2c767c",
-                  marginTop: "1.3%",
-                  marginRight: "8px",
-                }}
-              />
-
-              <Button
-                onClick={() => {
-                  if (!departementId) return;
-                  handleAddNewAffiliation();
-                }}
-                className={`btn btn-outline-primary d-flex align-items-center ${
-                  !departementId ? "disabled-btn" : ""
-                }`}
-                size="sm"
-                style={{
-                  marginRight: "30px !important",
-                  width: "190px",
-                }}
-              >
-                <FaPlusCircle className="me-2" />
-                Ajouter Affiliation
-              </Button>
-
-              <Dropdown
-                show={showDropdown}
-                onToggle={(isOpen) => setShowDropdown(isOpen)}
-              >
-                <Dropdown.Toggle
-                  as="button"
-                  id="dropdown-visibility"
-                  title="Visibilité Colonnes"
-                  style={iconButtonStyle}
-                >
+                {/* Bloc actions */}
+                <div style={{ display: "flex", gap: "10px", alignItems: 'center', flexWrap: 'wrap' }}>
                   <FontAwesomeIcon
-                    icon={faSliders}
-                    style={{ width: 18, height: 18, color: "#4b5563" }}
+                    onClick={() =>
+                      handleFiltersToggle && handleFiltersToggle(!filtersVisible)
+                    }
+                    icon={filtersVisible ? faClose : faFilter}
+                    color={filtersVisible ? "green" : ""}
+                    style={{
+                      cursor: "pointer",
+                      fontSize: "1.9rem",
+                      color: "#2c767c",
+                      marginTop: "1.3%",
+                      marginRight: "8px",
+                    }}
                   />
-                </Dropdown.Toggle>
-                <Dropdown.Menu as={CustomMenu} />
-              </Dropdown>
+
+                  <Button
+                    onClick={() => {
+                      if (!departementId) return;
+                      handleAddNewAffiliation();
+                    }}
+                    className={`btn btn-outline-primary d-flex align-items-center ${!departementId ? "disabled-btn" : ""
+                      }`}
+                    size="sm"
+                    style={{
+                      width: "190px",
+                      flex: "0 0 auto",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    <FaPlusCircle className="me-2" />
+                    Ajouter Affiliation
+                  </Button>
+
+                  <Dropdown
+                    show={showDropdown}
+                    onToggle={(isOpen) => setShowDropdown(isOpen)}
+                  >
+                    <Dropdown.Toggle
+                      as="button"
+                      id="dropdown-visibility"
+                      title="Visibilité Colonnes"
+                      style={iconButtonStyle}
+                    >
+                      <FontAwesomeIcon
+                        icon={faSliders}
+                        style={{ width: 18, height: 18, color: "#4b5563" }}
+                      />
+                    </Dropdown.Toggle>
+                    <Dropdown.Menu as={CustomMenu} />
+                  </Dropdown>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
-      </div>
-
-      <div style={{ display: 'flex', gap: '20px', transition: 'all 0.3s' }}>
-        <div style={{ flex: '1', width: showAddForm ? '50%' : '100%', transition: 'all 0.3s', minWidth: 0 }}>
-      {/* Section filtres */}
-      <AnimatePresence>
-        {filtersVisible && (
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.3 }}
-            className="filters-container"
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              gap: "12px",
-              padding: "16px 20px",
-              minHeight: 0,
-            }}
-          >
-            <div
-              className="filters-icon-section"
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "8px",
-                justifyContent: "center",
-                marginLeft: "-8px",
-                marginRight: "14%",
-              }}
-            >
-              <svg
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="#4a90a4"
-                strokeWidth="2"
-                className="filters-icon"
-              >
-                <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
-              </svg>
-              <span className="filters-title">Filtres</span>
-            </div>
-
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "1px",
-                flexWrap: "wrap",
-                justifyContent: "center",
-                width: "100%",
-              }}
-            >
-              {/* Mutuelle dropdown */}
-              <div
+          {/* Section filtres */}
+          <AnimatePresence>
+            {filtersVisible && (
+              <motion.div
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.3 }}
+                className="filters-container"
                 style={{
                   display: "flex",
-                  alignItems: "center",
-                  margin: 0,
-                  marginRight: "46px",
+                  flexDirection: "column",
+                  gap: "12px",
+                  padding: "16px 20px",
+                  minHeight: 0,
                 }}
               >
-                <label
-                  className="filter-label"
-                  style={{
-                    fontSize: "0.9rem",
-                    margin: 0,
-                    marginRight: "-44px",
-                    whiteSpace: "nowrap",
-                    minWidth: "auto",
-                    fontWeight: 600,
-                    color: "#2c3e50",
-                  }}
-                >
-                  Mutuelle
-                </label>
-                <select
-                  value={selectedMutuelleFilter}
-                  onChange={(e) => setSelectedMutuelleFilter(e.target.value)}
-                  className="filter-input"
-                  style={{
-                    minWidth: 120,
-                    maxWidth: 150,
-                    height: 30,
-                    fontSize: "0.9rem",
-                    padding: "2px 6px",
-                    borderRadius: 6,
-                  }}
-                >
-                  <option value="">Toutes</option>
-                  {filtresMutuelle.map((m) => (
-                    <option key={m.id} value={m.id}>
-                      {m.nom}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {filterOptions.filters.map((filter, index) => (
                 <div
-                  key={index}
+                  className="filters-icon-section"
                   style={{
                     display: "flex",
                     alignItems: "center",
-                    margin: 0,
-                    marginRight: "46px",
+                    gap: "8px",
+                    justifyContent: "center",
+                    marginLeft: "-8px",
+                    marginRight: "14%",
                   }}
                 >
-                  <label
-                    className="filter-label"
-                    style={{
-                      fontSize: "0.9rem",
-                      margin: 0,
-                      marginRight: "-44px",
-                      whiteSpace: "nowrap",
-                      minWidth: "auto",
-                      fontWeight: 600,
-                      color: "#2c3e50",
-                    }}
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="#4a90a4"
+                    strokeWidth="2"
+                    className="filters-icon"
                   >
-                    {filter.label}
-                  </label>
+                    <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+                  </svg>
+                  <span className="filters-title">Filtres</span>
+                </div>
 
-                  {filter.type === "select" ? (
+
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "1px",
+                    flexWrap: "wrap",
+                    justifyContent: "center",
+                    width: "100%",
+                  }}
+                >
+
+                  {/* FILTER: MUTUELLE */}
+                  <div style={{ display: "flex", alignItems: "center", marginRight: "46px" }}>
+                    <label className="filter-label" style={{ fontSize: "0.9rem", marginRight: "6px", fontWeight: 600, color: "#2c3e50" }}>
+                      Mutuelle
+                    </label>
                     <select
-                      value={filter.value}
-                      onChange={(e) =>
-                        handleFilterChange(filter.key, e.target.value)
-                      }
+                      value={selectedMutuelleFilter}
+                      onChange={(e) => setSelectedMutuelleFilter(e.target.value)}
                       className="filter-input"
-                      style={{
-                        minWidth: 80,
-                        maxWidth: 110,
-                        height: 30,
-                        fontSize: "0.9rem",
-                        padding: "2px 6px",
-                        borderRadius: 6,
-                      }}
+                      style={{ minWidth: 120, height: 30, fontSize: "0.9rem", padding: "2px 6px", borderRadius: 6 }}
                     >
-                      <option value="">{filter.placeholder}</option>
-                      {filter.options?.map((option, optIndex) => (
-                        <option key={optIndex} value={option.value}>
-                          {option.label}
+                      <option value="">Toutes</option>
+                      {filtresMutuelle.map((m) => (
+                        <option key={m.id} value={m.id}>
+                          {m.nom}
                         </option>
                       ))}
                     </select>
-                  ) : filter.type === "range" ? (
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "4px",
+                  </div>
+
+                  {/* FILTER: STATUT */}
+                  <div style={{ display: "flex", alignItems: "center", marginRight: "46px" }}>
+                    <label className="filter-label" style={{ fontSize: "0.9rem", marginRight: "6px", fontWeight: 600, color: "#2c3e50" }}>
+                      Statut
+                    </label>
+                    <select
+                      value={filterStatut}
+                      onChange={(e) => {
+                        setFilterStatut(e.target.value);
+                        setCurrentPage(0);
                       }}
+                      className="filter-input"
+                      style={{ minWidth: 100, height: 30, fontSize: "0.9rem", padding: "2px 6px", borderRadius: 6 }}
                     >
-                      <input
-                        type={
-                          filter.key === "date_affiliation" ? "date" : "number"
-                        }
-                        value={filter.min}
-                        onChange={(e) =>
-                          handleRangeFilterChange(
-                            filter.key,
-                            "min",
-                            e.target.value
-                          )
-                        }
-                        placeholder={filter.placeholderMin}
-                        className="filter-input filter-range-input"
-                        style={{
-                          minWidth: 50,
-                          maxWidth: 70,
-                          height: 30,
-                          fontSize: "0.9rem",
-                          padding: "2px 4px",
-                          borderRadius: 6,
-                        }}
-                      />
-                      <span
-                        className="filter-range-separator"
-                        style={{
-                          margin: "0 2px",
-                          fontSize: "0.9rem",
-                          color: "#666",
-                        }}
-                      >
-                        -
-                      </span>
-                      <input
-                        type={
-                          filter.key === "date_affiliation" ? "date" : "number"
-                        }
-                        value={filter.max}
-                        onChange={(e) =>
-                          handleRangeFilterChange(
-                            filter.key,
-                            "max",
-                            e.target.value
-                          )
-                        }
-                        placeholder={filter.placeholderMax}
-                        className="filter-input filter-range-input"
-                        style={{
-                          minWidth: 50,
-                          maxWidth: 70,
-                          height: 30,
-                          fontSize: "0.9rem",
-                          padding: "2px 4px",
-                          borderRadius: 6,
-                        }}
-                      />
+                      <option value="">Tous</option>
+                      <option value="ACTIVE">Active</option>
+                      <option value="RESILIE">Résilié</option>
+                    </select>
+                  </div>
+
+                  {/* FILTER: DATE ADHESION */}
+                  <div style={{ display: "flex", alignItems: "center", marginRight: "46px" }}>
+                    <label className="filter-label" style={{ fontSize: "0.9rem", marginRight: "6px", fontWeight: 600, color: "#2c3e50" }}>
+                      Date Adhésion
+                    </label>
+                    <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+                      <input type="date" value={dateAdhesionFrom} onChange={(e) => setDateAdhesionFrom(e.target.value)}
+                        className="filter-input" style={{ width: 110, height: 30, fontSize: "0.85rem", padding: "2px", borderRadius: 6 }} />
+                      <span style={{ fontSize: "0.9rem", color: "#666" }}>-</span>
+                      <input type="date" value={dateAdhesionTo} onChange={(e) => setDateAdhesionTo(e.target.value)}
+                        className="filter-input" style={{ width: 110, height: 30, fontSize: "0.85rem", padding: "2px", borderRadius: 6 }} />
                     </div>
-                  ) : null}
+                  </div>
+
+                  {/* FILTER: DATE RESILIATION */}
+                  <div style={{ display: "flex", alignItems: "center", marginRight: "0px" }}>
+                    <label className="filter-label" style={{ fontSize: "0.9rem", marginRight: "6px", fontWeight: 600, color: "#2c3e50" }}>
+                      Date Résiliation
+                    </label>
+                    <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+                      <input type="date" value={dateResiliationFrom} onChange={(e) => setDateResiliationFrom(e.target.value)}
+                        className="filter-input" style={{ width: 110, height: 30, fontSize: "0.85rem", padding: "2px", borderRadius: 6 }} />
+                      <span style={{ fontSize: "0.9rem", color: "#666" }}>-</span>
+                      <input type="date" value={dateResiliationTo} onChange={(e) => setDateResiliationTo(e.target.value)}
+                        className="filter-input" style={{ width: 110, height: 30, fontSize: "0.85rem", padding: "2px", borderRadius: 6 }} />
+                    </div>
+                  </div>
+
+                  {/* RESET BUTTON */}
+                  <div style={{ marginTop: "12px", width: "100%", display: "flex", justifyContent: "flex-end" }}>
+                    <button
+                      className="btn btn-sm btn-outline-secondary"
+                      onClick={() => {
+                        setFilterSearch("");
+                        setSelectedMutuelleFilter("");
+                        setFilterStatut("");
+                        setDateAdhesionFrom("");
+                        setDateAdhesionTo("");
+                        setDateResiliationFrom("");
+                        setDateResiliationTo("");
+                      }}
+                      title="Réinitialiser les filtres"
+                    >
+                      <FontAwesomeIcon icon={faClose} className="me-1" />
+                      Réinitialiser
+                    </button>
+                  </div>
                 </div>
-              ))}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
 
-      {/* TABLE */}
-      <ExpandRAffiliationTable
-        columns={visibleColumns}
-        data={filteredAffiliationsWithFilters}
-        searchTerm={(globalSearch || "").toLowerCase()}
-        highlightText={highlightText}
-        selectAll={
-          selectedAffiliations.length === filteredAffiliationsWithFilters.length &&
-          filteredAffiliationsWithFilters.length > 0
-        }
-        selectedItems={selectedAffiliations}
-        handleSelectAllChange={handleSelectAllChange}
-        handleCheckboxChange={handleCheckboxChange}
-        handleEdit={handleEditAffiliation}
-        handleDelete={handleDeleteAffiliation}
-        handleDeleteSelected={handleDeleteSelected}
-        rowsPerPage={affiliationsPerPage}
-        page={currentPage}
-        handleChangePage={handleChangePage}
-        handleChangeRowsPerPage={handleChangeRowsPerPage}
-        expandedRows={expandedRows}
-        toggleRowExpansion={toggleRowExpansion}
-        renderExpandedRow={renderExpandedRow}
-        renderCustomActions={renderCustomActions}
-      />
-      </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
-      {showAddForm && (
-        <div style={{ flex: '0 0 50%', maxWidth: '50%', transition: 'all 0.3s', minWidth: '380px' }}>
-        <AddAffiliationMutuelle
-          toggleAffiliationForm={handleCloseForm}
-          selectedDepartementId={departementId}
-          onAffiliationAdded={handleAffiliationAdded}
-          selectedAffiliation={selectedAffiliation}
-          onAffiliationUpdated={handleAffiliationUpdated}
-          fetchAffiliations={fetchAffiliationsWithDetails}
-          isSidebar={true}
-        />
+          {/* TABLE */}
+          <ExpandRAffiliationTable
+            columns={visibleColumns}
+            data={filteredAffiliationsWithFilters}
+            searchTerm={(globalSearch || "").toLowerCase()}
+            highlightText={highlightText}
+            selectAll={
+              selectedAffiliations.length === filteredAffiliationsWithFilters.length &&
+              filteredAffiliationsWithFilters.length > 0
+            }
+            selectedItems={selectedAffiliations}
+            handleSelectAllChange={handleSelectAllChange}
+            handleCheckboxChange={handleCheckboxChange}
+            handleEdit={handleEditAffiliation}
+            handleDelete={handleDeleteAffiliation}
+            handleDeleteSelected={handleDeleteSelected}
+            rowsPerPage={affiliationsPerPage}
+            page={currentPage}
+            handleChangePage={handleChangePage}
+            handleChangeRowsPerPage={handleChangeRowsPerPage}
+            expandedRows={expandedRows}
+            toggleRowExpansion={toggleRowExpansion}
+            renderExpandedRow={renderExpandedRow}
+            renderCustomActions={renderCustomActions}
+          />
         </div>
-      )}
+
+        {showAddForm && (
+          <div style={{
+            flex: '0 0 50%',
+            overflowY: 'auto',
+            height: '100%',
+            backgroundColor: '#fdfdfd',
+            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+            borderLeft: '1px solid #e0e0e0',
+            borderRadius: '8px'
+          }}>
+            <AddAffiliationMutuelle
+              toggleAffiliationForm={handleCloseForm}
+              selectedDepartementId={departementId}
+              onAffiliationAdded={handleAffiliationAdded}
+              selectedAffiliation={selectedAffiliation}
+              onAffiliationUpdated={handleAffiliationUpdated}
+              fetchAffiliations={fetchAffiliationsWithDetails}
+              isSidebar={true}
+            />
+          </div>
+        )}
       </div>
 
       <AffiliationMutuelleFichePrint

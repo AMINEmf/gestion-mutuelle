@@ -31,14 +31,40 @@ class AffiliationMutuelleController extends Controller
                 });
             }
 
-            // Filtrer par mutuelle si spécifié
-            if ($request->has('mutuelle_id') && $request->mutuelle_id) {
+            // FILTER: Mutuelle
+            if ($request->filled('mutuelle_id')) {
                 $query->where('mutuelle_id', $request->mutuelle_id);
             }
 
-            // Filtrer par statut (Si 'ALL' ou non présent, on retourne tout)
-            if ($request->has('statut') && $request->statut !== 'ALL') {
+            // FILTER: Statut
+            if ($request->filled('statut')) {
                 $query->where('statut', $request->statut);
+            }
+
+            // FILTER: Search (Nom/Prénom)
+            if ($request->filled('search')) {
+                $search = $request->search;
+                $query->whereHas('employe', function($q) use ($search) {
+                    $q->where('nom', 'LIKE', "%{$search}%")
+                      ->orWhere('prenom', 'LIKE', "%{$search}%")
+                      ->orWhere('matricule', 'LIKE', "%{$search}%");
+                });
+            }
+
+            // FILTER: Date Adhésion (Range)
+            if ($request->filled('date_adhesion_from')) {
+                $query->whereDate('date_adhesion', '>=', $request->date_adhesion_from);
+            }
+            if ($request->filled('date_adhesion_to')) {
+                $query->whereDate('date_adhesion', '<=', $request->date_adhesion_to);
+            }
+
+            // FILTER: Date Résiliation (Range)
+            if ($request->filled('date_resiliation_from')) {
+                $query->whereDate('date_resiliation', '>=', $request->date_resiliation_from);
+            }
+            if ($request->filled('date_resiliation_to')) {
+                $query->whereDate('date_resiliation', '<=', $request->date_resiliation_to);
             }
 
             $affiliations = $query->orderBy('created_at', 'desc')->get();
@@ -88,6 +114,28 @@ class AffiliationMutuelleController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Erreur lors de la récupération des employés éligibles',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * GET /api/employes/{id}/affiliations-mutuelle
+     * Récupérer les affiliations d'un employé spécifique
+     */
+    public function getByEmploye($employeId)
+    {
+        try {
+            $affiliations = AffiliationMutuelle::with(['mutuelle', 'regime'])
+                ->where('employe_id', $employeId)
+                ->orderBy('created_at', 'desc')
+                ->get();
+
+            return response()->json($affiliations);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur lors de la récupération des affiliations de l\'employé',
                 'error' => $e->getMessage()
             ], 500);
         }
@@ -338,6 +386,26 @@ class AffiliationMutuelleController extends Controller
                 'message' => 'Erreur lors de la suppression',
                 'error' => $e->getMessage()
             ], 500);
+        }
+    }
+
+    /**
+     * GET /api/employes/affilies-mutuelle
+     * Employés ayant au moins une affiliation active
+     */
+    public function employesAffilies()
+    {
+        try {
+            $employes = Employe::whereHas('affiliationsMutuelle', function($q) {
+                    $q->where('statut', 'ACTIVE');
+                })
+                ->select('id', 'matricule', 'nom', 'prenom')
+                ->orderBy('nom')
+                ->get();
+
+            return response()->json($employes);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Erreur serveur'], 500);
         }
     }
 }
