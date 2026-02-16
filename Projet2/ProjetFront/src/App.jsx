@@ -12,6 +12,11 @@ import CNSSDashboard from './Zakaria/cnss/CNSSDashboard';
 import DeclarationsCNSS from './Zakaria/cnss/DeclarationsCNSS';
 import DossierCNSS from './Zakaria/cnss/DossierCNSS';
 import EmpHistorique from './Zakaria/EmpHistorique.jsx';
+import CareerDashboard from './Zakaria/CarriereFormation/CareerDashboard';
+import PositionsGrades from './Zakaria/CarriereFormation/PositionsGrades';
+import TrainingDashboard from './Zakaria/CarriereFormation/TrainingDashboard';
+import CarrieresPage from './Zakaria/CarriereFormation/CarrieresPage';
+import FormationsPage from './Zakaria/CarriereFormation/FormationsPage';
 
 
 import { OpenProvider } from './Acceuil/OpenProvider.jsx';
@@ -46,6 +51,11 @@ const App = () => {
 
             <Route path="/emphistorique" element={<EmpHistorique />} />
 
+            <Route path="/carrieres-formations/dashboard-carrieres" element={<CareerDashboard />} />
+            <Route path="/carrieres-formations/carrieres" element={<CarrieresPage />} />
+            <Route path="/carrieres-formations/postes-grades" element={<PositionsGrades />} />
+            <Route path="/carrieres-formations/dashboard-formations" element={<TrainingDashboard />} />
+            <Route path="/carrieres-formations/formations" element={<FormationsPage />} />
 
 
 

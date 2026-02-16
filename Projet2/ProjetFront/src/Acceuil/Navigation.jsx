@@ -47,6 +47,7 @@ import DeliveryDiningIcon from "@mui/icons-material/DeliveryDining";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
 import SupervisorAccountIcon from "@mui/icons-material/SupervisorAccount";
 import StarHalfIcon from "@mui/icons-material/StarHalf";
+import WorkIcon from "@mui/icons-material/Work";
 import { Link } from "react-router-dom";
 import CssBaseline from "@mui/material/CssBaseline";
 import TimeToLeaveIcon from "@mui/icons-material/TimeToLeave";
@@ -374,6 +375,7 @@ const Navigation = () => {
   const [isCommandsOpen, setIsCommandsOpen] = useState(false);
   const [isEmployeesOpen, setIsEmployeesOpen] = useState(false);
   const [isCnssOpen, setIsCnssOpen] = useState(false);
+  const [isCareerFormationOpen, setIsCareerFormationOpen] = useState(false);
   const [isPlanificationOpen, setIsPlanificationOpen] = useState(false);
   const [isPlanificationPaieOpen, setIsPlanificationPaieOpen] = useState(false);
   const [isTraitementPaieOpen, setIsTraitementPaieOpen] = useState(false);
@@ -424,6 +426,10 @@ const Navigation = () => {
 
   const handleCnssClick = () => {
     setIsCnssOpen(!isCnssOpen);
+  };
+
+  const handleCareerFormationClick = () => {
+    setIsCareerFormationOpen(!isCareerFormationOpen);
   };
 
   const handlePlanificationClick = () => {
@@ -839,6 +845,55 @@ const Navigation = () => {
                 )}
 
 
+              </List>
+            </Collapse>
+
+            {/*-------------------------------- Menu Carrieres & Formations -------------------------------------- */}
+            <ListItem
+              button
+              onClick={handleCareerFormationClick}
+              sx={{ "& .MuiListItemIcon-root": { minWidth: 56 } }}
+              style={{ color: "white", display: "flex" }}
+            >
+              <ListItemIcon>
+                <WorkIcon style={{ fontSize: "1.6rem", color: "white" }} />
+              </ListItemIcon>
+              <ListItemText primary="Carrieres & Formations" />
+              {isCareerFormationOpen ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
+            </ListItem>
+
+            <Collapse in={isCareerFormationOpen} timeout="auto" unmountOnExit>
+              <List component="div" disablePadding>
+                <SubMenuItem button component={Link} to="/carrieres-formations/dashboard-carrieres">
+                  <ListItemIcon>
+                    <ListIcon />
+                  </ListItemIcon>
+                  <ListItemText primary="Dashboard Carrieres" />
+                </SubMenuItem>
+                <SubMenuItem button component={Link} to="/carrieres-formations/carrieres">
+                  <ListItemIcon>
+                    <ListIcon />
+                  </ListItemIcon>
+                  <ListItemText primary="Carrieres" />
+                </SubMenuItem>
+                <SubMenuItem button component={Link} to="/carrieres-formations/postes-grades">
+                  <ListItemIcon>
+                    <ListIcon />
+                  </ListItemIcon>
+                  <ListItemText primary="Postes & Grades" />
+                </SubMenuItem>
+                <SubMenuItem button component={Link} to="/carrieres-formations/dashboard-formations">
+                  <ListItemIcon>
+                    <ListIcon />
+                  </ListItemIcon>
+                  <ListItemText primary="Dashboard Formations" />
+                </SubMenuItem>
+                <SubMenuItem button component={Link} to="/carrieres-formations/formations">
+                  <ListItemIcon>
+                    <ListIcon />
+                  </ListItemIcon>
+                  <ListItemText primary="Formations" />
+                </SubMenuItem>
               </List>
             </Collapse>
 
