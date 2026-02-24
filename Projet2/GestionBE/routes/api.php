@@ -500,6 +500,8 @@ use App\Http\Controllers\AffiliationMutuelleController;
 use App\Http\Controllers\MutuelleDossierController;
 use App\Http\Controllers\MutuelleDocumentController;
 use App\Http\Controllers\MutuelleOperationController;
+use App\Http\Controllers\TypeOperationController;
+use App\Http\Controllers\TypeDocumentController;
 use App\Http\Controllers\MutuelleDashboardController;
 
 // api_Soukaina
@@ -608,18 +610,22 @@ Route::post("/login", [AuthController::class, 'login']);
 // Routes pour mutuelles
 Route::get('/mutuelle/dashboard-stats', [MutuelleDashboardController::class, 'dashboardStats']);
 Route::prefix('mutuelles')->group(function () {
-    // Dossiers
+    // Dossiers - Routes spécifiques AVANT les routes wildcard
     Route::get('/dossiers', [MutuelleDossierController::class, 'index']);
-    Route::get('/dossiers/{numero_dossier}', [MutuelleDossierController::class, 'show'])->where('numero_dossier', '.*');
     Route::get('/dossiers/{employe}/documents', [MutuelleDocumentController::class, 'index']);
     Route::get('/dossiers/{employe}/operations', [MutuelleOperationController::class, 'indexByEmploye']);
     Route::post('/dossiers/{employe}/documents', [MutuelleDocumentController::class, 'storeByEmploye']);
     Route::post('/dossiers/{employe}/operations', [MutuelleOperationController::class, 'storeByEmploye']);
+    // Route wildcard EN DERNIER
+    Route::get('/dossiers/{numero_dossier}', [MutuelleDossierController::class, 'show'])->where('numero_dossier', '.*');
 
     // Mutuelles
     Route::get('/', [MutuelleController::class, 'index']);
     Route::get('/{id}', [MutuelleController::class, 'show']);
     Route::get('/{mutuelle_id}/regimes', [MutuelleController::class, 'regimes']);
+    Route::post('/{mutuelle_id}/regimes', [RegimeMutuelleController::class, 'storeForMutuelle']);
+    Route::put('/{mutuelle_id}/regimes/{id}', [RegimeMutuelleController::class, 'updateForMutuelle']);
+    Route::delete('/{mutuelle_id}/regimes/{id}', [RegimeMutuelleController::class, 'destroyForMutuelle']);
     Route::post('/', [MutuelleController::class, 'store']);
     Route::put('/{id}', [MutuelleController::class, 'update']);
     Route::delete('/{id}', [MutuelleController::class, 'destroy']);
@@ -631,9 +637,24 @@ Route::prefix('mutuelles')->group(function () {
     // Documents (General)
     Route::post('/documents', [MutuelleDocumentController::class, 'store']);
     Route::delete('/documents/{document}', [MutuelleDocumentController::class, 'destroy']);
+    Route::get('/documents/{document}/download', [MutuelleDocumentController::class, 'download']);
 
     // Dashboard stats
     Route::get('/dashboard-stats', [MutuelleDashboardController::class, 'dashboardStats']);
+
+    // Parametrage Types Operations
+    Route::get('/parametrage/types-operations', [TypeOperationController::class, 'index']);
+    Route::post('/parametrage/types-operations', [TypeOperationController::class, 'store']);
+    Route::get('/parametrage/types-operations/{id}', [TypeOperationController::class, 'show']);
+    Route::put('/parametrage/types-operations/{id}', [TypeOperationController::class, 'update']);
+    Route::delete('/parametrage/types-operations/{id}', [TypeOperationController::class, 'destroy']);
+
+    // Parametrage Types Documents
+    Route::get('/parametrage/types-documents', [TypeDocumentController::class, 'index']);
+    Route::post('/parametrage/types-documents', [TypeDocumentController::class, 'store']);
+    Route::get('/parametrage/types-documents/{id}', [TypeDocumentController::class, 'show']);
+    Route::put('/parametrage/types-documents/{id}', [TypeDocumentController::class, 'update']);
+    Route::delete('/parametrage/types-documents/{id}', [TypeDocumentController::class, 'destroy']);
 });
 
 // RÃ©gimes & Affiliations (Public/Read)
@@ -1151,6 +1172,7 @@ Route::delete('/employes/{employe}', [EmployeController::class, 'destroy']);
 
 Route::post('/employe',[EmployeController::class , 'store']);
 Route::get('/employes', [EmployeController::class, 'index']);
+Route::get('/employes/{employe}', [EmployeController::class, 'show']);
 
 Route::post('/employes/update-departement', [EmployeController::class, 'updateDepartement']);
 

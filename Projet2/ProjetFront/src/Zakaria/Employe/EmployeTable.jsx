@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo, useRef, forwardRef, useImperativeHandle } from "react";
+﻿import React, { useState, useEffect, useCallback, useMemo, useRef, forwardRef, useImperativeHandle } from "react";
 import axios from "axios";
 import { Button, Card, Tab, Tabs, Table, Modal, Form } from 'react-bootstrap';
 import { faEdit, faTrash, faFilePdf, faFileExcel, faPrint, faSliders, faChevronDown, faChevronUp, faSearch, faCalendarAlt, faClipboardCheck, faIdCard, faFilter, faClose } from "@fortawesome/free-solid-svg-icons";
@@ -14,7 +14,7 @@ import 'jspdf-autotable';
 import * as XLSX from 'xlsx';
 import { FaUserPlus } from 'react-icons/fa';
 import Dropdown from "react-bootstrap/Dropdown";
-import Swal from "sweetalert2";
+import { showSuccessMessage, showErrorMessage, showInfoMessage, showConfirmDialog, STANDARD_MESSAGES } from '../../utils/messageHelper';
 import { TextField } from '@mui/material';
 import AddEmp from "./AddEmp";
 import "../Style.css";
@@ -583,16 +583,10 @@ const EmployeTable = forwardRef((props, ref) => {
   }, []);
 
   const handleDeleteEmployer = useCallback(async (id) => {
-    const result = await Swal.fire({
-      title: "Êtes-vous sûr?",
-      text: "Vous ne pourrez pas revenir en arrière!",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#3085d6",
-      cancelButtonColor: "#d33",
-      confirmButtonText: "Oui, supprimer!",
-      cancelButtonText: "Annuler",
-    });
+    const result = await showConfirmDialog(
+      STANDARD_MESSAGES.DELETE_CONFIRM_TITLE,
+      "Vous ne pourrez pas revenir en arrière !"
+    );
 
     if (result.isConfirmed) {
       try {
@@ -602,10 +596,10 @@ const EmployeTable = forwardRef((props, ref) => {
           localStorage.setItem("employeesWithContracts", JSON.stringify(updated));
           return updated;
         });
-        Swal.fire("Supprimé!", "L'employé a été supprimé.", "success");
+        showSuccessMessage("Supprimé", "L'employé a été supprimé.");
       } catch (error) {
         console.error("Error deleting employer:", error);
-        Swal.fire("Erreur!", "Une erreur est survenue lors de la suppression.", "error");
+        showErrorMessage(STANDARD_MESSAGES.DELETE_ERROR, "Une erreur est survenue lors de la suppression.");
       }
     }
   }, []);
@@ -771,16 +765,10 @@ body {
   const handleDeleteSelected = useCallback(async () => {
     if (selectedEmployers.length === 0) return;
 
-    const result = await Swal.fire({
-      title: "Êtes-vous sûr?",
-      text: `Vous allez supprimer ${selectedEmployers.length} employé(s)!`,
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#3085d6",
-      cancelButtonColor: "#d33",
-      confirmButtonText: "Oui, supprimer!",
-      cancelButtonText: "Annuler",
-    });
+    const result = await showConfirmDialog(
+      STANDARD_MESSAGES.DELETE_CONFIRM_TITLE,
+      `Vous allez supprimer ${selectedEmployers.length} employé(s) !`
+    );
     if (result.isConfirmed) {
       try {
         await Promise.all(
@@ -794,10 +782,10 @@ body {
         });
 
         setSelectedEmployers([]);
-        Swal.fire("Supprimés!", "Les employés ont été supprimés.", "success");
+        showSuccessMessage("Supprimés", "Les employés ont été supprimés.");
       } catch (error) {
         console.error("Error deleting selected employers:", error);
-        Swal.fire("Erreur!", "Une erreur est survenue lors de la suppression.", "error");
+        showErrorMessage(STANDARD_MESSAGES.DELETE_ERROR, "Une erreur est survenue lors de la suppression.");
       }
     }
   }, [selectedEmployers]);
@@ -968,7 +956,7 @@ body {
 
   const handleAffecterPlanning = async () => {
     if (selectedEmployers.length === 0) {
-      Swal.fire("Attention", "Veuillez sélectionner un ou plusieurs employés.", "warning");
+      showInfoMessage("Attention", "Veuillez sélectionner un ou plusieurs employés.");
       return;
     }
 
@@ -999,7 +987,7 @@ body {
         }
       }
 
-      Swal.fire("Succès", "Planning(s) affecté(s) avec succès !", "success");
+      showSuccessMessage("Succès", "Planning(s) affecté(s) avec succès !");
 
       setShowPlanningModal(false);
       setSelectedEmployers([]);
@@ -1007,7 +995,7 @@ body {
       console.log("Tous les plannings ont été affectés avec succès.");
     } catch (error) {
       console.error(" Erreur lors de l'affectation du planning :", error);
-      Swal.fire("Erreur", "Échec de l'affectation du planning", "error");
+      showErrorMessage("Erreur", "Échec de l'affectation du planning");
     }
   };
 
@@ -1050,7 +1038,7 @@ body {
 
   const handleAffecterRegle = async () => {
     if (selectedEmployers.length === 0) {
-      Swal.fire("Attention", "Veuillez sélectionner un ou plusieurs employés.", "warning");
+      showInfoMessage("Attention", "Veuillez sélectionner un ou plusieurs employés.");
       return;
     }
 
@@ -1073,13 +1061,13 @@ body {
         }
       }
 
-      Swal.fire("Succès", "Règle(s) affectée(s) avec succès !", "success");
+      showSuccessMessage("Succès", "Règle(s) affectée(s) avec succès !");
 
       setShowRegleModal(false);
       setSelectedEmployers([]);
     } catch (err) {
       console.error('Erreur affectation règle', err);
-      Swal.fire("Erreur", "Échec de l'affectation des règles", "error");
+      showErrorMessage("Erreur", "Échec de l'affectation des règles");
     }
   };
 
@@ -1101,11 +1089,11 @@ body {
 
       axios.post('http://localhost:8000/api/employes', { data: json })
         .then(() => {
-          Swal.fire('Succès', 'Employés importés avec succès', 'success');
+          showSuccessMessage('Succès', 'Employés importés avec succès');
         })
         .catch(error => {
           console.error(error);
-          Swal.fire('Erreur', 'Erreur lors d importation', 'error');
+          showErrorMessage('Erreur', 'Erreur lors de l\'importation');
         });
     };
 
@@ -1125,7 +1113,7 @@ body {
 
   const handleImportValidation = () => {
     if (!selectedFile) {
-      alert("Veuillez sélectionner un fichier Excel.");
+      showInfoMessage("Attention", "Veuillez sélectionner un fichier Excel.");
       return;
     }
 
@@ -1136,7 +1124,7 @@ body {
 
     axios.post("http://127.0.0.1:8000/api/import-employes", formData)
       .then(response => {
-        Swal.fire("Succès", "Importation terminée !", "success");
+        showSuccessMessage("Succès", "Importation terminée !");
 
         fetchEmployersWithContracts();
 
@@ -1144,7 +1132,7 @@ body {
         setShowDropdown(false);
       })
       .catch(error => {
-        Swal.fire("Erreur", "Échec de l'importation", "error");
+        showErrorMessage("Erreur", "Échec de l'importation");
         console.error(error);
       });
   };
@@ -1519,62 +1507,38 @@ body {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.3 }}
-              className="filters-container"
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '12px',
-                padding: '16px 20px',
-                minHeight: 0
-              }}
-            >
-              {/* Ligne 1: Icône et titre */}
-              <div className="filters-icon-section" style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                justifyContent: 'center',
-                marginLeft: '-8px',
-                marginRight: '14%',
-              }}>
-                <svg
-                  width="20"
-                  height="20"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="#4a90a4"
-                  strokeWidth="2"
-                  className="filters-icon"
-                >
-                  <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
-                </svg>
-                <span className="filters-title">Filtres</span>
-              </div>
+              className="filters-container emp-filters">
+              <div className="filters-row">
+                <div className="filters-icon-section">
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="#4a90a4"
+                    strokeWidth="2"
+                    className="filters-icon"
+                  >
+                    <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+                  </svg>
+                  <span className="filters-title">Filtres</span>
+                </div>
 
-              {/* Ligne 2: Tous les filtres */}
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '1px',
-                flexWrap: 'wrap',
-                justifyContent: 'center',
-                width: '100%'
-              }}>
                 {filterOptions.filters.map((filter, index) => (
-                  <div key={index} style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    margin: 0,
-                    marginRight: '46px'
-                  }}>            <label className="filter-label" style={{
-                    fontSize: '0.9rem',
-                    margin: 0,
-                    marginRight: '-44px',
-                    whiteSpace: 'nowrap',
-                    minWidth: 'auto',
-                    fontWeight: 600,
-                    color: '#2c3e50'
-                  }}>
+                  <div
+                    key={index}
+                    className="filter-group"
+                  >
+                    <label
+                      className="filter-label"
+                      style={{
+                        fontSize: '0.9rem',
+                        margin: 0,
+                        whiteSpace: 'nowrap',
+                        minWidth: 'auto',
+                        fontWeight: 600,
+                        color: '#2c3e50'
+                      }}>
                       {filter.label}
                     </label>
 
@@ -2448,3 +2412,7 @@ body {
 });
 
 export default EmployeTable;
+
+
+
+

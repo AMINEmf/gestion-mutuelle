@@ -33,8 +33,9 @@ class MutuelleDocumentController extends Controller
 
         $validated = $request->validate([
             'operation_id' => 'required|exists:mutuelle_operations,id',
-            'fichier' => 'required|file|mimes:pdf,jpg,jpeg,png|max:5120',
+            'fichier' => 'required|file|mimes:pdf,jpg,jpeg,png|max:2048',
             'nom' => 'nullable|string|max:255',
+            'type_document' => 'nullable|string|max:100',
         ]);
 
         $filePath = null;
@@ -52,6 +53,7 @@ class MutuelleDocumentController extends Controller
         $document = MutuelleDocument::create([
             'operation_id' => $validated['operation_id'],
             'employe_id' => $operation->affiliation->employe_id,
+            'type_document' => $validated['type_document'] ?? null,
             'nom' => $validated['nom'] ?? $fileName,
             'file_path' => $filePath,
             'file_name' => $fileName,
@@ -75,7 +77,7 @@ class MutuelleDocumentController extends Controller
 
         $validated = $request->validate([
             'nom' => 'nullable|string|max:255',
-            'fichier' => 'nullable|file|max:5120',
+            'fichier' => 'nullable|file|max:2048',
         ]);
 
         $filePath = null;
@@ -102,7 +104,7 @@ class MutuelleDocumentController extends Controller
         $validated = $request->validate([
             'operation_id' => 'required|exists:mutuelle_operations,id',
             'nom' => 'nullable|string|max:255',
-            'fichier' => 'required|file|max:10240',
+            'fichier' => 'required|file|max:2048',
         ]);
 
         $operation = \App\Models\MutuelleOperation::with('affiliation')->find($validated['operation_id']);
@@ -141,5 +143,21 @@ class MutuelleDocumentController extends Controller
         $document->delete();
 
         return response()->json(['message' => 'Document supprimé'], 200);
+    }
+
+    /**
+     * Download a document
+     * GET /api/mutuelles/documents/{document}/download
+     */
+    public function download(MutuelleDocument $document)
+    {
+        if (!$document->file_path || !Storage::disk('public')->exists($document->file_path)) {
+            return response()->json(['message' => 'Fichier introuvable'], 404);
+        }
+
+        $filePath = Storage::disk('public')->path($document->file_path);
+        $fileName = $document->file_name ?? basename($document->file_path);
+
+        return response()->download($filePath, $fileName);
     }
 }

@@ -7,7 +7,7 @@ import AffiliationMutuelleTable from "./AffiliationMutuelleTable";
 import { IoFolderOpenOutline } from "react-icons/io5";
 import { FaMinus } from "react-icons/fa6";
 import { FaPlus } from "react-icons/fa6";
-import Swal from 'sweetalert2';
+import { showSuccessMessage, showErrorMessage, showConfirmDialog, showErrorFromResponse, STANDARD_MESSAGES } from '../../utils/messageHelper';
 // import PageHeader from "../../ComponentHistorique/PageHeader";
 import { useHeader } from "../../Acceuil/HeaderContext";
 import { useOpen } from "../../Acceuil/OpenProvider";
@@ -74,7 +74,7 @@ function AffiliationMutuelleManager() {
   };
 
   useEffect(() => {
-    setTitle("Gestion de l'affiliation mutuelle");
+    setTitle("Gestion de l'Affiliation Assurance");
     setOnPrint(() => () => { if (affiliationMutuelleTableRef.current) affiliationMutuelleTableRef.current.handlePrint(); });
     setOnExportPDF(() => () => { if (affiliationMutuelleTableRef.current) affiliationMutuelleTableRef.current.exportToPDF(); });
     setOnExportExcel(() => () => { if (affiliationMutuelleTableRef.current) affiliationMutuelleTableRef.current.exportToExcel(); });
@@ -92,11 +92,10 @@ function AffiliationMutuelleManager() {
     } catch (error) {
       console.error("Error fetching department hierarchy:", error);
       if (error.response && error.response.status === 403) {
-        Swal.fire({
-          icon: "error",
-          title: "Accès refusé",
-          text: "Vous n'avez pas l'autorisation de voir la hiérarchie des départements.",
-        });
+        showErrorMessage(
+          "Accès refusé",
+          "Vous n'avez pas l'autorisation de voir la hiérarchie des départements."
+        );
       }
     }
   };
@@ -146,11 +145,10 @@ function AffiliationMutuelleManager() {
       setError("An error occurred while fetching departments. Please try again.");
       setDepartements([]);
       if (error.response && error.response.status === 403) {
-        Swal.fire({
-          icon: "error",
-          title: "Accès refusé",
-          text: "Vous n'avez pas l'autorisation de voir la liste des départements.",
-        });
+        showErrorMessage(
+          "Accès refusé",
+          "Vous n'avez pas l'autorisation de voir la liste des départements."
+        );
       }
     } finally {
       setIsLoading(false);
@@ -214,7 +212,7 @@ function AffiliationMutuelleManager() {
 
   const handleAddSousDepartement = (parentId) => {
     if (!canCreate) return;
-    
+
     setAddingSubDepartement(parentId);
     setParentDepartementId(parentId);
     setContextMenu({ visible: false, x: 0, y: 0, departementId: null });
@@ -270,11 +268,10 @@ function AffiliationMutuelleManager() {
 
       } catch (error) {
         console.error("Erreur lors de la création du sous-département:", error);
-        Swal.fire({
-          icon: "error",
-          title: "Erreur",
-          text: "Une erreur est survenue lors de la création du sous-département.",
-        });
+        showErrorMessage(
+          "Erreur",
+          "Une erreur est survenue lors de la création du sous-département."
+        );
       }
     }
   };
@@ -287,7 +284,7 @@ function AffiliationMutuelleManager() {
 
   const handleStartEditing = (departementId, currentName) => {
     if (!canUpdate) return;
-    
+
     setEditingDepartement({ id: departementId, name: currentName });
     setContextMenu({ visible: false, x: 0, y: 0, departementId: null });
 
@@ -328,14 +325,13 @@ function AffiliationMutuelleManager() {
         }
 
         setEditingDepartement(null);
-        
+
       } catch (error) {
         console.error("Erreur lors de la modification du département:", error);
-        Swal.fire({
-          icon: "error",
-          title: "Erreur",
-          text: "Une erreur est survenue lors de la modification du département.",
-        });
+        showErrorMessage(
+          "Erreur",
+          "Une erreur est survenue lors de la modification du département."
+        );
       }
     } else {
       setEditingDepartement(null);
@@ -355,26 +351,20 @@ function AffiliationMutuelleManager() {
     return null;
   };
 
-  const confirmDeleteDepartement = (departementId) => {
+  const confirmDeleteDepartement = async (departementId) => {
     if (!canDelete) return;
-    
+
     const departement = findDepartement(departements, departementId);
     if (!departement) return;
 
-    Swal.fire({
-      title: 'Êtes-vous sûr?',
-      text: `Vous allez supprimer le département "${departement.nom}" et tous ses sous-départements!`,
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonColor: '#3085d6',
-      cancelButtonColor: '#d33',
-      confirmButtonText: 'Oui, supprimer!',
-      cancelButtonText: 'Annuler'
-    }).then((result) => {
-      if (result.isConfirmed) {
-        deleteDepartement(departementId);
-      }
-    });
+    const result = await showConfirmDialog(
+      'Êtes-vous sûr ?',
+      `Vous allez supprimer le département "${departement.nom}" et tous ses sous-départements !`
+    );
+    
+    if (result.isConfirmed) {
+      deleteDepartement(departementId);
+    }
   };
 
   const deleteDepartement = async (departementId) => {
@@ -399,19 +389,17 @@ function AffiliationMutuelleManager() {
       setSelectedDepartementId(null);
       setSelectedDepartementName(null);
 
-      Swal.fire(
-        'Supprimé!',
-        'Le département a été supprimé avec succès.',
-        'success'
+      showSuccessMessage(
+        'Supprimé',
+        'Le département a été supprimé avec succès.'
       );
 
       fetchDepartmentHierarchy();
     } catch (error) {
       console.error("Erreur lors de la suppression du département:", error);
-      Swal.fire(
-        'Erreur!',
-        'Une erreur s\'est produite lors de la suppression du département.',
-        'error'
+      showErrorMessage(
+        'Erreur',
+        'Une erreur s\'est produite lors de la suppression du département.'
       );
     }
   };
@@ -473,7 +461,7 @@ function AffiliationMutuelleManager() {
           {departement.children && departement.children.length === 0 && (
             <div style={{ width: "24px", marginRight: "8px" }}></div>
           )}
-          
+
           {editingDepartement && editingDepartement.id === departement.id ? (
             <input
               ref={editInputRef}
@@ -506,7 +494,7 @@ function AffiliationMutuelleManager() {
           )}
         </div>
       </div>
-      
+
       {addingSubDepartement === departement.id && (
         <div className="sub-departement-input">
           <input
@@ -527,7 +515,7 @@ function AffiliationMutuelleManager() {
           />
         </div>
       )}
-      
+
       {departement.children &&
         departement.children.length > 0 &&
         expandedDepartements[departement.id] && (
@@ -555,114 +543,115 @@ function AffiliationMutuelleManager() {
   if (error) return <div>Erreur: {error}</div>;
 
   return (
-    <ThemeProvider theme={customTheme}>
-      <Box sx={dynamicStyles}>
-        <Box 
-          component="main" 
-          className="departement_home1" 
-          sx={{ 
-            position: 'relative',
-            width: '100%',
-            height: 'calc(100vh - 160px)',
-            display: 'flex',
-            border: 'none',
-            margin: 0,
-            padding: 0,
-            boxSizing: 'border-box'
-          }}
-        >
-            <div className="departement_home1">
-              <ul className="departement_list">
-                <div className="separator" style={{marginTop:'-1%'}}></div>
-                {departements.map((departement) => renderDepartement(departement))}
-              </ul>
+    <div style={{
+      ...dynamicStyles,
+      display: "flex",
+      flexDirection: "row",
+      gap: "15px",
+      padding: "20px 20px 20px 5px",
+      marginTop: "72px",
+      height: "calc(100vh - 80px)",
+      boxSizing: "border-box",
+      backgroundColor: "#ffffff"
+    }}>
+      <div className="departement_home1" style={{ display: 'flex', width: '100%', gap: '15px' }}>
+        <ul className="departement_list" style={{
+          backgroundColor: '#fff',
+          borderRadius: '12px',
+          border: '1px solid rgba(8, 179, 173, 0.08)',
+          boxShadow: '0 6px 20px rgba(8, 179, 173, 0.08), 0 2px 6px rgba(8, 179, 173, 0.04)',
+          padding: '15px',
+          height: '100%',
+          margin: 0,
+          listStyle: 'none',
+          overflowY: 'auto'
+        }}>
+          {departements.map((departement) => renderDepartement(departement))}
+        </ul>
 
-              {contextMenu.visible && (
-                <div 
-                  className="context-menu" 
-                  style={{ top: "15%", left:  "16%" }}
-                >
-                  <button onClick={() => handleAddAffiliationClick(contextMenu.departementId)}>
-                    Ajouter une affiliation
-                  </button>
-                  <button
-                    onClick={() => { if (!canCreate) return; handleAddSousDepartement(contextMenu.departementId); }}
-                    className={!canCreate ? 'disabled-btn' : ''}
-                    style={{ cursor: canCreate ? 'pointer' : 'not-allowed', opacity: canCreate ? 1 : 0.5 }}
-                  >
-                    Ajouter sous département
-                  </button>
-                  <button
-                    onClick={() => {
-                      if (!canUpdate) return;
-                      const dept = findDepartement(departements, contextMenu.departementId);
-                      if (dept) {
-                        handleStartEditing(contextMenu.departementId, dept.nom);
-                      }
-                    }}
-                    className={!canUpdate ? 'disabled-btn' : ''}
-                    style={{ cursor: canUpdate ? 'pointer' : 'not-allowed', opacity: canUpdate ? 1 : 0.5 }}
-                  >
-                    Modifier
-                  </button>
-                  <button
-                    onClick={() => {
-                      if (!canDelete) return;
-                      confirmDeleteDepartement(contextMenu.departementId);
-                      setContextMenu({ visible: false, x: 0, y: 0, departementId: null });
-                    }}
-                    className={!canDelete ? 'disabled-btn' : ''}
-                    style={{ cursor: canDelete ? 'pointer' : 'not-allowed', opacity: canDelete ? 1 : 0.5 }}
-                  >
-                    Supprimer
-                  </button>
-                </div>
-              )}
+        {contextMenu.visible && (
+          <div
+            className="context-menu"
+            style={{ top: "15%", left: "16%" }}
+          >
+            <button onClick={() => handleAddAffiliationClick(contextMenu.departementId)}>
+              Ajouter une affiliation
+            </button>
+            <button
+              onClick={() => { if (!canCreate) return; handleAddSousDepartement(contextMenu.departementId); }}
+              className={!canCreate ? 'disabled-btn' : ''}
+              style={{ cursor: canCreate ? 'pointer' : 'not-allowed', opacity: canCreate ? 1 : 0.5 }}
+            >
+              Ajouter sous département
+            </button>
+            <button
+              onClick={() => {
+                if (!canUpdate) return;
+                const dept = findDepartement(departements, contextMenu.departementId);
+                if (dept) {
+                  handleStartEditing(contextMenu.departementId, dept.nom);
+                }
+              }}
+              className={!canUpdate ? 'disabled-btn' : ''}
+              style={{ cursor: canUpdate ? 'pointer' : 'not-allowed', opacity: canUpdate ? 1 : 0.5 }}
+            >
+              Modifier
+            </button>
+            <button
+              onClick={() => {
+                if (!canDelete) return;
+                confirmDeleteDepartement(contextMenu.departementId);
+                setContextMenu({ visible: false, x: 0, y: 0, departementId: null });
+              }}
+              className={!canDelete ? 'disabled-btn' : ''}
+              style={{ cursor: canDelete ? 'pointer' : 'not-allowed', opacity: canDelete ? 1 : 0.5 }}
+            >
+              Supprimer
+            </button>
+          </div>
+        )}
 
-              {isEditingDepartement && (
-                <div className="edit-form" style={{
-                  width: '90%',
-                  maxWidth: '300px',
-                  position: 'fixed',
-                  top: '50%',
-                  left: '50%',
-                  transform: 'translate(-50%, -50%)'
-                }}>
-                  <form onSubmit={(e) => {
-                    e.preventDefault();
-                    handleUpdateDepartement(e.target.elements.newName.value);
-                  }}>
-                    <input
-                      name="newName"
-                      defaultValue={departements.find((d) => d.id === editingDepartementId)?.nom}
-                    />
-                    <button type="submit">Enregistrer</button>
-                  </form>
-                </div>
-              )}
-
-              <AffiliationMutuelleTable
-                departementId={selectedDepartementId}
-                departementName={selectedDepartementName}
-                onClose={() => setSelectedDepartementId(null)}
-                contextMenu={contextMenu}
-                handleAddAffiliationClick={handleAddAffiliationClick}
-                fetchDepartements={fetchDepartements}
-                isAddingAffiliation={isAddingAffiliation}
-                setIsAddingAffiliation={setIsAddingAffiliation}
-                includeSubDepartments={includeSubDepartments}
-                getSubDepartmentIds={getSubDepartmentIds}
-                departements={departements}
-                ref={affiliationMutuelleTableRef}
-                globalSearch={searchQuery}
-                filtersVisible={filtersVisible}
-                handleFiltersToggle={handleFiltersToggle}
+        {isEditingDepartement && (
+          <div className="edit-form" style={{
+            width: '90%',
+            maxWidth: '300px',
+            position: 'fixed',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)'
+          }}>
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              handleUpdateDepartement(e.target.elements.newName.value);
+            }}>
+              <input
+                name="newName"
+                defaultValue={departements.find((d) => d.id === editingDepartementId)?.nom}
               />
-            </div>
-            
-        </Box>
-      </Box>
-    </ThemeProvider>
+              <button type="submit">Enregistrer</button>
+            </form>
+          </div>
+        )}
+
+        <AffiliationMutuelleTable
+          departementId={selectedDepartementId}
+          departementName={selectedDepartementName}
+          onClose={() => setSelectedDepartementId(null)}
+          contextMenu={contextMenu}
+          handleAddAffiliationClick={handleAddAffiliationClick}
+          fetchDepartements={fetchDepartements}
+          isAddingAffiliation={isAddingAffiliation}
+          setIsAddingAffiliation={setIsAddingAffiliation}
+          includeSubDepartments={includeSubDepartments}
+          getSubDepartmentIds={getSubDepartmentIds}
+          departements={departements}
+          ref={affiliationMutuelleTableRef}
+          globalSearch={searchQuery}
+          filtersVisible={filtersVisible}
+          handleFiltersToggle={handleFiltersToggle}
+        />
+      </div>
+    </div>
   );
 }
 

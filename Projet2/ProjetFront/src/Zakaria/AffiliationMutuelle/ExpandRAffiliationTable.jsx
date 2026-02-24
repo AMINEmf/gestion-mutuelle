@@ -35,6 +35,7 @@ const ExpandRAffiliationTable = ({
   renderCustomActions,
   expansionType = "default",
   emptyMessage = "Aucune affiliation mutuelle trouvée",
+  stickyActions = false,
 }) => {
   const hasActions = !!handleEdit || !!handleDelete || !!renderCustomActions;
 
@@ -121,14 +122,13 @@ const ExpandRAffiliationTable = ({
   };
 
   const headerCellStyles = {
-    fontSize: "0.78rem",
-    fontWeight: 700,
+    fontSize: "0.875rem",
+    fontWeight: 600,
     color: "#4b5563",
     backgroundColor: "#f9fafc",
     whiteSpace: "nowrap",
     padding: "0.75rem 1rem",
     textTransform: "uppercase",
-    letterSpacing: "0.5px",
     borderBottom: "1px solid #e5e7eb",
     position: "sticky", // ✅ header sticky
     top: 0,
@@ -137,6 +137,7 @@ const ExpandRAffiliationTable = ({
 
   const tableCellStyles = {
     padding: "0.75rem 1rem",
+    fontSize: "0.875rem",
     borderBottom: "1px solid #e5e7eb",
     color: "#111827",
     whiteSpace: "nowrap",
@@ -192,7 +193,20 @@ const ExpandRAffiliationTable = ({
                 ))}
 
                 {hasActions && (
-                  <TableCell sx={headerCellStyles} align="center">
+                  <TableCell
+                    sx={{
+                      ...headerCellStyles,
+                      ...(stickyActions
+                        ? {
+                            position: "sticky",
+                            right: 0,
+                            zIndex: 3,
+                            boxShadow: "-4px 0 12px rgba(0,0,0,0.06)",
+                          }
+                        : {}),
+                    }}
+                    align="center"
+                  >
                     Actions
                   </TableCell>
                 )}
@@ -253,7 +267,18 @@ const ExpandRAffiliationTable = ({
 
                       {hasActions && (
                         <TableCell
-                          sx={tableCellStyles}
+                          sx={{
+                            ...tableCellStyles,
+                            ...(stickyActions
+                              ? {
+                                  position: "sticky",
+                                  right: 0,
+                                  zIndex: 2,
+                                  backgroundColor: "white",
+                                  boxShadow: "-4px 0 12px rgba(0,0,0,0.04)",
+                                }
+                              : {}),
+                          }}
                           align="center"
                           onClick={(e) => {
                             e.stopPropagation();

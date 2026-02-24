@@ -283,6 +283,7 @@ import Pagination from './Pagination';
 import { MdOutlinePostAdd } from "react-icons/md";
 import './OffrePrix.css';
 import Swal from 'sweetalert2';
+import { showErrorMessage } from '../utils/messageHelper';
 
 
 function OffrePrix() {
@@ -313,11 +314,10 @@ function OffrePrix() {
         } catch (error) {
             console.error('Error fetching Offres:', error);
             if (error.response && error.response.status === 403) {
-                Swal.fire({
-                    icon: "error",
-                    title: "Accès refusé",
-                    text: "Vous n'avez pas l'autorisation de voir la liste des offres.",
-                });
+                showErrorMessage(
+                    "Accès refusé",
+                    "Vous n'avez pas l'autorisation de voir la liste des offres."
+                );
             } else {
                 setError('Error fetching Offres. Please try again.');
             }

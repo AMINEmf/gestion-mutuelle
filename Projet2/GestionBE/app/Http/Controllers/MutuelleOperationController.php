@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 
 class MutuelleOperationController extends Controller
 {
@@ -25,6 +26,45 @@ class MutuelleOperationController extends Controller
     private array $statutOptions = ['EN_COURS', 'TERMINEE', 'REMBOURSEE', 'ANNULEE'];
 
     private array $beneficiaireTypeOptions = ['EMPLOYE', 'CONJOINT', 'ENFANT'];
+
+    /**
+     * Normalise un libellé vers un code technique (MAJ + underscores, sans accents)
+     */
+    private function normalizeType(string $value): string
+    {
+        return Str::of($value)
+            ->ascii()
+            ->upper()
+            ->replaceMatches('/[^A-Z0-9]+/', '_')
+            ->trim('_')
+            ->value();
+    }
+
+    /**
+     * Alias connus pour mapper code <-> libellé (sécurité backward)
+     */
+    private function typeAliases(string $value): array
+    {
+        $normalized = $this->normalizeType($value);
+        $map = [
+            'DEPOT_DOSSIER' => ['DÉPÔT DOSSIER', 'DEPOT DOSSIER'],
+            'REMBOURSEMENT' => ['REMBOURSEMENT'],
+            'PRISE_EN_CHARGE' => ['PRISE EN CHARGE'],
+            'RECLAMATION' => ['RÉCLAMATION', 'RECLAMATION'],
+            'ATTESTATION' => ['ATTESTATION'],
+            'REGULARISATION' => ['RÉGULARISATION', 'REGULARISATION'],
+            'AUTRE' => ['AUTRE'],
+        ];
+
+        $aliases = [$value, $normalized];
+        if (isset($map[$normalized])) {
+            $aliases = array_merge($aliases, $map[$normalized]);
+        }
+        // + version upper simple (sans underscore) pour les anciennes données éventuelles
+        $aliases[] = Str::of($value)->upper()->value();
+
+        return array_values(array_unique($aliases));
+    }
 
     /**
      * Liste toutes les opérations (ou filtrées par affiliation)
@@ -59,58 +99,89 @@ class MutuelleOperationController extends Controller
             'numero_dossier' => 'nullable|string|max:191',
             'beneficiaire_type' => ['required', Rule::in($this->beneficiaireTypeOptions)],
             'beneficiaire_nom' => 'nullable|string|max:191',
+            'lien_parente' => 'nullable|string|max:191',
             'date_operation' => 'required|date',
             'date_depot' => 'nullable|date',
             'date_remboursement' => 'nullable|date',
-            'type_operation' => ['required', 'string', Rule::in($this->typeOptions)],
+            'type_operation' => 'required|string|max:191',
             'statut' => ['required', 'string', Rule::in($this->statutOptions)],
-            'montant_total' => 'required|numeric|min:0',
+            'montant_total' => 'nullable|numeric|min:0',
             'montant_rembourse' => 'nullable|numeric|min:0',
             'commentaire' => 'nullable|string',
         ]);
 
         if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
+            return response()->json(['errors' => $validator->errors(), 'message' => 'Données invalides : ' . implode(', ', array_map(fn($e) => implode(', ', $e), $validator->errors()->toArray()))], 422);
         }
 
         $validated = $validator->validated();
+        $validated['type_operation'] = $this->normalizeType($validated['type_operation']);
 
         // Validation du bénéficiaire selon l'affiliation
-        $affiliation = AffiliationMutuelle::find($validated['affiliation_id']);
+        $affiliation = AffiliationMutuelle::with('employe')->find($validated['affiliation_id']);
+        $beneficiaireType = $validated['beneficiaire_type'];
+        $beneficiaireNom = $validated['beneficiaire_nom'] ?? null;
+        $lienParente = $validated['lien_parente'] ?? null;
+        $beneficiaireNom = $beneficiaireNom ? trim($beneficiaireNom) : null;
+        $lienParente = $lienParente ? trim($lienParente) : null;
+        $employeeFullName = trim(($affiliation->employe->nom ?? '') . ' ' . ($affiliation->employe->prenom ?? ''));
         
-        if ($validated['beneficiaire_type'] === 'CONJOINT' && !$affiliation->conjoint_ayant_droit) {
+        if ($beneficiaireType === 'CONJOINT' && !$affiliation->conjoint_ayant_droit) {
             return response()->json([
-                'errors' => ['beneficiaire_type' => ['Le conjoint n\'est pas autorisé pour cette affiliation.']]
+                'errors' => ['beneficiaire_type' => ['Le conjoint n\'est pas autorisé pour cette affiliation.']],
+                'message' => 'Le conjoint n\'est pas autorisé pour cette affiliation.'
             ], 422);
         }
 
-        if ($validated['beneficiaire_type'] === 'ENFANT' && !$affiliation->ayant_droit) {
+        if ($beneficiaireType === 'ENFANT' && !$affiliation->ayant_droit) {
             return response()->json([
-                'errors' => ['beneficiaire_type' => ['Les enfants ne sont pas autorisés pour cette affiliation.']]
+                'errors' => ['beneficiaire_type' => ['Les enfants ne sont pas autorisés pour cette affiliation.']],
+                'message' => 'Les enfants ne sont pas autorisés pour cette affiliation.'
             ], 422);
+        }
+
+        if ($beneficiaireType === 'EMPLOYE') {
+            $beneficiaireNom = $beneficiaireNom ?: ($employeeFullName ?: 'Employé');
+            $lienParente = 'Employé';
+        } else {
+            if (!$beneficiaireNom || trim($beneficiaireNom) === '') {
+                return response()->json([
+                    'errors' => ['beneficiaire_nom' => ['Le nom du bénéficiaire est requis.']],
+                    'message' => 'Le nom du bénéficiaire est requis.'
+                ], 422);
+            }
+
+            if (!$lienParente || trim($lienParente) === '') {
+                return response()->json([
+                    'errors' => ['lien_parente' => ['Le lien de parenté est requis pour ce bénéficiaire.']],
+                    'message' => 'Le lien de parenté est requis pour ce bénéficiaire.'
+                ], 422);
+            }
         }
 
         // Calcul reste à charge
+        $montantTotal = $validated['montant_total'] ?? 0;
         $montantRembourse = $validated['montant_rembourse'] ?? 0;
-        $resteACharge = max($validated['montant_total'] - $montantRembourse, 0);
+        $resteACharge = max($montantTotal - $montantRembourse, 0);
 
         $operation = MutuelleOperation::create([
             'affiliation_id' => $validated['affiliation_id'],
             'numero_dossier' => $validated['numero_dossier'] ?? null,
-            'beneficiaire_type' => $validated['beneficiaire_type'],
-            'beneficiaire_nom' => $validated['beneficiaire_nom'] ?? null,
+            'beneficiaire_type' => $beneficiaireType,
+            'beneficiaire_nom' => $beneficiaireNom,
+            'lien_parente' => $lienParente,
             'date_operation' => $validated['date_operation'],
             'date_depot' => $validated['date_depot'] ?? null,
             'date_remboursement' => $validated['date_remboursement'] ?? null,
             'type_operation' => $validated['type_operation'],
             'statut' => $validated['statut'],
-            'montant_total' => $validated['montant_total'],
+            'montant_total' => $montantTotal,
             'montant_rembourse' => $montantRembourse,
             'reste_a_charge' => $resteACharge,
             'commentaire' => $validated['commentaire'] ?? null,
         ]);
 
-        return response()->json($operation->load(['affiliation.employe', 'affiliation.mutuelle']), 201);
+        return response()->json($operation->load(['affiliation.employe', 'affiliation.mutuelle', 'documents']), 201);
     }
 
     /**
@@ -134,26 +205,30 @@ class MutuelleOperationController extends Controller
             'numero_dossier' => 'nullable|string|max:191',
             'beneficiaire_type' => ['sometimes', Rule::in($this->beneficiaireTypeOptions)],
             'beneficiaire_nom' => 'nullable|string|max:191',
+            'lien_parente' => 'nullable|string|max:191',
             'date_operation' => 'sometimes|date',
             'date_depot' => 'nullable|date',
             'date_remboursement' => 'nullable|date',
-            'type_operation' => ['sometimes', 'string', Rule::in($this->typeOptions)],
+            'type_operation' => 'sometimes|string|max:191',
             'statut' => ['sometimes', 'string', Rule::in($this->statutOptions)],
-            'montant_total' => 'sometimes|numeric|min:0',
+            'montant_total' => 'nullable|numeric|min:0',
             'montant_rembourse' => 'nullable|numeric|min:0',
             'commentaire' => 'nullable|string',
         ]);
 
         if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
+            return response()->json(['errors' => $validator->errors(), 'message' => 'Données invalides : ' . implode(', ', array_map(fn($e) => implode(', ', $e), $validator->errors()->toArray()))], 422);
         }
 
         $validated = $validator->validated();
+        if (isset($validated['type_operation'])) {
+            $validated['type_operation'] = $this->normalizeType($validated['type_operation']);
+        }
+
+        $affiliation = $operation->affiliation()->with('employe')->first();
 
         // Validation du bénéficiaire si changement
-        if (isset($validated['beneficiaire_type'])) {
-            $affiliation = $operation->affiliation;
-            
+        if (isset($validated['beneficiaire_type'])) {          
             if ($validated['beneficiaire_type'] === 'CONJOINT' && !$affiliation->conjoint_ayant_droit) {
                 return response()->json([
                     'errors' => ['beneficiaire_type' => ['Le conjoint n\'est pas autorisé pour cette affiliation.']]
@@ -167,6 +242,33 @@ class MutuelleOperationController extends Controller
             }
         }
 
+        $beneficiaireType = $validated['beneficiaire_type'] ?? $operation->beneficiaire_type;
+        $beneficiaireNom = array_key_exists('beneficiaire_nom', $validated) ? $validated['beneficiaire_nom'] : $operation->beneficiaire_nom;
+        $lienParente = array_key_exists('lien_parente', $validated) ? $validated['lien_parente'] : $operation->lien_parente;
+        $beneficiaireNom = $beneficiaireNom ? trim($beneficiaireNom) : null;
+        $lienParente = $lienParente ? trim($lienParente) : null;
+        $employeeFullName = trim(($affiliation->employe->nom ?? '') . ' ' . ($affiliation->employe->prenom ?? ''));
+
+        if ($beneficiaireType === 'EMPLOYE') {
+            $validated['beneficiaire_nom'] = $employeeFullName ?: $beneficiaireNom;
+            $validated['lien_parente'] = 'Employé';
+        } else {
+            if (!$beneficiaireNom || trim($beneficiaireNom) === '') {
+                return response()->json([
+                    'errors' => ['beneficiaire_nom' => ['Le nom du bénéficiaire est requis.']]
+                ], 422);
+            }
+
+            if (!$lienParente || trim($lienParente) === '') {
+                return response()->json([
+                    'errors' => ['lien_parente' => ['Le lien de parenté est requis pour ce bénéficiaire.']]
+                ], 422);
+            }
+
+            $validated['beneficiaire_nom'] = $beneficiaireNom;
+            $validated['lien_parente'] = $lienParente;
+        }
+
         // Recalculer reste à charge si changement des montants
         if (isset($validated['montant_total']) || isset($validated['montant_rembourse'])) {
             $montantTotal = $validated['montant_total'] ?? $operation->montant_total;
@@ -176,7 +278,7 @@ class MutuelleOperationController extends Controller
 
         $operation->update($validated);
 
-        return response()->json($operation->load(['affiliation.employe', 'affiliation.mutuelle']));
+            return response()->json($operation->load(['affiliation.employe', 'affiliation.mutuelle', 'documents']));
     }
 
     /**
@@ -184,9 +286,12 @@ class MutuelleOperationController extends Controller
      */
     public function destroy(MutuelleOperation $operation)
     {
+        // Restriction removed per user request: Allow deletion regardless of status
+        /*
         if ($operation->statut === 'REMBOURSEE') {
             return response()->json(['message' => 'Opération remboursée non supprimable'], 403);
         }
+        */
 
         $operation->delete();
 
@@ -203,9 +308,43 @@ class MutuelleOperationController extends Controller
         $affiliationIds = $employe->affiliationsMutuelle()->pluck('id');
 
         // Récupérer toutes les opérations liées à ces affiliations
-        $operations = MutuelleOperation::with(['affiliation.mutuelle'])
+        $typeFilter = request('type');
+
+        $operations = MutuelleOperation::with(['affiliation.mutuelle', 'documents'])
             ->whereIn('affiliation_id', $affiliationIds)
+            ->when($typeFilter !== null && $typeFilter !== '', function ($q) use ($typeFilter) {
+                $aliases = $this->typeAliases($typeFilter);
+                $q->where(function ($sub) use ($aliases) {
+                    foreach ($aliases as $alias) {
+                        $sub->orWhere('type_operation', $alias);
+                    }
+                });
+            })
+            ->when(request('statut'), fn ($q) => $q->where('statut', request('statut')))
+            ->when(request('date_operation_from') || request('date_operation_to'), function ($q) {
+                $from = request('date_operation_from');
+                $to = request('date_operation_to');
+                if ($from && $to) {
+                    $q->whereBetween('date_operation', [$from, $to]);
+                } elseif ($from) {
+                    $q->whereDate('date_operation', '>=', $from);
+                } elseif ($to) {
+                    $q->whereDate('date_operation', '<=', $to);
+                }
+            })
+            ->when(request('date_remboursement_from') || request('date_remboursement_to'), function ($q) {
+                $from = request('date_remboursement_from');
+                $to = request('date_remboursement_to');
+                if ($from && $to) {
+                    $q->whereBetween('date_remboursement', [$from, $to]);
+                } elseif ($from) {
+                    $q->whereDate('date_remboursement', '>=', $from);
+                } elseif ($to) {
+                    $q->whereDate('date_remboursement', '<=', $to);
+                }
+            })
             ->orderByDesc('date_operation')
+            ->orderByDesc('id')
             ->get();
 
         return response()->json($operations);

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import AbsenceForm from './AbsenceForm';
 import axios from 'axios';
-import Swal from "sweetalert2";
+import { showSuccessMessage, showErrorMessage, showInfoMessage, showConfirmDialog, showErrorFromResponse, STANDARD_MESSAGES } from '../utils/messageHelper';
 import { Button, Card, Tab, Tabs, Table, Modal, Form } from 'react-bootstrap';
 import { Trash2, Edit2, Plus, Check, X } from 'lucide-react';
 import {
@@ -25,10 +25,11 @@ import ExpandRTable from "./Employe/ExpandRTable";
 import PageHeader from '../ComponentHistorique/PageHeader';
 import { FaPlusCircle } from "react-icons/fa";
 import { IoFolderOpenOutline } from "react-icons/io5";
-import {  FaMinus, FaPlus , FaRegCircle
+import {
+    FaMinus, FaPlus, FaRegCircle
 } from "react-icons/fa";
 import { useHeader } from "../Acceuil/HeaderContext";
-import { ThemeProvider, createTheme, Box  } from "@mui/material";
+import { ThemeProvider, createTheme, Box } from "@mui/material";
 import { useOpen } from "../Acceuil/OpenProvider";
 
 
@@ -130,7 +131,7 @@ const Rubrique = () => {
     useEffect(() => {
         const loadRubriques = async () => {
             if (!selectedGroup) return;
-            
+
             setIsLoading(true);
             try {
                 const response = await axios.get(`http://127.0.0.1:8000/api/rubriques?group=${selectedGroup.id}`);
@@ -196,42 +197,29 @@ const Rubrique = () => {
     const handleEditGroup = async (groupId) => {
         try {
             if (!editingGroupName) {
-                Swal.fire({
-                    icon: "warning",
-                    title: "Attention!",
-                    text: "Veuillez entrer un nom de groupe.",
-                });
+                showInfoMessage("Attention", "Veuillez entrer un nom de groupe.");
                 return;
             }
-    
-    
-            Swal.fire({
-                icon: "success",
-                title: "Succès!",
-                text: "Groupe modifié avec succès.",
-            });
+
+
+            showSuccessMessage("Succès", "Groupe modifié avec succès.");
         } catch (error) {
             console.error("Erreur lors de la modification du groupe:", error);
-    
-            Swal.fire({
-                icon: "error",
-                title: "Erreur!",
-                text: error.response?.data?.message || "Échec de la modification du groupe.",
-            });
+
+            const errorMessage = error.response?.data?.message || "Échec de la modification du groupe.";
+            showErrorMessage("Erreur", errorMessage);
         }
     };
 
     const handleDeleteSelectedZones = async () => {
         if (selectedZones.length === 0) return;
 
-        Swal.fire({
-            title: `Êtes-vous sûr de vouloir supprimer ${selectedZones.length} zone(s)?`,
-            showDenyButton: true,
-            confirmButtonText: "Oui",
-            denyButtonText: "Non",
-        }).then(async (result) => {
-            
-            if (result.isConfirmed) {
+        const result = await showConfirmDialog(
+            `Êtes-vous sûr de vouloir supprimer ${selectedZones.length} zone(s) ?`,
+            "Cette action est irréversible."
+        );
+
+        if (result.isConfirmed) {
                 try {
                     await Promise.all(
                         selectedZones.map((id) =>
@@ -245,42 +233,30 @@ const Rubrique = () => {
 
                     setSelectedZones([]);
 
-                    Swal.fire({
-                        icon: "success",
-                        title: "Succès!",
-                        text: `${selectedZones.length} zone(s) supprimée(s) avec succès.`,
-                    });
+                    showSuccessMessage("Succès", `${selectedZones.length} zone(s) supprimée(s) avec succès.`);
                 } catch (error) {
                     if (error.response && error.response.status === 500) {
-                        Swal.fire({
-                            icon: "error",
-                            title: "Erreur!",
-                            text: "Impossible de supprimer ces zones car elles sont utilisées dans d'autres interfaces.",
-                        });
+                        showErrorMessage(
+                            "Erreur",
+                            "Impossible de supprimer ces zones car elles sont utilisées dans d'autres interfaces."
+                        );
                     } else {
                         console.error("Erreur lors de la suppression des zones:", error);
-                        Swal.fire({
-                            icon: "error",
-                            title: "Erreur!",
-                            text: "Échec de la suppression des zones.",
-                        });
+                        showErrorMessage("Erreur", "Échec de la suppression des zones.");
                     }
                 }
-            } else {
-                console.log("Suppression annulée");
             }
-        });
+        };
     };
     const handleDeleteSelectedGroups = async () => {
         if (groups.length === 0) return;
 
-        Swal.fire({
-            title: `Êtes-vous sûr de vouloir supprimer ${groups.length} groupe(s)?`,
-            showDenyButton: true,
-            confirmButtonText: "Oui",
-            denyButtonText: "Non",
-        }).then(async (result) => {
-            if (result.isConfirmed) {
+        const result = await showConfirmDialog(
+            `Êtes-vous sûr de vouloir supprimer ${groups.length} groupe(s) ?`,
+            "Cette action est irréversible."
+        );
+        
+        if (result.isConfirmed) {
                 try {
                     await Promise.all(
                         groups.map((id) =>
@@ -294,29 +270,20 @@ const Rubrique = () => {
 
                     setSelectedGroup(null);
 
-                    Swal.fire({
-                        icon: "success",
-                        title: "Succès!",
-                        text: `${groups.length} groupe(s) supprimé(s) avec succès.`,
-                    });
+                    showSuccessMessage("Succès", `${groups.length} groupe(s) supprimé(s) avec succès.`);
                 } catch (error) {
                     if (error.response && error.response.status === 500) {
-                        Swal.fire({
-                            icon: "error",
-                            title: "Erreur!",
-                            text: "Impossible de supprimer ces groupes car ils sont utilisés dans d'autres interfaces.",
-                        });
+                        showErrorMessage(
+                            "Erreur",
+                            "Impossible de supprimer ces groupes car ils sont utilisés dans d'autres interfaces."
+                        );
                     } else {
                         console.error("Erreur lors de la suppression des groupes:", error);
-                        Swal.fire({
-                            icon: "error",
-                            title: "Erreur!",
-                            text: "Échec de la suppression des groupes.",
-                        });
+                        showErrorMessage("Erreur", "Échec de la suppression des groupes.");
                     }
                 }
             }
-        });
+        };
     };
 
     const toggleGroupSelection = (id) => {
@@ -336,41 +303,29 @@ const Rubrique = () => {
                     formData
                 );
 
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Succès!',
-                    text: 'Rubrique mise à jour avec succès.',
-                });
+                showSuccessMessage('Succès', 'Rubrique mise à jour avec succès.');
             } else {
                 response = await axios.post('http://127.0.0.1:8000/api/rubriques', formData);
 
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Succès!',
-                    text: 'Rubrique créée avec succès.',
-                });
+                showSuccessMessage('Succès', 'Rubrique créée avec succès.');
             }
             if (selectedGroup) {
                 await handleGroupClick(selectedGroup);
             }
-    
+
             setShowForm(false);
             setEditingRubrique(null);
         } catch (error) {
             console.error('Error saving rubrique:', error);
-    
-            Swal.fire({
-                icon: 'error',
-                title: 'Erreur!',
-                text: 'Une erreur est survenue lors de l\'enregistrement de la rubrique.',
-            });
+
+            showErrorMessage('Erreur', 'Une erreur est survenue lors de l\'enregistrement de la rubrique.');
         }
     };
 
 
 
 
-    
+
     const handleCancel = () => {
         setShowForm(false);
         setEditingRubrique(null);
@@ -381,37 +336,28 @@ const Rubrique = () => {
         setShowForm(true);
     };
 
-    const handleDelete = (id) => {
-        Swal.fire({
-            title: 'Êtes-vous sûr de vouloir supprimer cette rubrique?',
-            showDenyButton: true,
-            confirmButtonText: 'Oui',
-            denyButtonText: 'Non',
-        }).then(async (result) => {
-            if (result.isConfirmed) {
-                try {
-                    await axios.delete(`http://127.0.0.1:8000/api/rubriques/${id}`);
-    
-                    setRubriques((prevRubriques) =>
-                        prevRubriques.filter((rubrique) => rubrique.id !== id)
-                    );
-    
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Succès!',
-                        text: 'Rubrique supprimée avec succès.',
-                    });
-                } catch (error) {
-                    console.error('Erreur lors de la suppression de la rubrique:', error);
-    
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Erreur!',
-                        text: 'Échec de la suppression de la rubrique.',
-                    });
-                }
+    const handleDelete = async (id) => {
+        const result = await showConfirmDialog(
+            'Êtes-vous sûr de vouloir supprimer cette rubrique ?',
+            STANDARD_MESSAGES.DELETE_CONFIRM_TEXT
+        );
+        
+        if (result.isConfirmed) {
+            try {
+                await axios.delete(`http://127.0.0.1:8000/api/rubriques/${id}`);
+
+                setRubriques((prevRubriques) =>
+                    prevRubriques.filter((rubrique) => rubrique.id !== id)
+                );
+
+                showSuccessMessage('Succès', 'Rubrique supprimée avec succès.');
+            } catch (error) {
+                console.error('Erreur lors de la suppression de la rubrique:', error);
+
+                showErrorMessage('Erreur', 'Échec de la suppression de la rubrique.');
             }
-        });
+        }
+    };
     };
 
     const exportToPDF = useCallback(() => {
@@ -563,56 +509,43 @@ const Rubrique = () => {
     const handleAddGroupe = async () => {
         try {
             if (!newCategory.categorie) {
-                Swal.fire({
-                    icon: "warning",
-                    title: "Attention!",
-                    text: "Veuillez entrer un nom de groupe.",
-                });
+                showInfoMessage("Attention", "Veuillez entrer un nom de groupe.");
                 return;
             }
-    
+
             const response = await axios.post("http://127.0.0.1:8000/api/group-rubriques", {
                 designation: newCategory.categorie,
             });
-    
+
             setGroups((prevGroups) => [...prevGroups, response.data.data]);
-    
+
             setNewCategory({ categorie: "" });
-    
-            Swal.fire({
-                icon: "success",
-                title: "Succès!",
-                text: "Groupe ajouté avec succès.",
-            });
-    
+
+            showSuccessMessage("Succès", "Groupe ajouté avec succès.");
+
             setShowAddGroupe(false);
-    
+
             await handleGroupClick(selectedGroup);
         } catch (error) {
             console.error("Erreur lors de l'ajout:", error);
-    
-            Swal.fire({
-                icon: "error",
-                title: "Erreur!",
-                text: error.response?.data?.message || "Échec de l'ajout du groupe.",
-            });
+
+            const errorMessage = error.response?.data?.message || "Échec de l'ajout du groupe.";
+            showErrorMessage("Erreur", errorMessage);
         }
     };
 
     const handleDeleteGroupe = async (groupId) => {
         console.log("Tentative de suppression du groupe avec ID :", groupId);
-        const result = await Swal.fire({
-            title: "Êtes-vous sûr de vouloir supprimer cette groupe ?",
-            showDenyButton: true,
-            confirmButtonText: "Oui",
-            denyButtonText: "Non",
-            customClass: {
+        const result = await showConfirmDialog(
+            "Êtes-vous sûr de vouloir supprimer ce groupe ?",
+            STANDARD_MESSAGES.DELETE_CONFIRM_TEXT
+        );
                 actions: "my-actions",
                 confirmButton: "order-2",
                 denyButton: "order-3",
             },
         });
-    
+
         if (result.isConfirmed) {
             try {
                 const response = await axios.delete(`http://127.0.0.1:8000/api/group-rubriques/${groupId}`);
@@ -635,8 +568,8 @@ const Rubrique = () => {
 
     // Fonction pour gérer la sélection d'une rubrique individuelle
     const handleCheckboxChange = useCallback((id) => {
-        setSelectedRubriques(prev => 
-            prev.includes(id) 
+        setSelectedRubriques(prev =>
+            prev.includes(id)
                 ? prev.filter(itemId => itemId !== id)
                 : [...prev, id]
         );
@@ -646,30 +579,24 @@ const Rubrique = () => {
     const handleDeleteSelected = useCallback(async () => {
         if (selectedRubriques.length === 0) return;
 
-        const result = await Swal.fire({
-            title: "Êtes-vous sûr?",
-            text: `Vous allez supprimer ${selectedRubriques.length} rubrique(s)!`,
-            icon: "warning",
-            showCancelButton: true,
-            confirmButtonColor: "#3085d6",
-            cancelButtonColor: "#d33",
-            confirmButtonText: "Oui, supprimer!",
-            cancelButtonText: "Annuler",
-        });
+        const result = await showConfirmDialog(
+            "Êtes-vous sûr ?",
+            `Vous allez supprimer ${selectedRubriques.length} rubrique(s) !`
+        );
 
         if (result.isConfirmed) {
             try {
                 await Promise.all(
                     selectedRubriques.map(id => axios.delete(`http://127.0.0.1:8000/api/rubriques/${id}`))
                 );
-                
+
                 setRubriques(prev => prev.filter(rubrique => !selectedRubriques.includes(rubrique.id)));
                 setSelectedRubriques([]);
-                
-                Swal.fire("Supprimés!", "Les rubriques ont été supprimées.", "success");
+
+                showSuccessMessage("Supprimés", "Les rubriques ont été supprimées.");
             } catch (error) {
                 console.error("Error deleting selected rubriques:", error);
-                Swal.fire("Erreur!", "Une erreur est survenue lors de la suppression.", "error");
+                showErrorMessage("Erreur", "Une erreur est survenue lors de la suppression.");
             }
         }
     }, [selectedRubriques]);
@@ -703,52 +630,53 @@ const Rubrique = () => {
 
     useEffect(() => {
         setTitle("Gestion des rubriques");
-      
+
         setOnPrint(() => handlePrint);
         setOnExportPDF(() => exportToPDF);
         setOnExportExcel(() => exportToExcel);
-      
+
         return () => {
-          clearActions();
-          setTitle('');
+            clearActions();
+            setTitle('');
         };
-      }, [setTitle, setOnPrint, setOnExportPDF, setOnExportExcel, clearActions, handlePrint, exportToPDF, exportToExcel]);
-      
-      useEffect(() => {
+    }, [setTitle, setOnPrint, setOnExportPDF, setOnExportExcel, clearActions, handlePrint, exportToPDF, exportToExcel]);
+
+    useEffect(() => {
         setGlobalSearch(searchQuery || '');
-      }, [searchQuery]);
+    }, [searchQuery]);
 
 
-      const handleFiltersToggle = (isVisible) => {
+    const handleFiltersToggle = (isVisible) => {
         if (isVisible) {
-          setShowFilters(true);
+            setShowFilters(true);
         } else {
-          setTimeout(() => {
-            setShowFilters(false);
-          }, 300); 
+            setTimeout(() => {
+                setShowFilters(false);
+            }, 300);
         }
-      };
+    };
 
 
     return (
         <>
 
 
-<ThemeProvider theme={createTheme()}>
-    <Box sx={{ ...dynamicStyles }}>
-      <Box component="main" sx={{ flexGrow: 1, p: 0, mt: 12 }}>
+            <ThemeProvider theme={createTheme()}>
+                <Box sx={{ ...dynamicStyles }}>
+                    <Box component="main" sx={{ flexGrow: 1, p: 0, mt: 12 }}>
 
 
-      <div style={{ 
-        display: "flex", 
-        flex: 1, 
-        position: "relative",
-        margin: 0,
-        padding: 0,
-        height: "calc(100vh - 80px)"}}
-      >
+                        <div style={{
+                            display: "flex",
+                            flex: 1,
+                            position: "relative",
+                            margin: 0,
+                            padding: 0,
+                            height: "calc(100vh - 80px)"
+                        }}
+                        >
 
-            {/* <PageHeader
+                            {/* <PageHeader
                 title="Gestion des Rubriques"
                 onExportPDF={exportToPDF}
                 onExportExcel={exportToExcel}
@@ -760,500 +688,502 @@ const Rubrique = () => {
 
 
 
-                {/* Section des groupes */}
-                <div style={{ 
-          width: "18%", 
-          height: "100%",
-          margin: 0,
-          padding: 0
-        }}>
-                    <div className="groups-section">
-                        <div className="groups-header">
-                            <span>
-                                Groupes Rubriques
-                                <FontAwesomeIcon
-                                    icon={faGear}
-                                    className={`text-primary ${!canCreateGroupRubrique ? 'disabled-btn' : ''}`}
-                                    style={{ cursor: canCreateGroupRubrique ? "pointer" : "not-allowed", marginTop: '2%', marginLeft: '57%', opacity: canCreateGroupRubrique ? 1 : 0.5 }}
-                                    onClick={() => { if (!canCreateGroupRubrique) return; setShowAddGroupe(true); }}
-                                />
-                            </span>
-                        </div>
-                        <ul style={{ padding: 0, marginTop: '20px' }}>
-                            {groups.map(group => (
-                                <li
-                                    key={group.id}
-                                    onClick={() => handleGroupClick(group)}
-                                    className={`department-item ${selectedGroup?.id === group.id ? 'selected' : ''}`}
-                                    style={{ listStyleType: "none" }}
-                                >
-                                    <div className="department-item-content">
-                                        <button
-                                            className="expand-button"
-                                            onClick={() => handleGroupClick(group)}
-                                        >
-                                            {selectedGroup?.id === group.id ? (
-
-
-<FaRegCircle
-size={14} />
-) : (
-<FaRegCircle
-size={14} />
-
-
-
-                                            )}
-                                        </button>
-                                        <span className={`common-text ${selectedGroup?.id === group.id ? 'selected' : ''}`}>
-                                        <IoFolderOpenOutline size={18} />
-
-
-                                            {group.designation}
+                            {/* Section des groupes */}
+                            <div style={{
+                                width: "18%",
+                                height: "100%",
+                                margin: 0,
+                                padding: 0
+                            }}>
+                                <div className="groups-section">
+                                    <div className="groups-header">
+                                        <span>
+                                            Groupes Rubriques
+                                            <FontAwesomeIcon
+                                                icon={faGear}
+                                                className={`text-primary ${!canCreateGroupRubrique ? 'disabled-btn' : ''}`}
+                                                style={{ cursor: canCreateGroupRubrique ? "pointer" : "not-allowed", marginTop: '2%', marginLeft: '57%', opacity: canCreateGroupRubrique ? 1 : 0.5 }}
+                                                onClick={() => { if (!canCreateGroupRubrique) return; setShowAddGroupe(true); }}
+                                            />
                                         </span>
                                     </div>
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
-                </div>
-
-
-
-
-                {/* Section de la table */}
-
-
-                <div className="container3" style={{ 
-              width: showForm ? '33.3%' : '81%' }}>
-
-                <AnimatePresence>
-                    {showFilters && (
-                        <motion.div
-                            initial={{ opacity: 0, y: -20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -20 }}
-                            transition={{ duration: 0.3 }}
-                            className="filters-container"
-                        >
-                            <div className="filters-icon-section">
-                                <svg
-                                    width="20"
-                                    height="20"
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                    stroke="#4a90a4"
-                                    strokeWidth="2"
-                                    className="filters-icon"
-                                >
-                                    <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
-                                </svg>
-                                <span className="filters-title">
-                                    Filtres
-                                </span>
-                            </div>
-                            <div className="filter-group">
-                                <label className="filter-label"
-                                    style={{
-                                        fontSize: '0.9rem',
-                                        margin: 0,
-                                        marginRight: '-50px',
-                                        marginLeft: '50px',
-                                        whiteSpace: 'nowrap',
-                                        minWidth: 'auto',
-                                        fontWeight: 600,
-                                        color: '#2c3e50'
-                                    }}>
-                                    Code
-                                </label>
-                                <div className="filter-input-wrapper">
-                                    <input
-                                        type="text"
-                                        value={filters.code}
-                                        onChange={e => setFilters({ ...filters, code: e.target.value })}
-                                        className="filter-input"
-                                        placeholder="Code"
-                                    />
-                                </div>
-                                <label className="filter-label"
-                                    style={{
-                                        fontSize: '0.9rem',
-                                        margin: 0,
-                                        marginRight: '-50px',
-                                        marginLeft: '50px',
-                                        whiteSpace: 'nowrap',
-                                        minWidth: 'auto',
-                                        fontWeight: 600,
-                                        color: '#2c3e50'
-                                    }}>
-                                    Type
-                                </label>
-                                <div className="filter-input-wrapper">
-                                    <select
-                                        value={filters.type}
-                                        onChange={e => setFilters({ ...filters, type: e.target.value })}
-                                        className="filter-input"
-                                    >
-                                        <option value="">Sélectionner un type</option>
-                                        {[...new Set(rubriques.map(item => item.type_rubrique))].map((type, idx) => (
-                                            <option key={idx} value={type}>{type}</option>
-                                        ))}
-                                    </select>
-                                </div>
-                            </div>
-                        </motion.div>
-                    )}
-                </AnimatePresence>
-
-
-                <div className="mt-4">
-                    <div className="section-header mb-3">
-                        <div className="d-flex justify-content-between align-items-center">
-                            <div>
-                                <span className="section-title mb-1">
-                                    <i className="fas fa-cogs me-2"></i>
-                                    Détails Rubriques
-                                </span>
-                                <p className="section-description text-muted mb-0">
-                                    {selectedGroup ? selectedGroup.designation : 'Aucun'} - Groupe sélectionné
-                                </p>
-                            </div>
-
-                            <div className="d-flex align-items-center">
-
-<FontAwesomeIcon
-onClick={() => handleFiltersToggle && handleFiltersToggle(!showFilters)}
-icon={showFilters ? faClose : faFilter}
-color={showFilters ? "green" : ""}
-style={{
-cursor: "pointer",
-fontSize: "1.9rem",
-color: "#2c767c",
-marginRight: "15px",
-}}
-/>
-
-                            
-                            <Button
-                                onClick={() => {
-                                    if (!selectedGroup) {
-                                        return;
-                                    }
-                                    setShowForm(true);
-                                    setEditingRubrique(null);
-                                }}
-                                className={`btn btn-outline-primary d-flex align-items-center ${!selectedGroup ? "disabled-btn" : ""}`}
-                                size="sm"
-                                style={{ height:'45px' }}
-
-                            >
-              <FaPlusCircle className="me-2" />
-
-
-                                Ajouter une rubrique
-                            </Button>
-                            </div>
-                        </div>
-                    </div>
-                    <Tabs
-                        id="memo-tabs"
-                        activeKey={activeTab}
-                        onSelect={k => setActiveTab(k)}
-                        className="mb-3 onglet"
-                    >
-                        <Tab eventKey="tous" title="Tous">
-                            <ExpandRTable
-                                columns={[
-                                    { key: "code", label: "Code" },
-                                    { key: "intitule", label: "Intitule" },
-                                    { key: "type_rubrique", label: "Type" },
-                                    { key: "formule", label: "Formule" },
-                                    { key: "memo", label: "Mémo" }
-                                ]}
-                                data={filteredRubriques}
-                                searchTerm={globalSearch.toLowerCase()}
-                                highlightText={(text, searchTerm) => {
-                                    if (!text || !searchTerm) return text;
-                                    const textStr = String(text);
-                                    const searchTermLower = searchTerm.toLowerCase();
-                                    if (!textStr.toLowerCase().includes(searchTermLower)) return textStr;
-                                    const parts = textStr.split(new RegExp(`(${searchTerm})`, 'gi'));
-                                    return parts.map((part, i) =>
-                                        part.toLowerCase() === searchTermLower
-                                            ? <mark key={i} style={{ backgroundColor: 'yellow' }}>{part}</mark>
-                                            : part
-                                    );
-                                }}
-                                selectAll={selectedRubriques.length === filteredRubriques.length && filteredRubriques.length > 0}
-                                selectedItems={selectedRubriques}
-                                handleSelectAllChange={handleSelectAllChange}
-                                handleCheckboxChange={handleCheckboxChange}
-                                handleEdit={handleEdit}
-                                handleDelete={handleDelete}
-                                handleDeleteSelected={handleDeleteSelected}
-                                rowsPerPage={rowsPerPage}
-                                page={page}
-                                handleChangePage={handleChangePage}
-                                handleChangeRowsPerPage={handleChangeRowsPerPage}
-                                expandedRows={expandedRows}
-                                toggleRowExpansion={toggleRowExpansion}
-                                renderExpandedRow={renderExpandedRow}
-                            />
-                        </Tab>
-                        {selectedGroup && Array.from(uniqueMemos).map(memo => (
-                            <Tab key={memo} eventKey={memo} title={memo} className="tabiden">
-                                <ExpandRTable
-                                    columns={[
-                                        { key: "code", label: "Code" },
-                                        { key: "intitule", label: "Intitule" },
-                                        { key: "type_rubrique", label: "Type" },
-                                        { key: "formule", label: "Formule" },
-                                        { key: "memo", label: "Mémo" }
-                                    ]}
-                                    data={getRubriquesByMemo(memo).filter(rubrique => {
-                                        const codeValue = rubrique.code ? rubrique.code.toString().toLowerCase() : "";
-                                        const typeValue = rubrique.type_rubrique ? rubrique.type_rubrique.toString().toLowerCase() : "";
-                                        const matchesCode = !filters.code || codeValue.includes(filters.code.toLowerCase());
-                                        const matchesType = !filters.type || typeValue.includes(filters.type.toLowerCase());
-                                        return matchesCode && matchesType;
-                                    })}
-                                    searchTerm={globalSearch.toLowerCase()}
-                                    highlightText={(text, searchTerm) => {
-                                        if (!text || !searchTerm) return text;
-                                        const textStr = String(text);
-                                        const searchTermLower = searchTerm.toLowerCase();
-                                        if (!textStr.toLowerCase().includes(searchTermLower)) return textStr;
-                                        const parts = textStr.split(new RegExp(`(${searchTerm})`, 'gi'));
-                                        return parts.map((part, i) =>
-                                            part.toLowerCase() === searchTermLower
-                                                ? <mark key={i} style={{ backgroundColor: 'yellow' }}>{part}</mark>
-                                                : part
-                                        );
-                                    }}
-                                    selectAll={selectedRubriques.length === filteredRubriques.length && filteredRubriques.length > 0}
-                                    selectedItems={selectedRubriques}
-                                    handleSelectAllChange={handleSelectAllChange}
-                                    handleCheckboxChange={handleCheckboxChange}
-                                    handleEdit={handleEdit}
-                                    handleDelete={handleDelete}
-                                    handleDeleteSelected={handleDeleteSelected}
-                                    rowsPerPage={rowsPerPage}
-                                    page={page}
-                                    handleChangePage={handleChangePage}
-                                    handleChangeRowsPerPage={handleChangeRowsPerPage}
-                                    expandedRows={expandedRows}
-                                    toggleRowExpansion={toggleRowExpansion}
-                                    renderExpandedRow={renderExpandedRow}
-                                />
-                            </Tab>
-                        ))}
-                    </Tabs>
-                </div>
-            </div>
-            </div>
-
-
-            {showForm && (
-                <div
-                    style={{
-                        position: 'fixed',
-                        right: '0',
-                        zIndex: 1000,
-                        overflowY: 'auto',
-                        top: '-8.2%',
-                        width: '40%',
-                        height: '84%',
-                        marginTop: '8.7%',
-                        marginRight: '1%',
-                        display: 'flex',
-                        justifyContent: 'center',
-                        alignItems: 'flex-start',
-                        borderRadius: '8px',
-                        boxShadow: '0 0 10px rgba(0,0,0,0.1)',
-                        backgroundColor: '#fff',
-                    }}
-                >
-                    <RubriqueFormulaire
-                        onSubmit={handleSubmit}
-                        onCancel={handleCancel}
-                        initialData={editingRubrique}
-                        selectedGroup={selectedGroup}
-                    />
-                </div>
-            )}
-
-            <Modal
-                show={showAddGroupe}
-                onHide={() => setShowAddGroupe(false)}
-                dialogClassName="custom-modal2"
-                centered
-            >
-                <Modal.Body className="d-flex flex-column align-items-center justify-content-center pt-0">
-                    <div className="position-relative w-100" style={{ marginTop: '30px' }}>
-                        <div
-                            style={{
-                                position: 'absolute',
-                                top: '-12px',
-                                left: '20px',
-                                backgroundColor: 'white',
-                                padding: '0 12px',
-                                color: '#00afaa',
-                                fontWeight: 'bold',
-                                fontSize: '1.1rem',
-                                zIndex: 1,
-                            }}
-                        >
-                            Gestion des Groupes
-                        </div>
-                        <div
-                            style={{
-                                border: '1px solid #e0e0e0',
-                                borderRadius: '12px',
-                                padding: '30px 25px 10px',
-                                boxShadow: '0 2px 10px rgba(0, 0, 0, 0.05)',
-                                backgroundColor: 'white',
-                                maxHeight: '400px',
-                                overflowY: 'auto',
-                            }}
-                        >
-                            <Form>
-                                <Form.Group className="mb-3">
-                                    <Form.Control
-                                        type="text"
-                                        placeholder="Nom du groupe"
-                                        value={newCategory.categorie}
-                                        onChange={(e) => setNewCategory({ ...newCategory, categorie: e.target.value })}
-                                        style={{
-                                            height: 40,
-                                            border: '1px solid #e0e0e0',
-                                            borderRadius: '8px',
-                                            fontSize: '0.9rem'
-                                        }}
-                                    />
-                                </Form.Group>
-                                <Table className="custom-header" style={{ marginBottom: 0 }}>
-                                    <thead>
-                                        <tr style={{ textAlign: 'center' }}>
-                                            <th style={{ color: '#4b5563', backgroundColor: '#f9fafb', fontWeight: '600' }}>Id</th>
-                                            <th style={{ color: '#4b5563', backgroundColor: '#f9fafb', fontWeight: '600' }}>Groupe</th>
-                                            <th style={{ color: '#4b5563', backgroundColor: '#f9fafb', fontWeight: '600' }}>Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
+                                    <ul style={{ padding: 0, marginTop: '20px' }}>
                                         {groups.map(group => (
-                                            <tr key={group.id}>
-                                                <td>{group.id}</td>
-                                                <td>
-                                                    {editingGroupId === group.id ? (
-                                                        <Form.Control
-                                                            type="text"
-                                                            value={editingGroupName}
-                                                            onChange={(e) => setEditingGroupName(e.target.value)}
-                                                            style={{
-                                                                height: 35,
-                                                                border: '1px solid #e0e0e0',
-                                                                borderRadius: '6px',
-                                                                fontSize: '0.85rem'
-                                                            }}
-                                                        />
-                                                    ) : (
-                                                        group.designation
-                                                    )}
-                                                </td>
-                                                <td>
-                                                    {editingGroupId === group.id ? (
-                                                        <>
-                                                            <FontAwesomeIcon
-                                                                icon={faCheck}
-                                                                style={{
-                                                                    color: "#00afaa",
-                                                                    cursor: "pointer",
-                                                                    fontSize: '1rem',
-                                                                    marginRight: '10px'
-                                                                }}
-                                                                onClick={() => handleEditGroup(group.id)}
-                                                            />
-                                                            <FontAwesomeIcon
-                                                                icon={faXmark}
-                                                                style={{
-                                                                    color: "#ff4757",
-                                                                    cursor: "pointer",
-                                                                    fontSize: '1rem'
-                                                                }}
-                                                                onClick={() => {
-                                                                    setEditingGroupId(null);
-                                                                    setEditingGroupName('');
-                                                                }}
-                                                            />
-                                                        </>
-                                                    ) : (
-                                                        <>
-                                                            <FontAwesomeIcon
-                                                                icon={faEdit}
-                                                                style={{
-                                                                    color: "#4b5563",
-                                                                    cursor: "pointer",
-                                                                    fontSize: '1rem',
-                                                                    marginRight: '10px'
-                                                                }}
-                                                                onClick={() => {
-                                                                    setEditingGroupId(group.id);
-                                                                    setEditingGroupName(group.designation);
-                                                                }}
-                                                            />
-                                                            <FontAwesomeIcon
-                                                                icon={faTrash}
-                                                                style={{
-                                                                    color: "#ff4757",
-                                                                    cursor: "pointer",
-                                                                    fontSize: '1rem'
-                                                                }}
-                                                                onClick={() => handleDeleteGroupe(group.id)}
-                                                            />
-                                                        </>
-                                                    )}
-                                                </td>
-                                            </tr>
+                                            <li
+                                                key={group.id}
+                                                onClick={() => handleGroupClick(group)}
+                                                className={`department-item ${selectedGroup?.id === group.id ? 'selected' : ''}`}
+                                                style={{ listStyleType: "none" }}
+                                            >
+                                                <div className="department-item-content">
+                                                    <button
+                                                        className="expand-button"
+                                                        onClick={() => handleGroupClick(group)}
+                                                    >
+                                                        {selectedGroup?.id === group.id ? (
+
+
+                                                            <FaRegCircle
+                                                                size={14} />
+                                                        ) : (
+                                                            <FaRegCircle
+                                                                size={14} />
+
+
+
+                                                        )}
+                                                    </button>
+                                                    <span className={`common-text ${selectedGroup?.id === group.id ? 'selected' : ''}`}>
+                                                        <IoFolderOpenOutline size={18} />
+
+
+                                                        {group.designation}
+                                                    </span>
+                                                </div>
+                                            </li>
                                         ))}
-                                    </tbody>
-                                </Table>
-                            </Form>
+                                    </ul>
+                                </div>
+                            </div>
+
+
+
+
+                            {/* Section de la table */}
+
+
+                            <div className="container3" style={{
+                                width: showForm ? '33.3%' : '81%'
+                            }}>
+
+                                <AnimatePresence>
+                                    {showFilters && (
+                                        <motion.div
+                                            initial={{ opacity: 0, y: -20 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            exit={{ opacity: 0, y: -20 }}
+                                            transition={{ duration: 0.3 }}
+                                            className="filters-container"
+                                        >
+                                            <div className="filters-icon-section">
+                                                <svg
+                                                    width="20"
+                                                    height="20"
+                                                    viewBox="0 0 24 24"
+                                                    fill="none"
+                                                    stroke="#4a90a4"
+                                                    strokeWidth="2"
+                                                    className="filters-icon"
+                                                >
+                                                    <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+                                                </svg>
+                                                <span className="filters-title">
+                                                    Filtres
+                                                </span>
+                                            </div>
+                                            <div className="filter-group">
+                                                <label className="filter-label"
+                                                    style={{
+                                                        fontSize: '0.9rem',
+                                                        margin: 0,
+                                                        marginRight: '-50px',
+                                                        marginLeft: '50px',
+                                                        whiteSpace: 'nowrap',
+                                                        minWidth: 'auto',
+                                                        fontWeight: 600,
+                                                        color: '#2c3e50'
+                                                    }}>
+                                                    Code
+                                                </label>
+                                                <div className="filter-input-wrapper">
+                                                    <input
+                                                        type="text"
+                                                        value={filters.code}
+                                                        onChange={e => setFilters({ ...filters, code: e.target.value })}
+                                                        className="filter-input"
+                                                        placeholder="Code"
+                                                    />
+                                                </div>
+                                                <label className="filter-label"
+                                                    style={{
+                                                        fontSize: '0.9rem',
+                                                        margin: 0,
+                                                        marginRight: '-50px',
+                                                        marginLeft: '50px',
+                                                        whiteSpace: 'nowrap',
+                                                        minWidth: 'auto',
+                                                        fontWeight: 600,
+                                                        color: '#2c3e50'
+                                                    }}>
+                                                    Type
+                                                </label>
+                                                <div className="filter-input-wrapper">
+                                                    <select
+                                                        value={filters.type}
+                                                        onChange={e => setFilters({ ...filters, type: e.target.value })}
+                                                        className="filter-input"
+                                                    >
+                                                        <option value="">Sélectionner un type</option>
+                                                        {[...new Set(rubriques.map(item => item.type_rubrique))].map((type, idx) => (
+                                                            <option key={idx} value={type}>{type}</option>
+                                                        ))}
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
+
+
+                                <div className="mt-4">
+                                    <div className="section-header mb-3">
+                                        <div className="d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <span className="section-title mb-1">
+                                                    <i className="fas fa-cogs me-2"></i>
+                                                    Détails Rubriques
+                                                </span>
+                                                <p className="section-description text-muted mb-0">
+                                                    {selectedGroup ? selectedGroup.designation : 'Aucun'} - Groupe sélectionné
+                                                </p>
+                                            </div>
+
+                                            <div className="d-flex align-items-center">
+
+                                                <FontAwesomeIcon
+                                                    onClick={() => handleFiltersToggle && handleFiltersToggle(!showFilters)}
+                                                    icon={showFilters ? faClose : faFilter}
+                                                    color={showFilters ? "green" : ""}
+                                                    style={{
+                                                        cursor: "pointer",
+                                                        fontSize: "1.9rem",
+                                                        color: "#2c767c",
+                                                        marginRight: "15px",
+                                                    }}
+                                                />
+
+
+                                                <Button
+                                                    onClick={() => {
+                                                        if (!selectedGroup) {
+                                                            return;
+                                                        }
+                                                        setShowForm(true);
+                                                        setEditingRubrique(null);
+                                                    }}
+                                                    className={`btn btn-outline-primary d-flex align-items-center ${!selectedGroup ? "disabled-btn" : ""}`}
+                                                    size="sm"
+                                                    style={{ height: '45px' }}
+
+                                                >
+                                                    <FaPlusCircle className="me-2" />
+
+
+                                                    Ajouter une rubrique
+                                                </Button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <Tabs
+                                        id="memo-tabs"
+                                        activeKey={activeTab}
+                                        onSelect={k => setActiveTab(k)}
+                                        className="mb-3 onglet"
+                                    >
+                                        <Tab eventKey="tous" title="Tous">
+                                            <ExpandRTable
+                                                columns={[
+                                                    { key: "code", label: "Code" },
+                                                    { key: "intitule", label: "Intitule" },
+                                                    { key: "type_rubrique", label: "Type" },
+                                                    { key: "formule", label: "Formule" },
+                                                    { key: "memo", label: "Mémo" }
+                                                ]}
+                                                data={filteredRubriques}
+                                                searchTerm={globalSearch.toLowerCase()}
+                                                highlightText={(text, searchTerm) => {
+                                                    if (!text || !searchTerm) return text;
+                                                    const textStr = String(text);
+                                                    const searchTermLower = searchTerm.toLowerCase();
+                                                    if (!textStr.toLowerCase().includes(searchTermLower)) return textStr;
+                                                    const parts = textStr.split(new RegExp(`(${searchTerm})`, 'gi'));
+                                                    return parts.map((part, i) =>
+                                                        part.toLowerCase() === searchTermLower
+                                                            ? <mark key={i} style={{ backgroundColor: 'yellow' }}>{part}</mark>
+                                                            : part
+                                                    );
+                                                }}
+                                                selectAll={selectedRubriques.length === filteredRubriques.length && filteredRubriques.length > 0}
+                                                selectedItems={selectedRubriques}
+                                                handleSelectAllChange={handleSelectAllChange}
+                                                handleCheckboxChange={handleCheckboxChange}
+                                                handleEdit={handleEdit}
+                                                handleDelete={handleDelete}
+                                                handleDeleteSelected={handleDeleteSelected}
+                                                rowsPerPage={rowsPerPage}
+                                                page={page}
+                                                handleChangePage={handleChangePage}
+                                                handleChangeRowsPerPage={handleChangeRowsPerPage}
+                                                expandedRows={expandedRows}
+                                                toggleRowExpansion={toggleRowExpansion}
+                                                renderExpandedRow={renderExpandedRow}
+                                            />
+                                        </Tab>
+                                        {selectedGroup && Array.from(uniqueMemos).map(memo => (
+                                            <Tab key={memo} eventKey={memo} title={memo} className="tabiden">
+                                                <ExpandRTable
+                                                    columns={[
+                                                        { key: "code", label: "Code" },
+                                                        { key: "intitule", label: "Intitule" },
+                                                        { key: "type_rubrique", label: "Type" },
+                                                        { key: "formule", label: "Formule" },
+                                                        { key: "memo", label: "Mémo" }
+                                                    ]}
+                                                    data={getRubriquesByMemo(memo).filter(rubrique => {
+                                                        const codeValue = rubrique.code ? rubrique.code.toString().toLowerCase() : "";
+                                                        const typeValue = rubrique.type_rubrique ? rubrique.type_rubrique.toString().toLowerCase() : "";
+                                                        const matchesCode = !filters.code || codeValue.includes(filters.code.toLowerCase());
+                                                        const matchesType = !filters.type || typeValue.includes(filters.type.toLowerCase());
+                                                        return matchesCode && matchesType;
+                                                    })}
+                                                    searchTerm={globalSearch.toLowerCase()}
+                                                    highlightText={(text, searchTerm) => {
+                                                        if (!text || !searchTerm) return text;
+                                                        const textStr = String(text);
+                                                        const searchTermLower = searchTerm.toLowerCase();
+                                                        if (!textStr.toLowerCase().includes(searchTermLower)) return textStr;
+                                                        const parts = textStr.split(new RegExp(`(${searchTerm})`, 'gi'));
+                                                        return parts.map((part, i) =>
+                                                            part.toLowerCase() === searchTermLower
+                                                                ? <mark key={i} style={{ backgroundColor: 'yellow' }}>{part}</mark>
+                                                                : part
+                                                        );
+                                                    }}
+                                                    selectAll={selectedRubriques.length === filteredRubriques.length && filteredRubriques.length > 0}
+                                                    selectedItems={selectedRubriques}
+                                                    handleSelectAllChange={handleSelectAllChange}
+                                                    handleCheckboxChange={handleCheckboxChange}
+                                                    handleEdit={handleEdit}
+                                                    handleDelete={handleDelete}
+                                                    handleDeleteSelected={handleDeleteSelected}
+                                                    rowsPerPage={rowsPerPage}
+                                                    page={page}
+                                                    handleChangePage={handleChangePage}
+                                                    handleChangeRowsPerPage={handleChangeRowsPerPage}
+                                                    expandedRows={expandedRows}
+                                                    toggleRowExpansion={toggleRowExpansion}
+                                                    renderExpandedRow={renderExpandedRow}
+                                                />
+                                            </Tab>
+                                        ))}
+                                    </Tabs>
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                </Modal.Body>
-                <Modal.Footer className="border-0 pt-0 d-flex justify-content-center">
-                    <button
-                        className="btn px-4 py-2"
-                        style={{
-                            backgroundColor: '#00afaa',
-                            color: 'white',
-                            border: 'none',
-                            borderRadius: '8px',
-                            fontWeight: '500',
-                            transition: 'all 0.2s ease'
-                        }}
-                        onClick={handleAddGroupe}
-                    >
-                        <i className="fas fa-check me-2"></i>
-                        Valider
-                    </button>
-                    <button
-                        className="btn px-4 py-2 me-3"
-                        style={{
-                            backgroundColor: 'white',
-                            color: '#00afaa',
-                            border: '1px solid #00afaa',
-                            borderRadius: '8px',
-                            fontWeight: '500',
-                            transition: 'all 0.2s ease'
-                        }}
-                        onClick={() => setShowAddGroupe(false)}
-                    >
-                        Annuler
-                    </button>
-                </Modal.Footer>
-            </Modal>
-            <style jsx>{`
+
+
+                        {showForm && (
+                            <div
+                                style={{
+                                    position: 'fixed',
+                                    right: '0',
+                                    zIndex: 1000,
+                                    overflowY: 'auto',
+                                    top: '-8.2%',
+                                    width: '40%',
+                                    height: '84%',
+                                    marginTop: '8.7%',
+                                    marginRight: '1%',
+                                    display: 'flex',
+                                    justifyContent: 'center',
+                                    alignItems: 'flex-start',
+                                    borderRadius: '8px',
+                                    boxShadow: '0 0 10px rgba(0,0,0,0.1)',
+                                    backgroundColor: '#fff',
+                                }}
+                            >
+                                <RubriqueFormulaire
+                                    onSubmit={handleSubmit}
+                                    onCancel={handleCancel}
+                                    initialData={editingRubrique}
+                                    selectedGroup={selectedGroup}
+                                />
+                            </div>
+                        )}
+
+                        <Modal
+                            show={showAddGroupe}
+                            onHide={() => setShowAddGroupe(false)}
+                            dialogClassName="custom-modal2"
+                            centered
+                        >
+                            <Modal.Body className="d-flex flex-column align-items-center justify-content-center pt-0">
+                                <div className="position-relative w-100" style={{ marginTop: '30px' }}>
+                                    <div
+                                        style={{
+                                            position: 'absolute',
+                                            top: '-12px',
+                                            left: '20px',
+                                            backgroundColor: 'white',
+                                            padding: '0 12px',
+                                            color: '#00afaa',
+                                            fontWeight: 'bold',
+                                            fontSize: '1.1rem',
+                                            zIndex: 1,
+                                        }}
+                                    >
+                                        Gestion des Groupes
+                                    </div>
+                                    <div
+                                        style={{
+                                            border: '1px solid #e0e0e0',
+                                            borderRadius: '12px',
+                                            padding: '30px 25px 10px',
+                                            boxShadow: '0 2px 10px rgba(0, 0, 0, 0.05)',
+                                            backgroundColor: 'white',
+                                            maxHeight: '400px',
+                                            overflowY: 'auto',
+                                        }}
+                                    >
+                                        <Form>
+                                            <Form.Group className="mb-3">
+                                                <Form.Control
+                                                    type="text"
+                                                    placeholder="Nom du groupe"
+                                                    value={newCategory.categorie}
+                                                    onChange={(e) => setNewCategory({ ...newCategory, categorie: e.target.value })}
+                                                    style={{
+                                                        height: 40,
+                                                        border: '1px solid #e0e0e0',
+                                                        borderRadius: '8px',
+                                                        fontSize: '0.9rem'
+                                                    }}
+                                                />
+                                            </Form.Group>
+                                            <Table className="custom-header" style={{ marginBottom: 0 }}>
+                                                <thead>
+                                                    <tr style={{ textAlign: 'center' }}>
+                                                        <th style={{ color: '#4b5563', backgroundColor: '#f9fafb', fontWeight: '600' }}>Id</th>
+                                                        <th style={{ color: '#4b5563', backgroundColor: '#f9fafb', fontWeight: '600' }}>Groupe</th>
+                                                        <th style={{ color: '#4b5563', backgroundColor: '#f9fafb', fontWeight: '600' }}>Actions</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {groups.map(group => (
+                                                        <tr key={group.id}>
+                                                            <td>{group.id}</td>
+                                                            <td>
+                                                                {editingGroupId === group.id ? (
+                                                                    <Form.Control
+                                                                        type="text"
+                                                                        value={editingGroupName}
+                                                                        onChange={(e) => setEditingGroupName(e.target.value)}
+                                                                        style={{
+                                                                            height: 35,
+                                                                            border: '1px solid #e0e0e0',
+                                                                            borderRadius: '6px',
+                                                                            fontSize: '0.85rem'
+                                                                        }}
+                                                                    />
+                                                                ) : (
+                                                                    group.designation
+                                                                )}
+                                                            </td>
+                                                            <td>
+                                                                {editingGroupId === group.id ? (
+                                                                    <>
+                                                                        <FontAwesomeIcon
+                                                                            icon={faCheck}
+                                                                            style={{
+                                                                                color: "#00afaa",
+                                                                                cursor: "pointer",
+                                                                                fontSize: '1rem',
+                                                                                marginRight: '10px'
+                                                                            }}
+                                                                            onClick={() => handleEditGroup(group.id)}
+                                                                        />
+                                                                        <FontAwesomeIcon
+                                                                            icon={faXmark}
+                                                                            style={{
+                                                                                color: "#ff4757",
+                                                                                cursor: "pointer",
+                                                                                fontSize: '1rem'
+                                                                            }}
+                                                                            onClick={() => {
+                                                                                setEditingGroupId(null);
+                                                                                setEditingGroupName('');
+                                                                            }}
+                                                                        />
+                                                                    </>
+                                                                ) : (
+                                                                    <>
+                                                                        <FontAwesomeIcon
+                                                                            icon={faEdit}
+                                                                            style={{
+                                                                                color: "#4b5563",
+                                                                                cursor: "pointer",
+                                                                                fontSize: '1rem',
+                                                                                marginRight: '10px'
+                                                                            }}
+                                                                            onClick={() => {
+                                                                                setEditingGroupId(group.id);
+                                                                                setEditingGroupName(group.designation);
+                                                                            }}
+                                                                        />
+                                                                        <FontAwesomeIcon
+                                                                            icon={faTrash}
+                                                                            style={{
+                                                                                color: "#ff4757",
+                                                                                cursor: "pointer",
+                                                                                fontSize: '1rem'
+                                                                            }}
+                                                                            onClick={() => handleDeleteGroupe(group.id)}
+                                                                        />
+                                                                    </>
+                                                                )}
+                                                            </td>
+                                                        </tr>
+                                                    ))}
+                                                </tbody>
+                                            </Table>
+                                        </Form>
+                                    </div>
+                                </div>
+                            </Modal.Body>
+                            <Modal.Footer className="border-0 pt-0 d-flex justify-content-center gap-3">
+                                <button
+                                    className="btn px-4 py-2"
+                                    style={{
+                                        backgroundColor: '#3a8a90',
+                                        color: 'white',
+                                        border: 'none',
+                                        borderRadius: '8px',
+                                        fontWeight: '600',
+                                        minWidth: '140px',
+                                        transition: 'all 0.2s ease'
+                                    }}
+                                    onClick={handleAddGroupe}
+                                >
+                                    Valider
+                                </button>
+                                <button
+                                    className="btn px-4 py-2"
+                                    style={{
+                                        backgroundColor: '#3a8a90',
+                                        color: 'white',
+                                        border: 'none',
+                                        borderRadius: '8px',
+                                        fontWeight: '600',
+                                        minWidth: '140px',
+                                        transition: 'all 0.2s ease'
+                                    }}
+                                    onClick={() => setShowAddGroupe(false)}
+                                >
+                                    Annuler
+                                </button>
+                            </Modal.Footer>
+                        </Modal>
+                        <style jsx>{`
             /* Styles identiques à AbsenceTable */
             .expand-button {
                 background: transparent;
@@ -1545,9 +1475,9 @@ marginRight: "15px",
 }
 
             `}</style>
-                        </Box>
-      </Box>
-    </ThemeProvider>
+                    </Box>
+                </Box>
+            </ThemeProvider>
 
 
         </>

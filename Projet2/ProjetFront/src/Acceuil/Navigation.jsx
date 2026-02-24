@@ -52,6 +52,7 @@ import { Link } from "react-router-dom";
 import CssBaseline from "@mui/material/CssBaseline";
 import TimeToLeaveIcon from "@mui/icons-material/TimeToLeave";
 import MuiAppBar from "@mui/material/AppBar";
+import { showErrorMessage } from '../utils/messageHelper';
 import Swal from "sweetalert2";
 import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
@@ -85,6 +86,7 @@ import { useHeader } from "./HeaderContext";
 
 
 import SearchIcon from "@mui/icons-material/Search";
+import CloseIcon from "@mui/icons-material/Close";
 import PrintIcon from "@mui/icons-material/Print";
 import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
 import TableViewIcon from "@mui/icons-material/TableView";
@@ -155,6 +157,7 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
   "& .MuiInputBase-input": {
     padding: theme.spacing(1, 1, 1, 0),
     paddingLeft: `calc(1em + ${theme.spacing(4)})`,
+    paddingRight: theme.spacing(6),
     transition: theme.transitions.create("width"),
     width: "100%",
   },
@@ -206,6 +209,9 @@ const SubMenuItem = styled(ListItem)(({ theme }) => ({
     "& .MuiListItemText-primary": {
       fontSize: "0.875rem",
       fontWeight: 400,
+      whiteSpace: "normal",
+      wordWrap: "break-word",
+      lineHeight: 1.3,
     }
   }
 }));
@@ -233,6 +239,9 @@ const MainMenuItem = styled(ListItem)(({ theme }) => ({
     "& .MuiListItemText-primary": {
       fontSize: "0.95rem",
       fontWeight: 500,
+      whiteSpace: "normal",
+      wordWrap: "break-word",
+      lineHeight: 1.3,
     }
   }
 }));
@@ -267,6 +276,9 @@ const LogoutButton = styled(ListItem)(({ theme }) => ({
       color: "rgba(255, 255, 255, 0.8)",
       fontWeight: 500,
       fontSize: "0.95rem",
+      whiteSpace: "normal",
+      wordWrap: "break-word",
+      lineHeight: 1.3,
     }
   },
 
@@ -338,7 +350,7 @@ const Drawer = styled(MuiDrawer, {
     position: "fixed",
     height: "100vh",
     minHeight: "100vh",
-    whiteSpace: "nowrap",
+    whiteSpace: "normal",
     width: drawerWidth,
     transition: theme.transitions.create("width", {
       easing: theme.transitions.easing.sharp,
@@ -566,11 +578,7 @@ const Navigation = () => {
     } catch (error) {
       console.error("Error during logout:", error);
 
-      Swal.fire({
-        icon: "error",
-        title: "Error",
-        text: "An error occurred during logout.",
-      });
+      showErrorMessage("Erreur", "Une erreur est survenue lors de la déconnexion.");
     }
   };
 
@@ -579,7 +587,7 @@ const Navigation = () => {
     toggleOpen();
   };
 
-  const { title, searchQuery, setSearchQuery, onPrint, onExportPDF, onExportExcel, showSearch } = useHeader();
+  const { title, searchQuery, setSearchQuery, clearSearch, onPrint, onExportPDF, onExportExcel, showSearch } = useHeader();
 
   return (
 
@@ -675,9 +683,34 @@ const Navigation = () => {
                   inputProps={{ "aria-label": "search" }}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
+                  sx={{ width: "100%" }}
                 />
-                {/* IcÃ´ne â‹® Ã  l'intÃ©rieur de la barre */}
-                <IconButton color="#2c3e50" onClick={handleMenuOpen} size="small" style={{ marginLeft: '32%' }}>
+                {searchQuery && (
+                  <IconButton
+                    onClick={clearSearch}
+                    size="small"
+                    sx={{
+                      position: "absolute",
+                      right: 36,
+                      top: "50%",
+                      transform: "translateY(-50%)",
+                      color: "#2c3e50"
+                    }}
+                  >
+                    <CloseIcon fontSize="small" />
+                  </IconButton>
+                )}
+                <IconButton
+                  onClick={handleMenuOpen}
+                  size="small"
+                  sx={{
+                    position: "absolute",
+                    right: 4,
+                    top: "50%",
+                    transform: "translateY(-50%)",
+                    color: "#2c3e50"
+                  }}
+                >
                   <MoreVertIcon />
                 </IconButton>
               </Search>
@@ -852,7 +885,7 @@ const Navigation = () => {
               <ListItemIcon style={{ color: 'white' }}>
                 <SecurityIcon style={{ fontSize: "1.6rem", color: "white" }} />
               </ListItemIcon>
-              <ListItemText primary="Gestion Affiliation Mutuelle" />
+              <ListItemText primary="Gestion Affiliation Assurance" />
               {isAffiliationMutuelleOpen ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
             </ListItem>
 
@@ -863,7 +896,7 @@ const Navigation = () => {
                     <ListItemIcon>
                       <SecurityIcon />
                     </ListItemIcon>
-                    <ListItemText primary="Dashboard Mutuelle" />
+                    <ListItemText primary="Tableau de bord Assurance" />
                   </SubMenuItem>
                 )}
                 {permissions.includes("view_all_employes") && (
@@ -871,7 +904,7 @@ const Navigation = () => {
                     <ListItemIcon>
                       <SecurityIcon />
                     </ListItemIcon>
-                    <ListItemText primary="Affiliation Mutuelle" />
+                    <ListItemText primary="Affiliation Assurance" />
                   </SubMenuItem>
                 )}
                 {permissions.includes("view_all_employes") && (
@@ -879,7 +912,7 @@ const Navigation = () => {
                     <ListItemIcon>
                       <SecurityIcon />
                     </ListItemIcon>
-                    <ListItemText primary="Dossier Mutuelle" />
+                    <ListItemText primary="Gestion des Opérations Assurance" />
                   </SubMenuItem>
                 )}
               </List>

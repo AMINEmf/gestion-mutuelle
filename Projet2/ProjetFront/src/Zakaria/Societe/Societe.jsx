@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import Swal from "sweetalert2";
+import { showSuccessMessage, showErrorMessage, showConfirmDialog, showErrorFromResponse, STANDARD_MESSAGES } from '../../utils/messageHelper';
 import { Form, Button, Card, Tabs, Tab } from "react-bootstrap";
 import Navigation from "../../Acceuil/Navigation";
 import Search from "../../Acceuil/Search";
@@ -164,106 +164,61 @@ const Societe = () => {
     }
   };
 
-  const handleDeleteSelected = () => {
-    Swal.fire({
-      title: "Êtes-vous sûr de vouloir supprimer ?",
-      showDenyButton: true,
-      showCancelButton: false,
-      confirmButtonText: "Oui",
-      denyButtonText: "Non",
-      customClass: {
-        actions: "my-actions",
-        cancelButton: "order-1 right-gap",
-        confirmButton: "order-2",
-        denyButton: "order-3",
-      },
-    }).then((result) => {
-      if (result.isConfirmed) {
-        selectedItems.forEach((id) => {
-          axios
-            .delete(`http://localhost:8000/api/agents/${id}`)
-            .then((response) => {
-              refetch();            
-            })
-            .catch((error) => {
-              console.error("Error deleting product:", error);
-              if (error.response && error.response.status === 403) {
-                Swal.fire({
-                  icon: "error",
-                  title: "Accès refusé",
-                  text: "Vous n'avez pas l'autorisation de supprimer ce Agent.",
-                });
-              } else {
-                Swal.fire({
-                  icon: "error",
-                  title: "Error!",
-                  text: "Échec de la suppression du Agent.",
-                });
-              }
-            });
-        });
+  const handleDeleteSelected = async () => {
+    const result = await showConfirmDialog(
+      "Êtes-vous sûr de vouloir supprimer ?",
+      "Cette action est irréversible."
+    );
+    
+    if (result.isConfirmed) {
+      try {
+        await Promise.all(
+          selectedItems.map(id => 
+            axios.delete(`http://localhost:8000/api/agents/${id}`)
+          )
+        );
+        refetch();
+        showSuccessMessage("Succès", "Agent(s) supprimé(s) avec succès.");
+      } catch (error) {
+        console.error("Error deleting product:", error);
+        if (error.response && error.response.status === 403) {
+          showErrorMessage(
+            "Accès refusé",
+            "Vous n'avez pas l'autorisation de supprimer cet agent."
+          );
+        } else {
+          showErrorMessage("Erreur", "Échec de la suppression de l'agent.");
+        }
       }
-      Swal.fire({
-        icon: "success",
-        title: "Succès!",
-        text: "Agent supprimé avec succès.",
-      });
-    });
+    }
     setSelectedItems([]);
   };
 
-  const handleDelete = (id) => {
-    Swal.fire({
-      title: "Êtes-vous sûr de vouloir supprimer ce produit ?",
-      showDenyButton: true,
-      showCancelButton: false,
-      confirmButtonText: "Oui",
-      denyButtonText: "Non",
-      customClass: {
-        actions: "my-actions",
-        cancelButton: "order-1 right-gap",
-        confirmButton: "order-2",
-        denyButton: "order-3",
-      },
-    }).then((result) => {
-      if (result.isConfirmed) {
-        axios
-          .delete(`http://localhost:8000/api/societes/${id}`)
-          .then((response) => {
-            refetch();
-              Swal.fire({
-              icon: "success",
-              title: "Succès!",
-              text: "Agent supprimé avec succès.",
-            });
-          })
-          .catch((error) => {
-            console.error("Error deleting product:", error);
-            if (error.response && error.response.status === 403) {
-              Swal.fire({
-                icon: "error",
-                title: "Accès refusé",
-                text: "Vous n'avez pas l'autorisation de supprimer ce Agent.",
-              });
-            } else if (error.response && error.response.status === 400) {
-              // Afficher le message d'erreur dans Swal.fire()
-              Swal.fire({
-                  icon: "error",
-                  title: "Erreur",
-                  text: error.response.data.error
-              });
-          } else {
-              Swal.fire({
-                icon: "error",
-                title: "Erreur!",
-                text: "Échec de la suppression du Agent.",
-              });
-            }
-          });
-      } else {
-        console.log("Suppression annulée");
+  const handleDelete = async (id) => {
+    const result = await showConfirmDialog(
+      "Êtes-vous sûr de vouloir supprimer cette société ?",
+      "Cette action est irréversible."
+    );
+    
+    if (result.isConfirmed) {
+      try {
+        await axios.delete(`http://localhost:8000/api/societes/${id}`);
+        refetch();
+        showSuccessMessage("Succès", "Société supprimée avec succès.");
+      } catch (error) {
+        console.error("Error deleting product:", error);
+        if (error.response && error.response.status === 403) {
+          showErrorMessage(
+            "Accès refusé",
+            "Vous n'avez pas l'autorisation de supprimer cette société."
+          );
+        } else if (error.response && error.response.status === 400) {
+          showErrorMessage("Erreur", error.response.data.error);
+        } else {
+          showErrorMessage("Erreur", "Échec de la suppression de la société.");
+        }
       }
-    });
+    }
   };
   const handleShowFormButtonClick = () => {
     setShowForm(true);
@@ -296,18 +251,10 @@ const Societe = () => {
       closeForm();
       refetch();
       const successMessage = `Société ${editingProduit ? "modifiée" : "ajoutée"} avec succès.`;
-      Swal.fire({
-        icon: "success",
-        title: "Succès!",
-        text: successMessage,
-      });
+      showSuccessMessage("Succès", successMessage);
     } catch (error) {
       console.error("Erreur lors de la soumission des données :", error);
-      Swal.fire({
-        icon: "error",
-        title: "Échec de l'opération",
-        text: "L'opération n'a pas pu être complétée. Veuillez réessayer plus tard.",
-      });
+      showErrorFromResponse(error, "Échec de l'opération");
     }
   };
 
@@ -325,19 +272,11 @@ const Societe = () => {
         `http://localhost:8000/api/categories/${categorieId}`
       );
       console.log(response.data);
-      Swal.fire({
-        icon: "success",
-        title: "Succès!",
-        text: "Categorie supprimé avec succès.",
-      });
+      showSuccessMessage("Succès", "Catégorie supprimée avec succès.");
       fetchCategories();
     } catch (error) {
       console.error("Error deleting categorie:", error);
-      Swal.fire({
-        icon: "error",
-        title: "Erreur!",
-        text: "Échec de la suppression de la categorie.",
-      });
+      showErrorMessage("Erreur", "Échec de la suppression de la catégorie.");
     }
   };
 

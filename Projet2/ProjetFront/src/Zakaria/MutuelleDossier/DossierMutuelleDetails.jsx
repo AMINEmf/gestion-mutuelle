@@ -2,7 +2,14 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { X, Download, Eye, Edit2, Trash2, Plus, FileText, CheckCircle, AlertCircle } from "lucide-react";
 import AddMutuelleOperation from "./AddMutuelleOperation";
-import Swal from "sweetalert2";
+import {
+  showSuccessMessage,
+  showErrorMessage,
+  showErrorFromResponse,
+  showConfirmDialog,
+  showInfoMessage,
+  STANDARD_MESSAGES
+} from "../../utils/messageHelper";
 import "../AffiliationMutuelle/AddAffiliationMutuelle.css";
 
 const api = axios.create({
@@ -51,40 +58,24 @@ function DossierMutuelleDetails({ numeroDossier, onClose, onUpdate, isSidebar = 
   const handleDeleteOperation = async (op) => {
     console.log("Attempting delete for operation:", op);
 
-    // Normalize status for check
-    const s = (op.statut || "").toUpperCase().trim();
-    const canDelete = s !== "REMBOURSEE";
-
-    if (!canDelete) {
-      Swal.fire({
-        icon: 'warning',
-        title: 'Action impossible',
-        text: `Cette opération ne peut pas être supprimée car elle est déjà remboursée.`,
-        confirmButtonColor: '#3a8a90'
-      });
-      return;
-    }
-
+    // Removal of status-based deletion restriction as requested by user
     if (!op.id) {
-      Swal.fire({
-        icon: 'error',
-        title: 'Erreur',
-        text: "ID de l'opération manquant.",
-        confirmButtonColor: '#3a8a90'
-      });
+      showErrorMessage(
+        "Erreur",
+        "ID de l'opération manquant."
+      );
       return;
     }
 
-    const { isConfirmed } = await Swal.fire({
-      title: 'Confirmation',
-      text: "Voulez-vous vraiment supprimer cette opération ?",
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonColor: '#d33',
-      cancelButtonColor: '#6c757d',
-      confirmButtonText: 'Oui, supprimer',
-      cancelButtonText: 'Annuler'
-    });
+    const { isConfirmed } = await showConfirmDialog(
+      "Confirmation",
+      "Voulez-vous vraiment supprimer cette opération ?",
+      {
+        confirmButtonColor: "#d33",
+        confirmButtonText: "Oui, supprimer",
+        cancelButtonText: "Annuler"
+      }
+    );
 
     if (!isConfirmed) return;
 
@@ -92,13 +83,11 @@ function DossierMutuelleDetails({ numeroDossier, onClose, onUpdate, isSidebar = 
       setLoading(true);
       await api.delete(`/mutuelles/operations/${op.id}`);
 
-      Swal.fire({
-        icon: 'success',
-        title: 'Supprimé',
-        text: 'Opération supprimée avec succès.',
-        timer: 1500,
-        showConfirmButton: false
-      });
+      showSuccessMessage(
+        "Supprimé",
+        "Opération supprimée avec succès.",
+        { timer: 1500, showConfirmButton: false }
+      );
 
       await fetchDossier();
       if (onUpdate) onUpdate();
@@ -108,11 +97,10 @@ function DossierMutuelleDetails({ numeroDossier, onClose, onUpdate, isSidebar = 
       }
     } catch (e) {
       console.error("Erreur suppression opération:", e);
-      Swal.fire({
-        icon: 'error',
-        title: 'Erreur',
-        text: e.response?.data?.message || "Erreur lors de la suppression."
-      });
+      showErrorMessage(
+        "Erreur",
+        e.response?.data?.message || "Erreur lors de la suppression."
+      );
     } finally {
       setLoading(false);
     }
@@ -138,7 +126,7 @@ function DossierMutuelleDetails({ numeroDossier, onClose, onUpdate, isSidebar = 
       }
     } catch (e) {
       console.error("Erreur suppression document:", e);
-      alert("Erreur lors de la suppression du document.");
+      showErrorMessage("Erreur", "Erreur lors de la suppression du document.");
     }
   };
 
@@ -168,7 +156,7 @@ function DossierMutuelleDetails({ numeroDossier, onClose, onUpdate, isSidebar = 
       // Update blocked ONLY for ANNULEE
       // Destroy blocked ONLY for REMBOURSEE
       const canEdit = s !== "ANNULEE";
-      const canDelete = s !== "REMBOURSEE";
+      const canDelete = true; // Always allow deletion as per user request
 
       // Fixed badge color normalization
       const badgeKey = s.replace(/\s+/g, '_').replace(/-/g, '_');
@@ -220,7 +208,7 @@ function DossierMutuelleDetails({ numeroDossier, onClose, onUpdate, isSidebar = 
               className="btn btn-outline-danger btn-sm"
               onClick={() => handleDeleteOperation(op)}
               disabled={!canDelete}
-              title={canDelete ? "Supprimer" : `Suppression impossible (Statut: ${op.statut})`}
+              title="Supprimer"
             >
               <Trash2 size={16} />
             </button>
@@ -235,17 +223,38 @@ function DossierMutuelleDetails({ numeroDossier, onClose, onUpdate, isSidebar = 
   const content = (
     <div className={isSidebar ? "" : "add-affiliation-panel"} style={isSidebar ? { width: '100%', height: '100%', display: 'flex', flexDirection: 'column' } : {}}>
       <div className="panel-container">
-        <div className="panel-header" style={{ borderBottom: '1px solid #e5e7eb', padding: '20px 24px', backgroundColor: '#fff' }}>
-          <div>
-            <h5 className="mb-0" style={{ color: '#3a8a90', fontWeight: 600 }}>Dossier Mutuelle : {numeroDossier}</h5>
-            {dossier?.header?.employe && (
-              <small className="text-muted" style={{ fontSize: '0.85rem' }}>
-                {dossier.header.employe.matricule ? `${dossier.header.employe.matricule} - ` : ""}
-                {dossier.header.employe.nom} {dossier.header.employe.prenom}
-              </small>
-            )}
-          </div>
-          <button className="btn btn-light btn-sm" onClick={onClose} style={{ borderRadius: '50%', width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div className="panel-header" style={{
+          borderBottom: '1px solid #e5e7eb',
+          padding: '16px 20px',
+          backgroundColor: '#f8fafc',
+          display: 'flex',
+          alignItems: 'center',
+          position: 'relative'
+        }}>
+          <h5 className="mb-0" style={{
+            fontWeight: 700,
+            color: '#4b5563',
+            fontSize: '1.1rem',
+            textAlign: 'center',
+            width: '100%'
+          }}>
+            Dossier Mutuelle : {numeroDossier}
+          </h5>
+          <button
+            className="btn btn-light btn-sm"
+            onClick={onClose}
+            style={{
+              borderRadius: '50%',
+              width: '32px',
+              height: '32px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              position: 'absolute',
+              right: 16,
+              color: '#64748b'
+            }}
+          >
             <X size={18} />
           </button>
         </div>
@@ -274,7 +283,7 @@ function DossierMutuelleDetails({ numeroDossier, onClose, onUpdate, isSidebar = 
                     {dossier?.header?.montants?.total || "0.00"} <span style={{ fontSize: "0.85rem", fontWeight: 500 }}>DH</span>
                   </div>
                 </div>
-                <div style={{ backgroundColor: "#2c767c15", padding: "10px", borderRadius: "10px", color: "#2c767c" }}>
+                <div style={{ backgroundColor: "#2c767c15", padding: "10px", borderRadius: "10px", color: "#1a3c5e" }}>
                   <FileText size={20} />
                 </div>
               </div>
@@ -413,8 +422,14 @@ function DossierMutuelleDetails({ numeroDossier, onClose, onUpdate, isSidebar = 
             )}
           </div>
         </div>
-        <div className="panel-footer" style={{ padding: "16px 24px", borderTop: "1px solid #e5e7eb", display: "flex", justifyContent: "flex-end", backgroundColor: "#fff" }}>
-          <button className="btn btn-secondary" onClick={onClose}>Fermer</button>
+        <div className="panel-footer" style={{ padding: "16px 24px", borderTop: "1px solid #e5e7eb", display: "flex", justifyContent: "center", backgroundColor: "#fff" }}>
+          <button
+            className="btn btn-primary"
+            onClick={onClose}
+            style={{ backgroundColor: "#1a3c5e", borderColor: "#1a3c5e", padding: '8px 24px', fontWeight: 600 }}
+          >
+            Fermer
+          </button>
         </div>
       </div>
     </div>
@@ -426,7 +441,6 @@ function DossierMutuelleDetails({ numeroDossier, onClose, onUpdate, isSidebar = 
         showOperationForm ? (
           <AddMutuelleOperation
             employe={dossier?.header?.employe}
-            dossierFixed={numeroDossier}
             affiliationIdProposed={dossier?.operations?.[0]?.affiliation_id}
             operation={editingOperation}
             onClose={() => {
@@ -451,7 +465,6 @@ function DossierMutuelleDetails({ numeroDossier, onClose, onUpdate, isSidebar = 
       {!isSidebar && showOperationForm && (
         <AddMutuelleOperation
           employe={dossier?.header?.employe}
-          dossierFixed={numeroDossier}
           affiliationIdProposed={dossier?.operations?.[0]?.affiliation_id}
           operation={editingOperation}
           onClose={() => {

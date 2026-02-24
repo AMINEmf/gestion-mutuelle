@@ -1,0 +1,97 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\TypeDocument;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
+
+class TypeDocumentController extends Controller
+{
+    /**
+     * Display a listing of the resource.
+     */
+    public function index()
+    {
+        $types = TypeDocument::all();
+        return response()->json($types);
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'label' => 'required|string|max:255|unique:type_documents',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        $type = TypeDocument::create([
+            'label' => $request->label,
+        ]);
+
+        return response()->json($type, 201);
+    }
+
+    /**
+     * Display the specified resource.
+     */
+    public function show(string $id)
+    {
+        $type = TypeDocument::find($id);
+
+        if (!$type) {
+            return response()->json(['message' => 'Type document not found'], 404);
+        }
+
+        return response()->json($type);
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, string $id)
+    {
+        $type = TypeDocument::find($id);
+
+        if (!$type) {
+            return response()->json(['message' => 'Type document not found'], 404);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'label' => 'required|string|max:255|unique:type_documents,label,' . $id,
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        $type->update([
+            'label' => $request->label,
+        ]);
+
+        return response()->json($type);
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(string $id)
+    {
+        $type = TypeDocument::find($id);
+
+        if (!$type) {
+            return response()->json(['message' => 'Type document not found'], 404);
+        }
+
+        // Check for dependencies logic here if needed
+
+        $type->delete();
+
+        return response()->json(['message' => 'Type document deleted successfully']);
+    }
+}

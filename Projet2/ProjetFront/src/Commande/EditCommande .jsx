@@ -4,6 +4,7 @@ import Button from "@mui/material/Button";
 import axios from "axios";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPenToSquare } from "@fortawesome/free-solid-svg-icons";
+import { showSuccessMessage, showErrorMessage } from '../utils/messageHelper';
 import swal from "sweetalert2";
 const EditCommande = ({
   produits,
@@ -199,12 +200,7 @@ const EditCommande = ({
       );
       //}
       // Step 4: Fetch updated commandes
-      swal.fire({
-        icon: "success",
-        title: "Commande modifiee avec succe!",
-        showConfirmButton: false,
-        timer: 1500, // Adjust the duration as needed
-      });
+      showSuccessMessage("Succès", "Commande modifiée avec succès !");
 
       // Step 5: Close the drawer
       handleDrawerClose();
@@ -215,9 +211,10 @@ const EditCommande = ({
       handleDrawerClose();
       console.error("Error updating commande:", error);
 
-      swal.fire({
-        icon: "error",
-        title: "Error updating commande",
+      showErrorMessage(
+        "Erreur",
+        "Une erreur est survenue lors de la modification de la commande. Veuillez réessayer."
+      );
       });
     }
   };

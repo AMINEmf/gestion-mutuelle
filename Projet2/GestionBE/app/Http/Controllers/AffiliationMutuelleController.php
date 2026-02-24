@@ -19,7 +19,7 @@ class AffiliationMutuelleController extends Controller
     {
         try {
             $query = AffiliationMutuelle::with([
-                'employe:id,matricule,nom,prenom,departement_id,nb_enfants,situation_fm',
+                'employe:id,matricule,nom,prenom,departement_id,nb_enfants,situation_fm,cin,date_naiss,adresse,date_embauche,cnss',
                 'mutuelle:id,nom',
                 'regime:id,libelle,taux_couverture,cotisation_mensuelle,part_employeur_pct,part_employe_pct'
             ]);
@@ -90,17 +90,14 @@ class AffiliationMutuelleController extends Controller
     public function employesEligibles()
     {
         try {
-            // On récupère les employés qui sont actifs OU qui n'ont pas de date de sortie
-            // (au cas où le flag active serait à 0 par défaut suite à un import)
-            $employes = Employe::where(function($q) {
-                    $q->where('active', true)
-                      ->orWhere('active', 1)
-                      ->orWhereNull('date_sortie');
-                })
+            // On récupère uniquement les employés ACTIFS (active = 1)
+            // qui n'ont PAS encore d'affiliation ACTIVE ou RÉSILIÉE
+            // (un employé résilié est déjà passé par le système, il n'a pas à réapparaître)
+            $employes = Employe::where('active', 1)
                 ->whereDoesntHave('affiliationsMutuelle', function($query) {
-                    $query->where('statut', 'ACTIVE');
+                    $query->whereIn('statut', ['ACTIVE', 'RESILIE']);
                 })
-                ->select('id', 'matricule', 'nom', 'prenom', 'nb_enfants', 'situation_fm')
+                ->select('id', 'matricule', 'nom', 'prenom', 'nb_enfants', 'situation_fm', 'cin', 'date_naiss', 'date_embauche', 'adresse')
                 ->orderBy('nom')
                 ->orderBy('prenom')
                 ->get();
@@ -222,7 +219,7 @@ class AffiliationMutuelleController extends Controller
     {
         try {
             $affiliation = AffiliationMutuelle::with([
-                'employe:id,matricule,nom,prenom,departement_id',
+                'employe:id,matricule,nom,prenom,departement_id,cin,date_naiss,adresse,date_embauche,cnss,nb_enfants,situation_fm',
                 'mutuelle:id,nom',
                 'regime:id,libelle,taux_couverture,cotisation_mensuelle,part_employeur_pct,part_employe_pct'
             ])->findOrFail($id);
@@ -399,7 +396,7 @@ class AffiliationMutuelleController extends Controller
             $employes = Employe::whereHas('affiliationsMutuelle', function($q) {
                     $q->where('statut', 'ACTIVE');
                 })
-                ->select('id', 'matricule', 'nom', 'prenom')
+                ->select('id', 'matricule', 'nom', 'prenom', 'cin', 'date_naiss', 'date_embauche', 'adresse', 'situation_fm')
                 ->orderBy('nom')
                 ->get();
 

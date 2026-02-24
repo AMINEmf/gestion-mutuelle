@@ -17,7 +17,6 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { jsPDF } from "jspdf";
 import "jspdf-autotable";
-import Swal from "sweetalert2";
 import Search from "../Acceuil/Search";
 import TablePagination from "@mui/material/TablePagination";
 import {LiaFileInvoiceSolid} from "react-icons/lia";
@@ -445,20 +444,12 @@ const DevisList = () => {
             }
 
             // Afficher un message de succès à l'utilisateur
-            Swal.fire({
-                icon: "success",
-                title: "Facture générée avec succès",
-                text: "La facture a été générée avec succès.",
-            });
+            showSuccessMessage("Succès", "Facture générée avec succès.");
         } catch (error) {
             console.error("Erreur lors de la génération de la facture :", error);
 
             // Afficher un message d'erreur à l'utilisateur
-            Swal.fire({
-                icon: "error",
-                title: "Erreur lors de la génération de la facture",
-                text: "Une erreur s'est produite lors de la génération de la facture. Veuillez réessayer.",
-            });
+            showErrorMessage("Erreur", "Une erreur s'est produite lors de la génération de la facture. Veuillez réessayer.");
         }
     };
 
@@ -660,20 +651,12 @@ const DevisList = () => {
             closeForm();
 
             // Afficher un message de succès à l'utilisateur
-            Swal.fire({
-                icon: "success",
-                title: "Devis ajoutée avec succès",
-                text: "La devise a été ajoutée avec succès.",
-            });
+            showSuccessMessage("Succès", "Devis ajouté avec succès.");
         } catch (error) {
             console.error("Erreur lors de la soumission des données :", error);
 
             // Afficher un message d'erreur à l'utilisateur
-            Swal.fire({
-                icon: "error",
-                title: "Erreur !",
-                text: "Erreur !",
-            });
+            showErrorMessage("Erreur", "Erreur lors de l'ajout du devis.");
         }
         closeForm();
     };
@@ -718,54 +701,26 @@ const DevisList = () => {
         }
     };
 
-    const handleDelete = (id) => {
-        Swal.fire({
-            title: "Êtes-vous sûr de vouloir supprimer ce devis ?",
-            showDenyButton: true,
-            showCancelButton: false,
-            confirmButtonText: "Oui",
-            denyButtonText: "Non",
-            customClass: {
-                actions: "my-actions",
-                cancelButton: "order-1 right-gap",
-                confirmButton: "order-2",
-                denyButton: "order-3",
-            },
-        }).then((result) => {
-            if (result.isConfirmed) {
-
-
-                // Ensuite, supprimer le devis
-                axios.delete(`http://localhost:8000/api/devises/${id}`)
-                    .then(() => {
-                        fetchDevis();
-                        Swal.fire({
-                            icon: "success",
-                            title: "Succès!",
-                            text: "Devis supprimé avec succès.",
-                        });
-                    })
-                    .catch((error) => {
-                        console.error("Erreur lors de la suppression du devis:", error);
-                        Swal.fire({
-                            icon: "error",
-                            title: "Erreur!",
-                            text: "Échec de la suppression du devis.",
-                        });
-                    })
-
-                    .catch((error) => {
-                        console.error("Erreur lors de la suppression de la facture:", error);
-                        Swal.fire({
-                            icon: "error",
-                            title: "Erreur!",
-                            text: "Échec de la suppression de la facture.",
-                        });
-                    });
-            } else {
-                console.log("Suppression annulée");
+    const handleDelete = async (id) => {
+        const result = await showConfirmDialog(
+            "Confirmer la suppression",
+            "Êtes-vous sûr de vouloir supprimer ce devis ?",
+            {
+                confirmButtonText: "Oui, supprimer",
+                cancelButtonText: "Annuler"
             }
-        });
+        );
+
+        if (result.isConfirmed) {
+            try {
+                await axios.delete(`http://localhost:8000/api/devises/${id}`);
+                fetchDevis();
+                showSuccessMessage("Succès", STANDARD_MESSAGES.DELETE_SUCCESS);
+            } catch (error) {
+                console.error("Erreur lors de la suppression du devis:", error);
+                showErrorMessage("Erreur", "Échec de la suppression du devis.");
+            }
+        }
     };
     const handleShowFormButtonClick = () => {
         if (formContainerStyle.right === "-100%") {

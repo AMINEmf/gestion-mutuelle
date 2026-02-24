@@ -7,7 +7,7 @@ import EmployeTable from "./EmployeTable";
 import { IoFolderOpenOutline } from "react-icons/io5";
 import { FaMinus } from "react-icons/fa6";
 import { FaPlus } from "react-icons/fa6";
-import Swal from 'sweetalert2';
+import { showSuccessMessage, showErrorMessage, showInfoMessage, showConfirmDialog, showErrorFromResponse, STANDARD_MESSAGES } from '../../utils/messageHelper';
 // import PageHeader from "../../ComponentHistorique/PageHeader";
 import { useHeader } from "../../Acceuil/HeaderContext";
 import { useOpen } from "../../Acceuil/OpenProvider";
@@ -87,11 +87,10 @@ function DepartementManager() {
     } catch (error) {
       console.error("Error fetching department hierarchy:", error);
       if (error.response && error.response.status === 403) {
-        Swal.fire({
-          icon: "error",
-          title: "Accès refusé",
-          text: "Vous n'avez pas l'autorisation de voir la hiérarchie des départements.",
-        });
+        showErrorMessage(
+          "Accès refusé",
+          "Vous n'avez pas l'autorisation de voir la hiérarchie des départements."
+        );
       }
     }
   };
@@ -121,11 +120,10 @@ function DepartementManager() {
       setError("An error occurred while fetching departments. Please try again.");
       setDepartements([]);
       if (error.response && error.response.status === 403) {
-        Swal.fire({
-          icon: "error",
-          title: "Accès refusé",
-          text: "Vous n'avez pas l'autorisation de voir la liste des départements.",
-        });
+        showErrorMessage(
+          "Accès refusé",
+          "Vous n'avez pas l'autorisation de voir la liste des départements."
+        );
       }
     } finally {
       setIsLoading(false);
@@ -229,25 +227,16 @@ function DepartementManager() {
       );
 
       setExpandedDepartements((prev) => ({ ...prev, [parentId]: true }));
-      Swal.fire({
-        icon: 'success',
-        title: 'Succès',
-        text: 'Sous-département ajouté avec succès',
-        confirmButtonText: 'OK',
-      });
+      showSuccessMessage('Succès', 'Sous-département ajouté avec succès');
 
       fetchDepartmentHierarchy();
     } catch (error) {
       console.error("Error adding sub-department:", error);
 
-      Swal.fire({
-        icon: 'error',
-        title: 'Erreur',
-        text: error.response
-          ? error.response.data.message
-          : "Une erreur s'est produite lors de l'ajout du sous-département. Veuillez réessayer.",
-        confirmButtonText: 'OK',
-      });
+      const errorMessage = error.response
+        ? error.response.data.message
+        : "Une erreur s'est produite lors de l'ajout du sous-département. Veuillez réessayer.";
+      showErrorMessage('Erreur', errorMessage);
     }
   };
 
@@ -527,16 +516,10 @@ function DepartementManager() {
   };
 
   const confirmDeleteDepartement = async (departementId) => {
-    const result = await Swal.fire({
-      title: 'Êtes-vous sûr?',
-      text: "Cette action supprimera ce département et potentiellement ses sous-départements!",
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonColor: '#3085d6',
-      cancelButtonColor: '#d33',
-      confirmButtonText: 'Oui, supprimer!',
-      cancelButtonText: 'Annuler'
-    });
+    const result = await showConfirmDialog(
+      'Êtes-vous sûr ?',
+      "Cette action supprimera ce département et potentiellement ses sous-départements !"
+    );
 
     if (result.isConfirmed) {
       try {
@@ -562,19 +545,17 @@ function DepartementManager() {
         setSelectedDepartementId(null);
         setSelectedDepartementName(null);
 
-        Swal.fire(
-          'Supprimé!',
-          'Le département a été supprimé avec succès.',
-          'success'
+        showSuccessMessage(
+          'Supprimé',
+          'Le département a été supprimé avec succès.'
         );
 
         fetchDepartmentHierarchy();
       } catch (error) {
         console.error("Erreur lors de la suppression du département:", error);
-        Swal.fire(
-          'Erreur!',
-          'Une erreur s\'est produite lors de la suppression du département.',
-          'error'
+        showErrorMessage(
+          'Erreur',
+          'Une erreur s\'est produite lors de la suppression du département.'
         );
       }
     }

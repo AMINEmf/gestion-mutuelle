@@ -28,9 +28,7 @@ import {
   faTrash,
 } from "@fortawesome/free-solid-svg-icons";
 import { Form } from "react-bootstrap";
-import Swal from "sweetalert2";
-import { border, style, textAlign } from "@mui/system";
-
+import { showSuccessMessage, showErrorMessage, showConfirmDialog, STANDARD_MESSAGES } from "../utils/messageHelper";
 const PreparationLogo = () => {
   const [clients, setClients] = useState([]);
   const [selectedClient, setSelectedClient] = useState(null);
@@ -670,18 +668,10 @@ console.log('id',id)
 
       setShowForm(false);
       setIsEditing(false); // Reset editing mode
-      Swal.fire({
-        icon: "success",
-        title: "Succès !",
-        text: "Succès.",
-      });
+      showSuccessMessage("Succès", STANDARD_MESSAGES.SAVE_SUCCESS);
     } catch (error) {
       console.error("Erreur lors de la soumission des données :", error);
-      Swal.fire({
-        icon: "error",
-        title: "Erreur !",
-        text: "Erreur lors de la soumission des données.",
-      });
+      showErrorMessage("Erreur", "Erreur lors de la soumission des données.");
     }
     closeForm();
   };
@@ -734,15 +724,14 @@ console.log(maxId);
   };
 
   const handleDeletePreparation = async (preparationId) => {
-    const result = await Swal.fire({
-      title: "Êtes-vous sûr?",
-      text: "Cette action est irréversible!",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#3085d6",
-      cancelButtonColor: "#d33",
-      confirmButtonText: "Oui, supprimer!",
-    });
+    const result = await showConfirmDialog(
+      "Confirmer la suppression",
+      "Êtes-vous sûr de vouloir supprimer cette préparation ? Cette action est irréversible.",
+      {
+        confirmButtonText: "Oui, supprimer",
+        cancelButtonText: "Annuler"
+      }
+    );
 
     if (result.isConfirmed) {
       try {
@@ -756,21 +745,13 @@ console.log(maxId);
           }
         );
         fetchData(); // Re-fetch data to update the UI
-        Swal.fire({
-          icon: "success",
-          title: "Succès !",
-          text: "Préparation supprimée avec succès.",
-        });
+        showSuccessMessage("Succès", STANDARD_MESSAGES.DELETE_SUCCESS);
       } catch (error) {
         console.error(
           "Erreur lors de la suppression de la préparation :",
           error
         );
-        Swal.fire({
-          icon: "error",
-          title: "Erreur !",
-          text: "Erreur lors de la suppression de la préparation.",
-        });
+        showErrorMessage("Erreur", "Erreur lors de la suppression de la préparation.");
       }
     }
   };

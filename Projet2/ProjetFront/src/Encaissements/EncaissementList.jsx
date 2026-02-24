@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import Swal from "sweetalert2";
+import { showSuccessMessage, showErrorMessage, showConfirmDialog, STANDARD_MESSAGES } from "../utils/messageHelper";
 import {Form, Button, Table} from "react-bootstrap";
 import "../style.css";
 import Navigation from "../Acceuil/Navigation";
@@ -196,46 +196,28 @@ const EncaissementList = () => {
     };
     //------------------------- encaissement Delete Selected ---------------------//
 
-    const handleDeleteSelected = () => {
-        Swal.fire({
-            title: 'Êtes-vous sûr de vouloir supprimer ?',
-            showDenyButton: true,
-            showCancelButton: false,
-            confirmButtonText: 'Oui',
-            denyButtonText: 'Non',
-            customClass: {
-                actions: 'my-actions',
-                cancelButton: 'order-1 right-gap',
-                confirmButton: 'order-2',
-                denyButton: 'order-3',
-            },
-        }).then((result) => {
-            if (result.isConfirmed) {
-                selectedItems.forEach((id) => {
-                    axios
-                        .delete(`http://localhost:8000/api/encaissements/${id}`)
-                        .then((response) => {
-                            fetchEncaissements();
-                            Swal.fire({
-                                icon: "success",
-                                title: "Succès!",
-                                text: 'encaissement supprimé avec succès.',
-                            });
-                        })
-                        .catch((error) => {
-                            console.error(
-                                "Erreur lors de la suppression du encaissement:", error);
-                            Swal.fire({
-                                icon: "error",
-                                title: "Erreur!",
-                                text: 'Échec de la suppression du encaissement.',
-                            });
-                        });
-                });
+    const handleDeleteSelected = async () => {
+        const result = await showConfirmDialog(
+            "Confirmer la suppression",
+            STANDARD_MESSAGES.DELETE_MULTIPLE_CONFIRM_TEXT,
+            {
+                confirmButtonText: "Oui, supprimer",
+                cancelButtonText: "Annuler"
             }
-        });
+        );
 
-        setSelectedItems([]);
+        if (result.isConfirmed) {
+            for (const id of selectedItems) {
+                try {
+                    await axios.delete(`http://localhost:8000/api/encaissements/${id}`);
+                } catch (error) {
+                    console.error("Erreur lors de la suppression de l'encaissement:", error);
+                }
+            }
+            fetchEncaissements();
+            showSuccessMessage("Succès", STANDARD_MESSAGES.DELETE_SUCCESS);
+            setSelectedItems([]);
+        }
     };
 
     const handleChange = (e) => {
@@ -526,57 +508,44 @@ const EncaissementList = () => {
     };
 
     //------------------------- encaissement Delete---------------------//
-    const handleDelete = (id) => {
-        Swal.fire({
-            title: 'Êtes-vous sûr de vouloir supprimer ce encaissement ?',
-            showDenyButton: true,
-            showCancelButton: false,
-            confirmButtonText: 'Oui',
-            denyButtonText: 'Non',
-            customClass: {
-                actions: 'my-actions',
-                cancelButton: 'order-1 right-gap',
-                confirmButton: 'order-2',
-                denyButton: 'order-3',
-            },
-        }).then((result) => {
-            if (result.isConfirmed) {
-                axios
-                    .delete(`http://localhost:8000/api/encaissements/${id}`)
-                    .then((response) => {
-                        if (response.data) {
-                            // Successful deletion
-                            fetchEncaissements();
-                            Swal.fire({
-                                icon: 'success',
-                                title: 'Succès!',
-                                text: "encaissement supprimé avec succès",
-                            });
-                        } else if (response.data.error) {
+    const handleDelete = async (id) => {
+        const result = await showConfirmDialog(
+            STANDARD_MESSAGES.DELETE_CONFIRM_TITLE,
+            STANDARD_MESSAGES.DELETE_CONFIRM_TEXT,
+            'Oui',
+            'Non'
+        );
+        
+        if (result.isConfirmed) {
+            try {
+                const response = await axios.delete(`http://localhost:8000/api/encaissements/${id}`);
+                if (response.data) {
+                    // Successful deletion
+                    fetchEncaissements();
+                    showSuccessMessage("Succès", STANDARD_MESSAGES.DELETE_SUCCESS);
+                } else if (response.data.error) {
                             // Error occurred
                             if (response.data.error.includes("Impossible de supprimer ou de mettre à jour une ligne parent : une contrainte de clé étrangère échoue")) {
                                 // Violated integrity constraint error
-                                Swal.fire({
-                                    icon: 'error',
-                                    title: 'Erreur!',
-                                    text: "Impossible de supprimer le encaissement car il a des produits associés.",
-                                });
+                                showErrorMessage(
+                                    "Erreur",
+                                    "Impossible de supprimer l'encaissement car il a des éléments associés."
+                                );
                             }
                         }
-                    })
-                    .catch((error) => {
-                        // Request error
-                        console.error("Erreur lors de la suppression du encaissement:", error);
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Erreur!',
-                            text: `Échec de la suppression du encaissement. Veuillez consulter la console pour plus d'informations.`,
-                        });
-                    });
-            } else {
-                console.log("Suppression annulée");
+                }
+            } catch (error) {
+                // Request error
+                console.error("Erreur lors de la suppression de l'encaissement:", error);
+                showErrorMessage(
+                    "Erreur",
+                    "Échec de la suppression de l'encaissement. Veuillez réessayer."
+                );
             }
-        });
+        } else {
+            console.log("Suppression annulée");
+        }
+    }
     }
     //------------------------- encaissement EDIT---------------------//
 
@@ -815,20 +784,12 @@ const EncaissementList = () => {
             closeForm();
 
             // Afficher un message de succès à l'utilisateur
-            Swal.fire({
-                icon: "success",
-                title: "Encaissement ajoutée avec succès",
-                text: "Encaissement a été ajoutée avec succès.",
-            });
+            showSuccessMessage("Succès", "Encaissement ajouté avec succès.");
         } catch (error) {
             console.error("Erreur lors de la soumission des données :", error);
 
             // Afficher un message d'erreur à l'utilisateur
-            Swal.fire({
-                icon: "error",
-                title: "Erreur !",
-                text: "Erreur !",
-            });
+            showErrorMessage("Erreur", "Erreur lors de l'ajout de l'encaissement.");
         }
         closeForm();
     };

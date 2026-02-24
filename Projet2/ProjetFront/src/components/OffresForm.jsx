@@ -3,6 +3,7 @@ import axios from 'axios';
 import './OffresForm.css';
 import { MdDeleteOutline } from "react-icons/md";
 import Select from "react-dropdown-select";
+import { showErrorMessage } from '../utils/messageHelper';
 
 function OffresForm({ form, handleChange, handleSubmit, handleOffre_detailChange, handleAddOffre_detail, handleRemoveOffre_detail, editing, setShowForm }) {
     const offreDetailsArray = Array.isArray(form.Offre_details) ? form.Offre_details : [];
@@ -20,11 +21,10 @@ function OffresForm({ form, handleChange, handleSubmit, handleOffre_detailChange
         } catch (error) {
             console.error("Error fetching products data:", error);
             if (error.response && error.response.status === 403) {
-                Swal.fire({
-                    icon: "error",
-                    title: "Accès refusé",
-                    text: "Vous n'avez pas l'autorisation de voir la liste des produits.",
-                });
+                showErrorMessage(
+                    "Accès refusé",
+                    "Vous n'avez pas l'autorisation de voir la liste des produits."
+                );
             }
         }
     };

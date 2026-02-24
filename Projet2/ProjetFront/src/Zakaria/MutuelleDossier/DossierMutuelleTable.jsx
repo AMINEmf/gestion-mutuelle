@@ -4,7 +4,6 @@ import { Eye } from "lucide-react";
 import { Button, Dropdown, Form } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFilter, faClose, faSliders } from "@fortawesome/free-solid-svg-icons";
-import Swal from "sweetalert2";
 import ExpandRAffiliationTable from "../AffiliationMutuelle/ExpandRAffiliationTable";
 import DossierMutuelleDetails from "./DossierMutuelleDetails";
 import AddMutuelleOperation from "./AddMutuelleOperation";
@@ -265,7 +264,7 @@ function DossierMutuelleTable({
             <div className="mb-3">
               <div className="d-flex align-items-center justify-content-between flex-wrap" style={{ gap: "16px" }}>
                 <div>
-                  <span className="h5 mb-1" style={{ color: "#3a8a90", fontWeight: "bold" }}>
+                  <span className="h5 mb-1" style={{ color: "#4b5563", fontWeight: "bold" }}>
                     <i className="fas fa-folder-open me-2"></i>
                     Dossiers Mutuelle
                   </span>
@@ -274,20 +273,18 @@ function DossierMutuelleTable({
                   </p>
                 </div>
                 <div className="d-flex gap-2 align-items-center">
-                  {departementId && (
-                    <FontAwesomeIcon
-                      onClick={() => handleFiltersToggle && handleFiltersToggle(!filtersVisible)}
-                      icon={filtersVisible ? faClose : faFilter}
-                      style={{
-                        cursor: "pointer",
-                        fontSize: "1.9rem",
-                        color: "#2c767c",
-                        marginTop: "1.3%",
-                        marginRight: "8px",
-                      }}
-                      title={filtersVisible ? "Fermer filtres" : "Ouvrir filtres"}
-                    />
-                  )}
+                  <FontAwesomeIcon
+                    onClick={() => handleFiltersToggle && handleFiltersToggle(!filtersVisible)}
+                    icon={filtersVisible ? faClose : faFilter}
+                    style={{
+                      cursor: "pointer",
+                      fontSize: "1.9rem",
+                      color: filtersVisible ? "green" : "#1a3c5e",
+                      marginTop: "1.3%",
+                      marginRight: "8px",
+                    }}
+                    title={filtersVisible ? "Fermer filtres" : "Ouvrir filtres"}
+                  />
 
                   <Button
                     onClick={() => {
@@ -333,8 +330,9 @@ function DossierMutuelleTable({
           </div>
 
           <AnimatePresence>
-            {filtersVisible && departementId && (
+            {filtersVisible && (
               <motion.div
+                key="dossier-filters-panel"
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
@@ -346,6 +344,8 @@ function DossierMutuelleTable({
                   gap: "12px",
                   padding: "16px 20px",
                   minHeight: 0,
+                  backgroundColor: "#f9fafb",
+                  zIndex: 5
                 }}
               >
                 <div
@@ -354,9 +354,7 @@ function DossierMutuelleTable({
                     display: "flex",
                     alignItems: "center",
                     gap: "8px",
-                    justifyContent: "center",
-                    marginLeft: "-8px",
-                    marginRight: "14%",
+                    marginBottom: "8px",
                   }}
                 >
                   <svg
@@ -377,16 +375,17 @@ function DossierMutuelleTable({
                   style={{
                     display: "flex",
                     alignItems: "center",
-                    gap: "1px",
-                    flexWrap: "wrap",
-                    justifyContent: "center",
+                    gap: "16px",
+                    flexWrap: "nowrap",
+                    justifyContent: "flex-start",
                     width: "100%",
+                    overflowX: "auto",
                   }}
                 >
 
                   {/* Statut */}
-                  <div style={{ display: "flex", alignItems: "center", margin: 0, marginRight: "46px" }}>
-                    <label className="filter-label" style={{ fontSize: "0.9rem", margin: 0, marginRight: "-44px", whiteSpace: "nowrap", minWidth: "auto", fontWeight: 600, color: "#2c3e50" }}>
+                  <div style={{ display: "flex", alignItems: "center" }}>
+                    <label className="filter-label" style={{ fontSize: "0.9rem", marginRight: "6px", fontWeight: 600, color: "#2c3e50" }}>
                       Statut
                     </label>
                     <select
@@ -404,8 +403,8 @@ function DossierMutuelleTable({
                   </div>
 
                   {/* N° Adhérent */}
-                  <div style={{ display: "flex", alignItems: "center", margin: 0, marginRight: "46px" }}>
-                    <label className="filter-label" style={{ fontSize: "0.9rem", margin: 0, marginRight: "-44px", whiteSpace: "nowrap", minWidth: "auto", fontWeight: 600, color: "#2c3e50" }}>
+                  <div style={{ display: "flex", alignItems: "center" }}>
+                    <label className="filter-label" style={{ fontSize: "0.9rem", marginRight: "6px", fontWeight: 600, color: "#2c3e50" }}>
                       N° Adhérent
                     </label>
                     <input
@@ -419,8 +418,8 @@ function DossierMutuelleTable({
                   </div>
 
                   {/* N° Dossier */}
-                  <div style={{ display: "flex", alignItems: "center", margin: 0, marginRight: "46px" }}>
-                    <label className="filter-label" style={{ fontSize: "0.9rem", margin: 0, marginRight: "-44px", whiteSpace: "nowrap", minWidth: "auto", fontWeight: 600, color: "#2c3e50" }}>
+                  <div style={{ display: "flex", alignItems: "center" }}>
+                    <label className="filter-label" style={{ fontSize: "0.9rem", marginRight: "6px", fontWeight: 600, color: "#2c3e50" }}>
                       N° Dossier
                     </label>
                     <input
@@ -433,23 +432,6 @@ function DossierMutuelleTable({
                     />
                   </div>
 
-                  {/* Reset Button */}
-                  <div style={{ marginTop: "12px", width: "100%", display: "flex", justifyContent: "flex-end" }}>
-                    <Button
-                      variant="outline-secondary"
-                      size="sm"
-                      onClick={() => {
-                        setFilterNom("");
-                        setFilterStatut("");
-                        setFilterNumeroAdherent("");
-                        setFilterNumeroDossier("");
-                      }}
-                      title="Réinitialiser les filtres"
-                    >
-                      <FontAwesomeIcon icon={faClose} className="me-1" />
-                      Réinitialiser
-                    </Button>
-                  </div>
                 </div>
               </motion.div>
             )}

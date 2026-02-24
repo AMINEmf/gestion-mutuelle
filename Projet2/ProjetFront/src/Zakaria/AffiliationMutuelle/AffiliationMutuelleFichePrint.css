@@ -26,20 +26,23 @@
 }
 
 .fiche-header {
+  position: relative;
   text-align: center;
   margin-bottom: 30px;
-  padding: 20px;
-  background: linear-gradient(135deg, rgba(0, 175, 170, 0.1), rgba(8, 145, 178, 0.1));
+  padding: 20px 20px 16px;
+  background: #fff;
   border-radius: 8px;
-  border-left: 4px solid #00afaa;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+  border-bottom: 3px solid #3a8a90;
 }
 
 .fiche-title {
-  color: #00afaa;
+  color: #2c3e50;
   font-weight: 700;
   margin: 0;
-  font-size: 1.5rem;
-  letter-spacing: 1px;
+  font-size: 1.4rem;
+  letter-spacing: 0.5px;
 }
 
 .fiche-subtitle {
@@ -47,6 +50,14 @@
   margin: 8px 0 0 0;
   font-size: 1.1rem;
   font-weight: 500;
+}
+
+.fiche-actions {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  display: flex;
+  gap: 10px;
 }
 
 .fiche-section {
@@ -58,19 +69,30 @@
 }
 
 .section-title {
-  color: #00afaa;
+  color: #fff;
+  background: linear-gradient(135deg, #2c767c 0%, #3a8a90 100%);
   font-weight: 600;
-  font-size: 1.1rem;
-  margin-bottom: 20px;
-  padding-bottom: 10px;
-  border-bottom: 2px solid rgba(0, 175, 170, 0.2);
+  font-size: 1rem;
+  margin: -20px -20px 20px -20px;
+  padding: 12px 16px;
+  border: none;
   display: flex;
   align-items: center;
 }
 
 .section-title i {
-  color: #00afaa;
+  color: #fff;
   margin-right: 8px;
+}
+
+.no-print {
+  display: inherit;
+}
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
 }
 
 .info-item {

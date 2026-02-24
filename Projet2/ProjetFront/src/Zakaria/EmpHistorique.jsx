@@ -10,6 +10,7 @@ import { useOpen } from "../Acceuil/OpenProvider";
 import PageHeader from "../ComponentHistorique/PageHeader";
 import DepartmentPanel from "../ComponentHistorique/DepartementPanel";
 import ExpandRTable from "./Employe/ExpandRTable";
+import { showSuccessMessage, showErrorMessage, showInfoMessage, showConfirmDialog, STANDARD_MESSAGES } from '../utils/messageHelper';
 import Swal from "sweetalert2";
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
@@ -210,40 +211,33 @@ function EmpHistorique() {
     setSelectAll(newSelectedItems.length === filteredData.length && filteredData.length > 0);
   };
 
-  const handleDeleteSelected = () => {
+  const handleDeleteSelected = async () => {
     if (selectedItems.length === 0) return;
 
-    Swal.fire({
-      title: 'Êtes-vous sûr?',
-      text: `Vous allez supprimer ${selectedItems.length} élément(s) sélectionné(s).`,
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonColor: '#3085d6',
-      cancelButtonColor: '#d33',
-      confirmButtonText: 'Oui, supprimer!',
-      cancelButtonText: 'Annuler'
-    }).then((result) => {
-      if (result.isConfirmed) {
-        // Filtrer les données pour exclure les éléments sélectionnés
-        const newFilteredData = filteredData.filter(item => 
-          !selectedItems.includes(item.id || `${item.employeeId}-${item.date_debut}-${item.date_fin}`)
-        );
-        const newEmployeeHistories = employeeHistories.filter(item => 
-          !selectedItems.includes(item.id || `${item.employeeId}-${item.date_debut}-${item.date_fin}`)
-        );
-        
-        setFilteredData(newFilteredData);
-        setEmployeeHistories(newEmployeeHistories);
-        setSelectedItems([]);
-        setSelectAll(false);
-        
-        Swal.fire(
-          'Supprimé!',
-          'Les éléments sélectionnés ont été supprimés.',
-          'success'
-        );
-      }
-    });
+    const result = await showConfirmDialog(
+      'Êtes-vous sûr ?',
+      `Vous allez supprimer ${selectedItems.length} élément(s) sélectionné(s).`
+    );
+    
+    if (result.isConfirmed) {
+      // Filtrer les données pour exclure les éléments sélectionnés
+      const newFilteredData = filteredData.filter(item => 
+        !selectedItems.includes(item.id || `${item.employeeId}-${item.date_debut}-${item.date_fin}`)
+      );
+      const newEmployeeHistories = employeeHistories.filter(item => 
+        !selectedItems.includes(item.id || `${item.employeeId}-${item.date_debut}-${item.date_fin}`)
+      );
+      
+      setFilteredData(newFilteredData);
+      setEmployeeHistories(newEmployeeHistories);
+      setSelectedItems([]);
+      setSelectAll(false);
+      
+      showSuccessMessage(
+        'Supprimé',
+        'Les éléments sélectionnés ont été supprimés.'
+      );
+    }
   };
 
   const handleChangePage = (newPage) => {
@@ -465,33 +459,24 @@ function EmpHistorique() {
 
   const handleDateSearch = async () => {
     if (!startDate || !endDate) {
-      Swal.fire({
-        icon: 'warning',
-        title: 'Avertissement',
-        text: 'Veuillez sélectionner une date de début et une date de fin',
-        confirmButtonText: 'OK'
-      });
+      showInfoMessage(
+        'Attention',
+        'Veuillez sélectionner une date de début et une date de fin'
+      );
       return;
     }
 
     const start = new Date(startDate);
     const end = new Date(endDate);
     if (isNaN(start.getTime()) || isNaN(end.getTime())) {
-      Swal.fire({
-        icon: 'error',
-        title: 'Erreur',
-        text: 'Format de date invalide',
-        confirmButtonText: 'OK'
-      });
+      showErrorMessage('Erreur', 'Format de date invalide');
       return;
     }
     if (start > end) {
-      Swal.fire({
-        icon: 'error',
-        title: 'Erreur',
-        text: 'La date de début doit être antérieure à la date de fin',
-        confirmButtonText: 'OK'
-      });
+      showErrorMessage(
+        'Erreur',
+        'La date de début doit être antérieure à la date de fin'
+      );
       return;
     }
 
@@ -545,21 +530,17 @@ function EmpHistorique() {
       setEmployeeHistories(sortedHistories);
 
       if (sortedHistories.length === 0) {
-        Swal.fire({
-          icon: 'info',
-          title: 'Information',
-          text: 'Aucun historique trouvé pour la période sélectionnée',
-          confirmButtonText: 'OK'
-        });
+        showInfoMessage(
+          'Information',
+          'Aucun historique trouvé pour la période sélectionnée'
+        );
       }
     } catch (error) {
       console.error("Error during date search:", error);
-      Swal.fire({
-        icon: 'error',
-        title: 'Erreur',
-        text: "Une erreur s'est produite lors de la recherche",
-        confirmButtonText: 'OK'
-      });
+      showErrorMessage(
+        'Erreur',
+        "Une erreur s'est produite lors de la recherche"
+      );
     } finally {
       setIsLoading(false);
     }

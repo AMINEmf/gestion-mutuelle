@@ -41,17 +41,30 @@ class MutuelleDashboardController extends Controller
         ];
 
         try {
-            // KPI counts
-            $totalAffiliations    = AffiliationMutuelle::count();
-            $activeAffiliations   = AffiliationMutuelle::where('statut', 'ACTIVE')->count();
-            $inactiveAffiliations = AffiliationMutuelle::where('statut', 'RESILIE')->count();
+            // Optimisation : On regroupe les counts en une seule requête par table
+            $affStats = AffiliationMutuelle::selectRaw("
+                count(*) as total,
+                count(case when statut = 'ACTIVE' then 1 end) as active,
+                count(case when statut = 'RESILIE' then 1 end) as inactive
+            ")->first();
 
-            // Operations status counts
-            $opsEnCours  = MutuelleOperation::where('statut', 'EN_COURS')->count();
-            $opsTerminee = MutuelleOperation::where('statut', 'TERMINEE')->count();
-            $opsAnnulee  = MutuelleOperation::where('statut', 'ANNULEE')->count();
-            $opsRembourse = MutuelleOperation::where('statut', 'REMBOURSEE')->count();
-            $opsTotal    = $opsEnCours + $opsTerminee + $opsAnnulee;
+            $totalAffiliations    = $affStats->total;
+            $activeAffiliations   = $affStats->active;
+            $inactiveAffiliations = $affStats->inactive;
+
+            // Optimisation : On regroupe les counts des opérations
+            $opStats = MutuelleOperation::selectRaw("
+                count(case when statut = 'EN_COURS' then 1 end) as en_cours,
+                count(case when statut = 'TERMINEE' then 1 end) as terminee,
+                count(case when statut = 'ANNULEE' then 1 end) as annulee,
+                count(case when statut = 'REMBOURSEE' then 1 end) as remboursee
+            ")->first();
+
+            $opsEnCours   = $opStats->en_cours;
+            $opsTerminee  = $opStats->terminee;
+            $opsAnnulee   = $opStats->annulee;
+            $opsRembourse = $opStats->remboursee;
+            $opsTotal     = $opsEnCours + $opsTerminee + $opsAnnulee;
 
             // Latest affiliations (5)
             $recentAffiliations = AffiliationMutuelle::with(['employe:id,nom,prenom,matricule'])

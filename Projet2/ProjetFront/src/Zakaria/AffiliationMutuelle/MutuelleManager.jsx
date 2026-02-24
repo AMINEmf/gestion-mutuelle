@@ -22,7 +22,7 @@ function MutuelleManager() {
   const affiliationTableRef = useRef(null);
 
   useEffect(() => {
-    setTitle("Gestion des Affiliations Mutuelles");
+    setTitle("Gestion des Affiliations Assurances");
     return () => {
       clearActions();
     };
@@ -47,6 +47,21 @@ function MutuelleManager() {
       setMutuelles(JSON.parse(mutuellesFromStorage));
     }
     fetchMutuelles();
+  }, [fetchMutuelles]);
+
+  // Réception des mises à jour (ajout/édition) sans refresh
+  useEffect(() => {
+    const handleMutuellesUpdated = (event) => {
+      if (Array.isArray(event?.detail)) {
+        setMutuelles(event.detail);
+        localStorage.setItem('mutuelles', JSON.stringify(event.detail));
+      } else {
+        fetchMutuelles();
+      }
+    };
+
+    window.addEventListener('mutuelles:updated', handleMutuellesUpdated);
+    return () => window.removeEventListener('mutuelles:updated', handleMutuellesUpdated);
   }, [fetchMutuelles]);
 
   const handleMutuelleClick = (mutuelleId, mutuelleName) => {

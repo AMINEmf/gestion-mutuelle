@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import AbsenceForm from './AbsenceForm';
 import axios from 'axios';
-import Swal from "sweetalert2";
+import { showSuccessMessage, showErrorMessage, showInfoMessage, showConfirmDialog, showErrorFromResponse, STANDARD_MESSAGES } from '../utils/messageHelper';
 import { Button, Card, Tab, Tabs, Table, Modal, Form } from 'react-bootstrap';
 import { Trash2, Edit2, Plus, Check, X } from 'lucide-react';
 import {
@@ -357,11 +357,7 @@ const Calendrie = () => {
     const handleEditGroup = async (groupId) => {
         try {
             if (!editingGroupData.nom.trim()) {
-                Swal.fire({
-                    icon: "warning",
-                    title: "Attention!",
-                    text: "Le nom du groupe ne peut pas être vide.",
-                });
+                showInfoMessage("Attention", "Le nom du groupe ne peut pas être vide.");
                 return;
             }
             const response = await axios.put(`http://127.0.0.1:8000/api/calendrie/${groupId}`, {
@@ -378,29 +374,20 @@ const Calendrie = () => {
             setEditingGroupId(null);
             setEditingGroupData({ id: null, nom: '', periode: '' });
             await refetchGroups(); 
-            Swal.fire({
-                icon: "success",
-                title: "Succès!",
-                text: "Groupe modifié avec succès.",
-            });
+            showSuccessMessage("Succès", "Groupe modifié avec succès.");
         } catch (error) {
             console.error("Error editing group:", error);
-            Swal.fire({
-                icon: "error",
-                title: "Erreur!",
-                text: "Échec de la modification du groupe.",
-            });
+            showErrorMessage("Erreur", "Échec de la modification du groupe.");
         }
     };
     const handleDeleteSelectedZones = async () => {
         if (selectedZones.length === 0) return;
-        Swal.fire({
-            title: `Êtes-vous sûr de vouloir supprimer ${selectedZones.length} zone(s)?`,
-            showDenyButton: true,
-            confirmButtonText: "Oui",
-            denyButtonText: "Non",
-        }).then(async (result) => {
-            if (result.isConfirmed) {
+        const result = await showConfirmDialog(
+            `Êtes-vous sûr de vouloir supprimer ${selectedZones.length} zone(s) ?`,
+            STANDARD_MESSAGES.DELETE_CONFIRM_TEXT
+        );
+        
+        if (result.isConfirmed) {
                 try {
                     await Promise.all(
                         selectedZones.map((id) =>
@@ -411,47 +398,34 @@ const Calendrie = () => {
                         prevZones.filter((zone) => !selectedZones.includes(zone.id))
                     );
                     setSelectedZones([]);
-                    Swal.fire({
-                        icon: "success",
-                        title: "Succès!",
-                        text: `${selectedZones.length} zone(s) supprimée(s) avec succès.`,
-                    });
+                    showSuccessMessage("Succès", `${selectedZones.length} zone(s) supprimée(s) avec succès.`);
                 } catch (error) {
                     if (error.response && error.response.status === 500) {
-                        Swal.fire({
-                            icon: "error",
-                            title: "Erreur!",
-                            text: "Impossible de supprimer ces zones car elles sont utilisées dans d'autres interfaces.",
-                        });
+                        showErrorMessage(
+                            "Erreur",
+                            "Impossible de supprimer ces zones car elles sont utilisées dans d'autres interfaces."
+                        );
                     } else {
                         console.error("Erreur lors de la suppression des zones:", error);
-                        Swal.fire({
-                            icon: "error",
-                            title: "Erreur!",
-                            text: "Échec de la suppression des zones.",
-                        });
+                        showErrorMessage("Erreur", "Échec de la suppression des zones.");
                     }
                 }
-            } else {
-                console.log("Suppression annulée");
             }
-        });
+        };
     };
     const handleDeleteSelectedGroups = async () => {
         if (selectedGroups.length === 0) return;
-        Swal.fire({
-            title: `Êtes-vous sûr de vouloir supprimer ${selectedGroups.length} groupe(s)?`,
-            showDenyButton: true,
-            confirmButtonText: "Oui",
-            denyButtonText: "Non",
-        }).then(async (result) => {
-            if (result.isConfirmed) {
-                try {
-                    await Promise.all(
-                        selectedGroups.map((id) =>
-                            axios.delete(`http://127.0.0.1:8000/api/group-motifs/${id}`)
-                        )
-                    );
+        const result = await showConfirmDialog(
+            `Supprimer ${selectedGroups.length} groupe(s)`,
+            STANDARD_MESSAGES.DELETE_MULTIPLE_CONFIRM_TEXT
+        );
+        if (result.isConfirmed) {
+            try {
+                await Promise.all(
+                    selectedGroups.map((id) =>
+                        axios.delete(`http://127.0.0.1:8000/api/group-motifs/${id}`)
+                    )
+                );
 
                     setGroups((prevGroups) =>
                         prevGroups.filter((group) => !selectedGroups.includes(group.id))
@@ -459,29 +433,20 @@ const Calendrie = () => {
 
                     setSelectedGroups([]);
 
-                    Swal.fire({
-                        icon: "success",
-                        title: "Succès!",
-                        text: `${selectedGroups.length} groupe(s) supprimé(s) avec succès.`,
-                    });
+                    showSuccessMessage("Succès", `${selectedGroups.length} groupe(s) supprimé(s) avec succès.`);
                 } catch (error) {
                     if (error.response && error.response.status === 500) {
-                        Swal.fire({
-                            icon: "error",
-                            title: "Erreur!",
-                            text: "Impossible de supprimer ces groupes car ils sont utilisés dans d'autres interfaces.",
-                        });
+                        showErrorMessage(
+                            "Erreur",
+                            "Impossible de supprimer ces groupes car ils sont utilisés dans d'autres interfaces."
+                        );
                     } else {
                         console.error("Erreur lors de la suppression des groupes:", error);
-                        Swal.fire({
-                            icon: "error",
-                            title: "Erreur!",
-                            text: "Échec de la suppression des groupes.",
-                        });
+                        showErrorMessage("Erreur", "Échec de la suppression des groupes.");
                     }
                 }
             }
-        });
+        };
     };
     console.log("selectedGroup", selectedGroup, horaires)
     // const toggleGroupSelection = (id) => {
@@ -516,10 +481,10 @@ const Calendrie = () => {
                         horaireData
                     );
                 }));
-                Swal.fire("Succès!", `${selectedRows.length} horaires ont été mis à jour avec succès!`, "success");
+                showSuccessMessage("Succès", `${selectedRows.length} horaires ont été mis à jour avec succès !`);
             } else {
                 if (!formData.groupe_id) {
-                    Swal.fire("Erreur!", "Veuillez sélectionner un horaire valide.", "error");
+                    showErrorMessage("Erreur", "Veuillez sélectionner un horaire valide.");
                     return;
                 }
                 console.log("Submitting data:", {
@@ -553,7 +518,7 @@ const Calendrie = () => {
 
     
                 }
-                Swal.fire("Succès!", "Calendrie ajouté avec succès!", "success");
+                showSuccessMessage("Succès", "Calendrie ajouté avec succès !");
             }
             refetchGroups();
             fetchHoraires();
@@ -572,7 +537,7 @@ const Calendrie = () => {
             const errorMessage = error.response?.data?.errors?.groupe_id?.[0] ||
                 error.response?.data?.message ||
                 "Échec de l'enregistrement!";
-            Swal.fire("Erreur!", errorMessage, "error");
+            showErrorMessage("Erreur", errorMessage);
         }
     };
 
@@ -733,32 +698,18 @@ const Calendrie = () => {
     
     const handleDelete = async (id) => {
         try {
-            const result = await Swal.fire({
-                title: "Êtes-vous sûr?",
-                text: "Cette action est irréversible!",
-                icon: "warning",
-                showCancelButton: true,
-                confirmButtonColor: "#3085d6",
-                cancelButtonColor: "#d33",
-                confirmButtonText: "Oui, supprimer!",
-                cancelButtonText: "Annuler"
-            });
+            const result = await showConfirmDialog(
+                STANDARD_MESSAGES.DELETE_CONFIRM_TITLE,
+                "Cette action est irréversible !"
+            );
             if (result.isConfirmed) {
                 await axios.delete(`http://127.0.0.1:8000/api/details-calendrie/${id}`);
                 setHoraires(horaires.filter(horaire => horaire.id !== id));
-                Swal.fire({
-                    icon: "success",
-                    title: "Supprimé!",
-                    text: "L'horaire a été supprimé avec succès.",
-                });
+                showSuccessMessage("Supprimé", "L'horaire a été supprimé avec succès.");
             }
         } catch (error) {
             console.error("Error deleting horaire:", error);
-            Swal.fire({
-                icon: "error",
-                title: "Erreur!",
-                text: "Une erreur est survenue lors de la suppression.",
-            });
+            showErrorMessage("Erreur", "Une erreur est survenue lors de la suppression.");
         }
         await fetchHoraires(selectedGroup?.id);
     };
@@ -779,11 +730,10 @@ const Calendrie = () => {
     const handleAddGroupe = async () => {
         try {
             if (!newCategory.categorie) {
-                Swal.fire({
-                    icon: "warning",
-                    title: "Attention!",
-                    text: "Veuillez entrer un nom de groupe.",
-                });
+                showInfoMessage(
+                    "Champ requis",
+                    "Veuillez entrer un nom de groupe."
+                );
                 return;
             }
             const response = await axios.post("http://127.0.0.1:8000/api/calendrie", {
@@ -791,35 +741,24 @@ const Calendrie = () => {
             });
             // setGroups(prevGroups => [...prevGroups, response.data]);
             setNewCategory({ categorie: "", period: "" });
-            Swal.fire({
-                icon: "success",
-                title: "Succès!",
-                text: "Groupe ajouté avec succès.",
-            });
+            showSuccessMessage(
+                "Succès",
+                "Groupe ajouté avec succès."
+            );
             setShowAddGroupe(false);
             await refetchGroups();
         } catch (error) {
             console.error("Erreur lors de l'ajout:", error);
-            Swal.fire({
-                icon: "error",
-                title: "Erreur!",
-                text: "Échec de l'ajout du groupe.",
-            });
+            showErrorFromResponse(error, "Erreur d'ajout");
         }
     };
 
     const handleDeleteGroupe = async (id) => {
         try {
-            const result = await Swal.fire({
-                title: "Êtes-vous sûr?",
-                text: "Cette action est irréversible!",
-                icon: "warning",
-                showCancelButton: true,
-                confirmButtonColor: "#3085d6",
-                cancelButtonColor: "#d33",
-                confirmButtonText: "Oui, supprimer!",
-                cancelButtonText: "Annuler"
-            });
+            const result = await showConfirmDialog(
+                STANDARD_MESSAGES.DELETE_CONFIRM_TITLE,
+                "Cette action est irréversible !"
+            );
             if (result.isConfirmed) {
                 const gdhhhs = await axios.delete(`http://127.0.0.1:8000/api/calendrie/${id}`);
                 console.log('fds', gdhhhs)
@@ -830,19 +769,11 @@ const Calendrie = () => {
                     setSelectedGroup(null);
                 }
                 await refetchGroups(); // Refresh the groups list
-                Swal.fire({
-                    icon: "success",
-                    title: "Succès!",
-                    text: "Groupe supprimé avec succès.",
-                });
+                showSuccessMessage("Succès", "Groupe supprimé avec succès.");
             }
         } catch (error) {
             console.error("Error deleting group:", error);
-            Swal.fire({
-                icon: "error",
-                title: "Erreur!",
-                text: "Une erreur est survenue lors de la suppression.",
-            });
+            showErrorMessage("Erreur", "Une erreur est survenue lors de la suppression.");
         }
     };
 
@@ -860,36 +791,22 @@ const Calendrie = () => {
     };
     const handleMultipleDelete = async () => {
         try {
-            const result = await Swal.fire({
-                title: "Êtes-vous sûr?",
-                text: `Voulez-vous supprimer ${selectedRows.length} horaires?`,
-                icon: "warning",
-                showCancelButton: true,
-                confirmButtonColor: "#3085d6",
-                cancelButtonColor: "#d33",
-                confirmButtonText: "Oui, supprimer!",
-                cancelButtonText: "Annuler"
-            });
+            const result = await showConfirmDialog(
+                STANDARD_MESSAGES.DELETE_CONFIRM_TITLE,
+                `Voulez-vous supprimer ${selectedRows.length} horaires ?`
+            );
             if (result.isConfirmed) {
                 await Promise.all(selectedRows.map(id =>
                     axios.delete(`http://127.0.0.1:8000/api/details-calendrie/${id}`)
                 ));
                 setHoraires(prev => prev.filter(horaire => !selectedRows.includes(horaire.id)));
                 setSelectedRows([]);
-                Swal.fire({
-                    icon: "success",
-                    title: "Supprimés!",
-                    text: "Les horaires ont été supprimés avec succès.",
-                });
+                showSuccessMessage("Supprimés", "Les horaires ont été supprimés avec succès.");
                 await fetchHoraires(selectedGroup?.id);
             }
         } catch (error) {
             console.error("Error deleting horaires:", error);
-            Swal.fire({
-                icon: "error",
-                title: "Erreur!",
-                text: "Une erreur est survenue lors de la suppression.",
-            });
+            showErrorMessage("Erreur", "Une erreur est survenue lors de la suppression.");
         }
     };
     const handleMultipleModify = () => {

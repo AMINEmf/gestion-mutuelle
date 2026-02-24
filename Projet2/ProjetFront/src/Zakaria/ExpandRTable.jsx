@@ -58,7 +58,7 @@ const ExpandRTable = ({
     const handleResize = () => {
       setIsMobile(window.innerWidth < 768);
     };
-    
+
     window.addEventListener('resize', handleResize);
     return () => {
       window.removeEventListener('resize', handleResize);
@@ -68,7 +68,7 @@ const ExpandRTable = ({
   const filterData = (item, searchTerm) => {
     if (!searchTerm) return true;
     const term = searchTerm.toLowerCase();
-    
+
     return columns.some(column => {
       const value = item[column.key];
       if (!value) return false;
@@ -81,7 +81,7 @@ const ExpandRTable = ({
   };
 
   const handleMuiChangeRowsPerPage = (event) => {
-    handleChangeRowsPerPage({ target: { value: parseInt(event.target.value, 10) }});
+    handleChangeRowsPerPage({ target: { value: parseInt(event.target.value, 10) } });
   };
 
   const renderImageCell = (item, column) => {
@@ -89,24 +89,24 @@ const ExpandRTable = ({
       const imgSrc = item[column.key];
       if (imgSrc) {
         return (
-          <img 
-            src={imgSrc} 
-            alt={item.designation || item.name || 'Image'} 
+          <img
+            src={imgSrc}
+            alt={item.designation || item.name || 'Image'}
             className="w-16 h-16 object-cover rounded"
           />
         );
       }
       return null;
     }
-    
+
     const cellContent = item[column.key] || '';
-    
-    return column.render 
-      ? column.render(item, searchTerm, toggleRowExpansion) 
-      : (highlightText 
-          ? <span dangerouslySetInnerHTML={{ __html: highlightText(cellContent, searchTerm) }} /> 
-          : cellContent
-        );
+
+    return column.render
+      ? column.render(item, searchTerm, toggleRowExpansion)
+      : (highlightText
+        ? <span dangerouslySetInnerHTML={{ __html: highlightText(cellContent, searchTerm) }} />
+        : cellContent
+      );
   };
 
   const filteredItems = displayData.filter(item => filterData(item, searchTerm));
@@ -127,10 +127,10 @@ const ExpandRTable = ({
 
   const headerCellStyles = {
     gridTemplateColumns: 'repeat(9, 1fr)',
-    gap: '1rem',                         
-    paddingBottom: '0.5rem',             
+    gap: '1rem',
+    paddingBottom: '0.5rem',
     borderBottom: 'none',
-    fontSize: '0.875rem',      
+    fontSize: '0.875rem',
     fontWeight: 600,
     color: '#4b5563 ',
     backgroundColor: '#f9fafc',
@@ -139,12 +139,12 @@ const ExpandRTable = ({
     textTransform: 'uppercase',
     letterSpacing: '0.5px',
   };
-  
+
   const tableCellStyles = {
     padding: '0.75rem 1rem',
-    borderBottom: '1px solid #e5e7eb',    
-    paddingTop: '0.5rem',                 
-    paddingBottom: '0.75rem',             
+    borderBottom: '1px solid #e5e7eb',
+    paddingTop: '0.5rem',
+    paddingBottom: '0.75rem',
     alignItems: 'center',
     color: '#111827',
   };
@@ -159,8 +159,8 @@ const ExpandRTable = ({
 
   return (
     <div className="overflow-hidden">
-      <TableContainer 
-        component={Paper} 
+      <TableContainer
+        component={Paper}
         sx={tableContainerStyles}
       >
         <Table sx={tableStyles} aria-label="table de données" stickyHeader>
@@ -175,17 +175,17 @@ const ExpandRTable = ({
                   sx={{ padding: '0', borderBottom: 'none' }}
                 />
               </TableCell>
-              
+
               {columns.map((column) => (
-                <TableCell 
-                  key={column.key} 
+                <TableCell
+                  key={column.key}
                   sx={headerCellStyles}
                   align={column.key === 'prix' || column.key === 'price' ? 'right' : 'left'}
                 >
                   {column.label}
                 </TableCell>
               ))}
-              
+
               {hasActions && (
                 <TableCell align="right" sx={headerCellStyles}>
                   Actions
@@ -226,9 +226,9 @@ const ExpandRTable = ({
                         sx={{ padding: '0', borderBottom: 'none' }}
                       />
                     </TableCell>
-                    
+
                     {columns.map((column) => (
-                      <TableCell 
+                      <TableCell
                         key={`${item.id}-${column.key}`}
                         align={column.key === 'prix' || column.key === 'price' ? 'right' : 'left'}
                         sx={tableCellStyles}
@@ -236,7 +236,7 @@ const ExpandRTable = ({
                         {renderImageCell(item, column)}
                       </TableCell>
                     ))}
-                    
+
                     {hasActions && (
                       <TableCell align="right" sx={tableCellStyles}>
                         <div className="flex justify-end space-x-3">
@@ -287,13 +287,13 @@ const ExpandRTable = ({
                       </TableCell>
                     )}
                   </TableRow>
-                  
+
                   {/* Expanded row */}
                   {isRowExpanded(item.id) && (
                     <TableRow>
-                      <TableCell 
+                      <TableCell
                         colSpan={columns.length + (hasActions ? 1 : 0) + 1}
-                        sx={{ padding: '16px', backgroundColor: '#f9fafb' }}
+                        sx={{ padding: '4px 16px 16px 16px', backgroundColor: '#f9fafb' }}
                       >
                         {renderExpandedRow(item)}
                       </TableCell>
@@ -301,12 +301,12 @@ const ExpandRTable = ({
                   )}
                 </React.Fragment>
               ))}
-              
+
             {filteredItems.length === 0 && (
               <TableRow>
-                <TableCell 
+                <TableCell
                   colSpan={columns.length + (hasActions ? 1 : 0) + 1}
-                  align="center" 
+                  align="center"
                   sx={{ padding: '24px', color: '#6b7280' }}
                 >
                   Aucune donnée disponible
@@ -316,42 +316,42 @@ const ExpandRTable = ({
           </TableBody>
         </Table>
       </TableContainer>
-      
+
       {/* Updated pagination section matching TableContainer's style */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: '10px' }}>
-        <div className="pagination-container" style={{ 
-          display: 'flex', 
-          alignItems: 'center', 
+        <div className="pagination-container" style={{
+          display: 'flex',
+          alignItems: 'center',
           justifyContent: 'space-between',
           margin: '20px 0'
         }}>
-        <Button
-          variant="contained"
-          color="error"
-          onClick={handleDeleteSelected}
-          disabled={!selectedItems || selectedItems.length === 0}
-          startIcon={<FontAwesomeIcon icon={faTrash} />}
-          sx={{
-            backgroundColor: '#ef4444',
-            '&:hover': {
-              backgroundColor: '#dc2626',
-            },
-            '&.Mui-disabled': {
-              backgroundColor: '#f1f5f9',
-              color: '#94a3b8'
-            }
-          }}
-        >
-          SUPPRIMER SELECTION
-        </Button>
-          
+          <Button
+            variant="contained"
+            color="error"
+            onClick={handleDeleteSelected}
+            disabled={!selectedItems || selectedItems.length === 0}
+            startIcon={<FontAwesomeIcon icon={faTrash} />}
+            sx={{
+              backgroundColor: '#ef4444',
+              '&:hover': {
+                backgroundColor: '#dc2626',
+              },
+              '&.Mui-disabled': {
+                backgroundColor: '#f1f5f9',
+                color: '#94a3b8'
+              }
+            }}
+          >
+            SUPPRIMER SELECTION
+          </Button>
+
 
 
         </div>
-        
-        <div className="pagination-container" style={{ 
-          display: 'flex', 
-          alignItems: 'center', 
+
+        <div className="pagination-container" style={{
+          display: 'flex',
+          alignItems: 'center',
           justifyContent: 'space-between',
           margin: '20px 0'
         }}>

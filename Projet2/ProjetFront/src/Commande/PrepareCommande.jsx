@@ -22,7 +22,7 @@ import { jsPDF } from "jspdf";
 import * as XLSX from "xlsx";
 import Select from "react-dropdown-select";
 import "jspdf-autotable";
-import Swal from "sweetalert2";
+import { showSuccessMessage, showErrorMessage, showConfirmDialog, STANDARD_MESSAGES } from "../utils/messageHelper";
 import Search from "../Acceuil/Search";
 const CommandeList = () => {
   const [rowsPerPage, setRowsPerPage] = useState(5);
@@ -367,18 +367,10 @@ const CommandeList = () => {
       });
 
       setShowForm(false);
-      Swal.fire({
-        icon: "success",
-        title: "Succès !",
-        text: "Succès.",
-      });
+      showSuccessMessage("Succès", STANDARD_MESSAGES.SAVE_SUCCESS);
     } catch (error) {
       console.error("Erreur lors de la soumission des données :", error);
-      Swal.fire({
-        icon: "error",
-        title: "Erreur !",
-        text: "Erreur lors de la soumission des données.",
-      });
+      showErrorMessage("Erreur", "Erreur lors de la soumission des données.");
     }
     closeForm();
   };
@@ -569,43 +561,26 @@ const CommandeList = () => {
     }
   };
 
-  const handleDelete = (id) => {
-    Swal.fire({
-      title: "Êtes-vous sûr de vouloir supprimer ce Commandes ?",
-      showDenyButton: true,
-      showCancelButton: false,
-      confirmButtonText: "Oui",
-      denyButtonText: "Non",
-      customClass: {
-        actions: "my-actions",
-        cancelButton: "order-1 right-gap",
-        confirmButton: "order-2",
-        denyButton: "order-3",
-      },
-    }).then((result) => {
-      if (result.isConfirmed) {
-        axios
-          .delete(`http://localhost:8000/api/commandes/${id}`)
-          .then(() => {
-            Swal.fire({
-              icon: "success",
-              title: "Succès!",
-              text: "Commandes supprimé avec succès.",
-            });
-            fetchData();
-          })
-          .catch((error) => {
-            console.error("Erreur lors de la suppression du Commandes:", error);
-            Swal.fire({
-              icon: "error",
-              title: "Erreur!",
-              text: "Échec de la suppression du Commandes.",
-            });
-          });
-      } else {
-        console.log("Suppression annulée");
+  const handleDelete = async (id) => {
+    const result = await showConfirmDialog(
+      "Confirmer la suppression",
+      "Êtes-vous sûr de vouloir supprimer cette commande ?",
+      {
+        confirmButtonText: "Oui, supprimer",
+        cancelButtonText: "Non, annuler"
       }
-    });
+    );
+
+    if (result.isConfirmed) {
+      try {
+        await axios.delete(`http://localhost:8000/api/commandes/${id}`);
+        showSuccessMessage("Succès", STANDARD_MESSAGES.DELETE_SUCCESS);
+        fetchData();
+      } catch (error) {
+        console.error("Erreur lors de la suppression de la commande:", error);
+        showErrorMessage("Erreur", "Échec de la suppression de la commande.");
+      }
+    }
   };
 
   const handleShowFormButtonClick = () => {

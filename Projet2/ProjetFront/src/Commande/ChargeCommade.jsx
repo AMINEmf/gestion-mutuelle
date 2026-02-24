@@ -1,8 +1,6 @@
-import { toast, ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import Swal from "sweetalert2";
+import { showSuccessMessage, showErrorMessage, showConfirmDialog, STANDARD_MESSAGES } from "../utils/messageHelper";
 import { Form, Button } from "react-bootstrap";
 import "../style.css";
 import Navigation from "../Acceuil/Navigation";
@@ -239,49 +237,29 @@ const ChargeCommande = () => {
   };
   //------------------------- chargementCommande Delete Selected ---------------------//
 
-  const handleDeleteSelected = () => {
-    Swal.fire({
-      title: "Êtes-vous sûr de vouloir supprimer ?",
-      showDenyButton: true,
-      showCancelButton: false,
-      confirmButtonText: "Oui",
-      denyButtonText: "Non",
-      customClass: {
-        actions: "my-actions",
-        cancelButton: "order-1 right-gap",
-        confirmButton: "order-2",
-        denyButton: "order-3",
-      },
-    }).then((result) => {
-      if (result.isConfirmed) {
-        selectedItems.forEach((id) => {
-          axios
-            .delete(`http://localhost:8000/api/chargementCommandes/${id}`)
-            .then((response) => {
-              fetchChargementCommandes();
-              Swal.fire({
-                icon: "success",
-                title: "Succès!",
-                text: "chargementCommande supprimé avec succès.",
-              });
-            })
-            .catch((error) => {
-              console.error(
-                "Erreur lors de la suppression du chargementCommande:",
-                error
-              );
-              Swal.fire({
-                icon: "error",
-                title: "Erreur!",
-                text: "Échec de la suppression du chargementCommande.",
-              });
-            });
-        });
-      }
-    });
+    const handleDeleteSelected = async () => {
+        const result = await showConfirmDialog(
+            "Confirmer la suppression",
+            STANDARD_MESSAGES.DELETE_MULTIPLE_CONFIRM_TEXT,
+            {
+                confirmButtonText: "Oui, supprimer",
+                cancelButtonText: "Annuler"
+            }
+        );
 
-    setSelectedItems([]);
-  };
+        if (result.isConfirmed) {
+            for (const id of selectedItems) {
+                try {
+                    await axios.delete(`http://localhost:8000/api/chargementCommandes/${id}`);
+                } catch (error) {
+                    console.error("Erreur lors de la suppression du chargement:", error);
+                }
+            }
+            fetchChargementCommandes();
+            showSuccessMessage("Succès", STANDARD_MESSAGES.DELETE_SUCCESS);
+            setSelectedItems([]);
+        }
+    };
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -525,33 +503,22 @@ const ChargeCommande = () => {
   };
 
   //------------------------- chargementCommande Delete---------------------//
-  const handleDelete = (id) => {
-    Swal.fire({
-      title: "Êtes-vous sûr de vouloir supprimer ce chargementCommande ?",
-      showDenyButton: true,
-      showCancelButton: false,
-      confirmButtonText: "Oui",
-      denyButtonText: "Non",
-      customClass: {
-        actions: "my-actions",
-        cancelButton: "order-1 right-gap",
-        confirmButton: "order-2",
-        denyButton: "order-3",
-      },
-    }).then((result) => {
-      if (result.isConfirmed) {
-        axios
-          .delete(`http://localhost:8000/api/chargementCommandes/${id}`)
-          .then((response) => {
-            if (response.data.message) {
-              // Successful deletion
-              fetchChargementCommandes();
-              Swal.fire({
-                icon: "success",
-                title: "Succès!",
-                text: "chargementCommande supprimé avec succès",
-              });
-            } else if (response.data.error) {
+  const handleDelete = async (id) => {
+    const result = await showConfirmDialog(
+      STANDARD_MESSAGES.DELETE_CONFIRM_TITLE,
+      STANDARD_MESSAGES.DELETE_CONFIRM_TEXT,
+      "Oui",
+      "Non"
+    );
+    
+    if (result.isConfirmed) {
+      try {
+        const response = await axios.delete(`http://localhost:8000/api/chargementCommandes/${id}`);
+        if (response.data.message) {
+          // Successful deletion
+          fetchChargementCommandes();
+          showSuccessMessage("Succès", STANDARD_MESSAGES.DELETE_SUCCESS);
+        } else if (response.data.error) {
               // Error occurred
               if (
                 response.data.error.includes(
@@ -559,30 +526,26 @@ const ChargeCommande = () => {
                 )
               ) {
                 // Violated integrity constraint error
-                Swal.fire({
-                  icon: "error",
-                  title: "Erreur!",
-                  text: "Impossible de supprimer le chargementCommande car il a des produits associés.",
-                });
+                showErrorMessage(
+                  "Erreur",
+                  "Impossible de supprimer le chargement car il a des éléments associés."
+                );
               }
             }
-          })
-          .catch((error) => {
-            // Request error
-            console.error(
-              "Erreur lors de la suppression du chargementCommande:",
-              error
-            );
-            Swal.fire({
-              icon: "error",
-              title: "Erreur!",
-              text: `Échec de la suppression du chargementCommande. Veuillez consulter la console pour plus d'informations.`,
-            });
-          });
-      } else {
-        console.log("Suppression annulée");
+      } catch (error) {
+        // Request error
+        console.error(
+          "Erreur lors de la suppression du chargement:",
+          error
+        );
+        showErrorMessage(
+          "Erreur",
+          "Échec de la suppression du chargement. Veuillez réessayer."
+        );
       }
-    });
+    } else {
+      console.log("Suppression annulée");
+    }
   };
   //------------------------- chargementCommande EDIT---------------------//
 
@@ -631,53 +594,53 @@ const ChargeCommande = () => {
   const handleDateLivraisonReeleFilterChange = (e) => {
     setDateLivraisonReeleFilter(e.target.value);
   };
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const url = editingChargementCommande
       ? `http://localhost:8000/api/chargementCommandes/${editingChargementCommande.id}`
       : "http://localhost:8000/api/chargementCommandes";
     const method = editingChargementCommande ? "put" : "post";
-    axios({
-      method: method,
-      url: url,
-      data: formData,
-    })
-      .then(() => {
-        fetchChargementCommandes();
-        Swal.fire({
-          icon: "success",
-          title: "Succès!",
-          text: `chargementCommande ${
-            editingChargementCommande ? "modifié" : "ajouté"
-          } avec succès.`,
-        });
-        setFormData({
-          vehicule_id: "",
-          livreur_id: "",
-          confort: "",
-          remarque: "",
-          commande_id: "",
-          dateLivraisonPrevue: "",
-          dateLivraisonReelle: "",
-        });
-        setEditingChargementCommande(null); // Clear editing chargementCommande
-        closeForm();
-      })
-      .catch((error) => {
-        console.error(
-          `Erreur lors de ${
-            editingChargementCommande ? "la modification" : "l'ajout"
-          } du chargementCommande:`,
-          error
-        );
-        Swal.fire({
-          icon: "error",
-          title: "Erreur!",
-          text: `Échec de ${
-            editingChargementCommande ? "la modification" : "l'ajout"
-          } du chargementCommande.`,
-        });
+    
+    try {
+      await axios({
+        method: method,
+        url: url,
+        data: formData,
       });
+      
+      fetchChargementCommandes();
+      showSuccessMessage(
+        "Succès",
+        editingChargementCommande 
+          ? "Chargement modifié avec succès."
+          : "Chargement ajouté avec succès."
+      );
+      
+      setFormData({
+        vehicule_id: "",
+        livreur_id: "",
+        confort: "",
+        remarque: "",
+        commande_id: "",
+        dateLivraisonPrevue: "",
+        dateLivraisonReelle: "",
+      });
+      setEditingChargementCommande(null);
+      closeForm();
+    } catch (error) {
+      console.error(
+        `Erreur lors de ${
+          editingChargementCommande ? "la modification" : "l'ajout"
+        } du chargement:`,
+        error
+      );
+      showErrorMessage(
+        "Erreur",
+        `Échec de ${
+          editingChargementCommande ? "la modification" : "l'ajout"
+        } du chargement.`
+      );
+    }
   };
 
   //------------------------- chargementCommande FORM---------------------//

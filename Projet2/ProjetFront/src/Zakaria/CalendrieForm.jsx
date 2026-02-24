@@ -9,7 +9,7 @@ const CalendrieForm = ({ onSubmit, onCancel, initialData, selectedGroup, selecte
     const [formData, setFormData] = useState({
         debut: initialData?.debut || '',
         fin: initialData?.fin || '',
-        groupe_horaire_id: initialData?.groupe_horaire_id || '', 
+        groupe_horaire_id: initialData?.groupe_horaire_id || '',
         groupe_id: Number(selectedGroup?.id) || '',
         jourDebut: initialData?.jourDebut || ''
     });
@@ -29,7 +29,7 @@ const CalendrieForm = ({ onSubmit, onCancel, initialData, selectedGroup, selecte
 
     const validateForm = () => {
         const errors = {};
-        
+
         // Required field validations
         if (!formData.debut) {
             errors.debut = 'La date de début est requise';
@@ -64,21 +64,21 @@ const CalendrieForm = ({ onSubmit, onCancel, initialData, selectedGroup, selecte
 
     const getDayOfWeekInFrench = (dateString) => {
         if (!dateString) return { nom: '', numero: null };
-    
+
         console.log(' getDayOfWeekInFrench appelée avec :', dateString);
-    
+
         const date = new Date(dateString);
         const daysInFrench = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
-    
+
         const jsDay = date.getDay();
         const numeroFrancais = jsDay === 0 ? 7 : jsDay;
-    
+
         return {
             nom: daysInFrench[jsDay],
             numero: numeroFrancais
         };
     };
-    
+
     //     if (selectedGroup) {
     //         setFormData(prev => ({
     //             ...prev,
@@ -106,16 +106,16 @@ const CalendrieForm = ({ onSubmit, onCancel, initialData, selectedGroup, selecte
         fetchGroups();
     }, []);
 
-    
+
     const handleChange = (e) => {
         const { name, value } = e.target;
-    
+
         setFormData(prev => {
             const newFormData = {
                 ...prev,
                 [name]: value
             };
-    
+
             if (name === 'debut' && value && !prev.jourDebut) {
                 const { nom, numero } = getDayOfWeekInFrench(value);
                 console.log(' Résultat :', nom, numero);
@@ -123,7 +123,7 @@ const CalendrieForm = ({ onSubmit, onCancel, initialData, selectedGroup, selecte
                 newFormData.jourDebut = nom;
                 newFormData.numeroJourDebut = numero;
             }
-    
+
             if (name === 'reposDe' || name === 'reposA') {
                 if (newFormData.reposDe && newFormData.reposA) {
                     newFormData.dureeRepos = calculateTimeDifference(
@@ -132,11 +132,11 @@ const CalendrieForm = ({ onSubmit, onCancel, initialData, selectedGroup, selecte
                     );
                 }
             }
-    
+
             return newFormData;
         });
     };
-    
+
     console.log('form', formData)
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -172,8 +172,8 @@ const CalendrieForm = ({ onSubmit, onCancel, initialData, selectedGroup, selecte
 
     return (
         <>
-        <style>
-        {`
+            <style>
+                {`
         .societe-form-container {
             border: none;
             border-radius: 0;
@@ -287,20 +287,20 @@ const CalendrieForm = ({ onSubmit, onCancel, initialData, selectedGroup, selecte
         }
 
         .btn-primary-custom {
-            background-color: #00afaa;
-            border: 1px solid #00afaa;
+            background-color: #3a8a90;
+            border: 1px solid #3a8a90;
             color: white;
             padding: 0.75rem 1.5rem;
             border-radius: 6px;
             font-size: 0.875rem;
-            font-weight: 500;
-            min-width: 120px;
+            font-weight: 600;
+            min-width: 140px;
             transition: all 0.2s ease;
         }
 
         .btn-primary-custom:hover:not(:disabled) {
-            background-color: #009691;
-            border-color: #009691;
+            background-color: #2c767c;
+            border-color: #2c767c;
         }
 
         .btn-primary-custom:disabled {
@@ -309,20 +309,21 @@ const CalendrieForm = ({ onSubmit, onCancel, initialData, selectedGroup, selecte
         }
 
         .btn-secondary-custom {
-            background-color: #f3f4f6;
-            border: 1px solid #d1d5db;
-            color: #4b5563;
+            background-color: #3a8a90;
+            border: 1px solid #3a8a90;
+            color: white;
             padding: 0.75rem 1.5rem;
             border-radius: 6px;
             font-size: 0.875rem;
-            font-weight: 500;
-            min-width: 120px;
+            font-weight: 600;
+            min-width: 140px;
             transition: all 0.2s ease;
         }
 
         .btn-secondary-custom:hover:not(:disabled) {
-            background-color: #009691;
-            border-color: #009691;
+            background-color: #2c767c;
+            border-color: #2c767c;
+            color: white;
         }
 
         .btn-secondary-custom:disabled {
@@ -342,137 +343,137 @@ const CalendrieForm = ({ onSubmit, onCancel, initialData, selectedGroup, selecte
 
 
         `}
-        </style>
+            </style>
 
-        <Card className="societe-form-container">
-            <div className="societe-form-header">
-                <h5>
-                <FontAwesomeIcon 
-                                            
-                 style={{
-                fontSize: "16px",
-                marginRight: "10px",
-                marginTop: "1px"
-                                }}
-/>
+            <Card className="societe-form-container">
+                <div className="societe-form-header">
+                    <h5>
+                        <FontAwesomeIcon
 
-                    {initialData ? 'Modifier le calendrier' : 'Ajouter Calendrier'}
-
-                </h5>
-                
-
-            </div>
-
-            <div className="societe-form-body">
-                <Form onSubmit={handleSubmit}>
-                    <div className="form-group-wrapper">
-                        <Form.Label className="form-label-enhanced">
-                            <Calendar size={16} className="icon-accent" />
-                            Date de début
-                        </Form.Label>
-                        <Form.Control
-                            type="date"
-                            name="debut"
-                            value={formData.debut}
-                            onChange={handleChange}
-                            className={`form-control-enhanced ${validationErrors.debut ? 'is-invalid' : ''}`}
+                            style={{
+                                fontSize: "16px",
+                                marginRight: "10px",
+                                marginTop: "1px"
+                            }}
                         />
-                        {validationErrors.debut && (
-                            <span className="error-message">{validationErrors.debut}</span>
-                        )}
-                    </div>
 
-                    <div className="form-group-wrapper">
-                        <Form.Label className="form-label-enhanced">
-                            <Calendar size={16} className="icon-accent" />
-                            Date de fin
-                        </Form.Label>
-                        <Form.Control
-                            type="date"
-                            name="fin"
-                            value={formData.fin}
-                            onChange={handleChange}
-                            className={`form-control-enhanced ${validationErrors.fin ? 'is-invalid' : ''}`}
-                        />
-                        {validationErrors.fin && (
-                            <span className="error-message">{validationErrors.fin}</span>
-                        )}
-                    </div>
+                        {initialData ? 'Modifier le calendrier' : 'Ajouter Calendrier'}
 
-                    <div className="form-group-wrapper">
-                        <Form.Label className="form-label-enhanced">
-                            <Clock size={16} className="icon-accent" />
-                            Horaire
-                        </Form.Label>
-                        <Form.Select
-                            name="groupe_horaire_id"
-                            value={formData.groupe_horaire_id || ''}
-                            onChange={handleChange}
-                            className={`form-control-enhanced ${validationErrors.groupe_horaire_id ? 'is-invalid' : ''}`}
-                        >
-                            <option value="">Sélectionnez un horaire</option>
-                            {groups.map(group => (
-                                <option key={group.id} value={group.id}>
-                                    {group.nom}
-                                </option>
-                            ))}
-                        </Form.Select>
-                        {validationErrors.groupe_horaire_id && (
-                            <span className="error-message">{validationErrors.groupe_horaire_id}</span>
-                        )}
-                    </div>
+                    </h5>
 
-                    <div className="form-group-wrapper">
-                        <Form.Label className="form-label-enhanced">
-                            <CalendarDays size={16} className="icon-accent" />
-                            Jour de début
-                        </Form.Label>
-                        <Form.Control
-                            type="text"
-                            name="jourDebut"
-                            value={`${formData.jourDebut} ${formData.numeroJourDebut || ''}`}
 
-                            className="form-control-enhanced"
-                            placeholder="Jour de début"
-                            readOnly
-                        />
-                    </div>
+                </div>
 
-                    {error && (
-                        <div className="alert-custom">
-                            {error}
+                <div className="societe-form-body">
+                    <Form onSubmit={handleSubmit}>
+                        <div className="form-group-wrapper">
+                            <Form.Label className="form-label-enhanced">
+                                <Calendar size={16} className="icon-accent" />
+                                Date de début
+                            </Form.Label>
+                            <Form.Control
+                                type="date"
+                                name="debut"
+                                value={formData.debut}
+                                onChange={handleChange}
+                                className={`form-control-enhanced ${validationErrors.debut ? 'is-invalid' : ''}`}
+                            />
+                            {validationErrors.debut && (
+                                <span className="error-message">{validationErrors.debut}</span>
+                            )}
                         </div>
-                    )}
 
-                    <div className="form-actions">
-                        <Button 
-                            type="submit" 
-                            disabled={loading}
-                            className="btn-primary-custom"
-                        >
-                            {loading ? (
-                                <>
-                                    <Spinner 
-                                        animation="border" 
-                                        size="sm" 
-                                        className="me-2"
-                                    />
-                                    Chargement...
-                                </>
-                            ) : initialData ? 'Modifier' : 'Ajouter'}
-                        </Button>
-                        <Button 
-                            type="button"
-                            onClick={onCancel} 
-                            disabled={loading}
-                            className="btn-secondary-custom"
-                        >
-                            Annuler
-                        </Button>
-                    </div>
-                </Form>
-            </div>
-        </Card>
+                        <div className="form-group-wrapper">
+                            <Form.Label className="form-label-enhanced">
+                                <Calendar size={16} className="icon-accent" />
+                                Date de fin
+                            </Form.Label>
+                            <Form.Control
+                                type="date"
+                                name="fin"
+                                value={formData.fin}
+                                onChange={handleChange}
+                                className={`form-control-enhanced ${validationErrors.fin ? 'is-invalid' : ''}`}
+                            />
+                            {validationErrors.fin && (
+                                <span className="error-message">{validationErrors.fin}</span>
+                            )}
+                        </div>
+
+                        <div className="form-group-wrapper">
+                            <Form.Label className="form-label-enhanced">
+                                <Clock size={16} className="icon-accent" />
+                                Horaire
+                            </Form.Label>
+                            <Form.Select
+                                name="groupe_horaire_id"
+                                value={formData.groupe_horaire_id || ''}
+                                onChange={handleChange}
+                                className={`form-control-enhanced ${validationErrors.groupe_horaire_id ? 'is-invalid' : ''}`}
+                            >
+                                <option value="">Sélectionnez un horaire</option>
+                                {groups.map(group => (
+                                    <option key={group.id} value={group.id}>
+                                        {group.nom}
+                                    </option>
+                                ))}
+                            </Form.Select>
+                            {validationErrors.groupe_horaire_id && (
+                                <span className="error-message">{validationErrors.groupe_horaire_id}</span>
+                            )}
+                        </div>
+
+                        <div className="form-group-wrapper">
+                            <Form.Label className="form-label-enhanced">
+                                <CalendarDays size={16} className="icon-accent" />
+                                Jour de début
+                            </Form.Label>
+                            <Form.Control
+                                type="text"
+                                name="jourDebut"
+                                value={`${formData.jourDebut} ${formData.numeroJourDebut || ''}`}
+
+                                className="form-control-enhanced"
+                                placeholder="Jour de début"
+                                readOnly
+                            />
+                        </div>
+
+                        {error && (
+                            <div className="alert-custom">
+                                {error}
+                            </div>
+                        )}
+
+                        <div className="form-actions">
+                            <Button
+                                type="submit"
+                                disabled={loading}
+                                className="btn-primary-custom"
+                            >
+                                {loading ? (
+                                    <>
+                                        <Spinner
+                                            animation="border"
+                                            size="sm"
+                                            className="me-2"
+                                        />
+                                        Chargement...
+                                    </>
+                                ) : initialData ? 'Modifier' : 'Ajouter'}
+                            </Button>
+                            <Button
+                                type="button"
+                                onClick={onCancel}
+                                disabled={loading}
+                                className="btn-secondary-custom"
+                            >
+                                Annuler
+                            </Button>
+                        </div>
+                    </Form>
+                </div>
+            </Card>
         </>
     );
 };

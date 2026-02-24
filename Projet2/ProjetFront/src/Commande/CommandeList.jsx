@@ -20,7 +20,7 @@ import * as XLSX from "xlsx";
 import { jsPDF } from "jspdf";
 import Select from "react-dropdown-select";
 import "jspdf-autotable";
-import Swal from "sweetalert2";
+import { showSuccessMessage, showErrorMessage, showConfirmDialog, STANDARD_MESSAGES } from "../utils/messageHelper";
 import Search from "../Acceuil/Search";
 import ShoppingBagIcon from "@mui/icons-material/ShoppingBag";
 import TablePagination from "@mui/material/TablePagination";
@@ -445,20 +445,12 @@ const CommandeList = () => {
       closeForm();
 
       // Afficher un message de succès à l'utilisateur
-      Swal.fire({
-        icon: "success",
-        title: "Commande ajoutée avec succès",
-        text: "La commande a été ajoutée avec succès.",
-      });
+      showSuccessMessage("Succès", "Commande ajoutée avec succès.");
     } catch (error) {
       console.error("Erreur lors de la soumission des données :", error);
 
       // Afficher un message d'erreur à l'utilisateur
-      Swal.fire({
-        icon: "error",
-        title: "Erreur !",
-        text: "Erreur !",
-      });
+      showErrorMessage("Erreur", "Erreur lors de l'ajout de la commande.");
     }
     closeForm();
   };
@@ -584,40 +576,26 @@ const CommandeList = () => {
   //     }));
   //   }
   // };
-  const handleDelete = (id) => {
-    Swal.fire({
-      title: "Confirmation de suppression",
-      text: "Êtes-vous sûr de vouloir supprimer cette commande ? Cette action est irréversible.",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#3085d6",
-      cancelButtonColor: "#d33",
-      confirmButtonText: "Oui, supprimer",
-      cancelButtonText: "Annuler",
-    }).then((result) => {
-      if (result.isConfirmed) {
-        axios
-          .delete(`http://localhost:8000/api/commandes/${id}`)
-          .then(() => {
-            Swal.fire({
-              icon: "success",
-              title: "Succès!",
-              text: "Commandes supprimé avec succès.",
-            });
-            fetchData();
-          })
-          .catch((error) => {
-            console.error("Erreur lors de la suppression du Commandes:", error);
-            Swal.fire({
-              icon: "error",
-              title: "Erreur!",
-              text: "Échec de la suppression du Commandes.",
-            });
-          });
-      } else {
-        console.log("Suppression annulée");
+  const handleDelete = async (id) => {
+    const result = await showConfirmDialog(
+      "Confirmation de suppression",
+      "Êtes-vous sûr de vouloir supprimer cette commande ? Cette action est irréversible.",
+      {
+        confirmButtonText: "Oui, supprimer",
+        cancelButtonText: "Annuler"
       }
-    });
+    );
+
+    if (result.isConfirmed) {
+      try {
+        await axios.delete(`http://localhost:8000/api/commandes/${id}`);
+        showSuccessMessage("Succès", STANDARD_MESSAGES.DELETE_SUCCESS);
+        fetchData();
+      } catch (error) {
+        console.error("Erreur lors de la suppression de la commande:", error);
+        showErrorMessage("Erreur", "Échec de la suppression de la commande.");
+      }
+    }
   };
 
   const handleShowFormButtonClick = () => {
@@ -908,51 +886,35 @@ const CommandeList = () => {
     console.log("selectedProductData", selectedProductsData);
   };
 
-  const handleDeleteSelected = () => {
-    Swal.fire({
-      title: "Confirmation de suppression",
-      text: "Êtes-vous sûr de vouloir supprimer les éléments sélectionnés ? Cette action est irréversible.",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#3085d6",
-      cancelButtonColor: "#d33",
-      confirmButtonText: "Oui, supprimer",
-      cancelButtonText: "Annuler",
-    }).then((result) => {
-      if (result.isConfirmed) {
-        const promises = selectedItems.map((id) => {
-          return axios
-            .delete(`http://localhost:8000/api/commandes/${id}`)
-            .then(() => {
-              return { id, success: true };
-            })
-            .catch(() => {
-              return { id, success: false };
-            });
-        });
-
-        Promise.all(promises).then((results) => {
-          const successCount = results.filter((res) => res.success).length;
-          if (successCount === results.length) {
-            Swal.fire({
-              icon: "success",
-              title: "Success!",
-              text: "Toute les commandes sélectionnées ont été supprimées avec succès.",
-            });
-          } else {
-            Swal.fire({
-              icon: "error",
-              title: "Error!",
-              text: "Certains commandes n'ont pas pu être supprimées.",
-            });
-          }
-          fetchData();
-          setSelectedItems([]);
-        });
-      } else {
-        setSelectedItems([]);
+  const handleDeleteSelected = async () => {
+    const result = await showConfirmDialog(
+      "Confirmation de suppression",
+      STANDARD_MESSAGES.DELETE_MULTIPLE_CONFIRM_TEXT,
+      {
+        confirmButtonText: "Oui, supprimer",
+        cancelButtonText: "Annuler"
       }
-    });
+    );
+
+    if (result.isConfirmed) {
+      const promises = selectedItems.map((id) => {
+        return axios
+          .delete(`http://localhost:8000/api/commandes/${id}`)
+          .then(() => ({ id, success: true }))
+          .catch(() => ({ id, success: false }));
+      });
+
+      const results = await Promise.all(promises);
+      const successCount = results.filter((res) => res.success).length;
+      
+      if (successCount === results.length) {
+        showSuccessMessage("Succès", "Toutes les commandes sélectionnées ont été supprimées avec succès.");
+      } else {
+        showErrorMessage("Erreur", "Certaines commandes n'ont pas pu être supprimées.");
+      }
+      fetchData();
+      setSelectedItems([]);
+    }
   };
 
   return (

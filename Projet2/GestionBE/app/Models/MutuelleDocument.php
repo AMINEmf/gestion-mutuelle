@@ -12,6 +12,7 @@ class MutuelleDocument extends Model
     protected $fillable = [
         'employe_id',
         'operation_id',
+        'type_document',
         'nom',
         'file_path',
         'file_name',

@@ -4,6 +4,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFilePdf } from "@fortawesome/free-solid-svg-icons";
 import jsPDF from "jspdf"; // Import jsPDF library
 import "jspdf-autotable";
+import { showInfoMessage } from '../utils/messageHelper';
 
 const exportToPdf = (chargementCommandes, selectedItems) => {
   console.log("idc", selectedItems);
@@ -13,7 +14,7 @@ const exportToPdf = (chargementCommandes, selectedItems) => {
     !selectedItems ||
     selectedItems.length === 0
   ) {
-    alert("No data to export!");
+    showInfoMessage("Attention", "Aucune donnée à exporter !");
     return;
   }
 
@@ -26,7 +27,7 @@ const exportToPdf = (chargementCommandes, selectedItems) => {
     !selectedchargementCommandesData ||
     selectedchargementCommandesData.length === 0
   ) {
-    alert("No selected data to export!");
+    showInfoMessage("Attention", "Aucune donnée sélectionnée à exporter !");
     return;
   }
 

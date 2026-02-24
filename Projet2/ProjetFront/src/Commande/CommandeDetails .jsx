@@ -4,7 +4,12 @@ import "./commande.css";
 import TablePagination from "@mui/material/TablePagination";
 import Search from "../Acceuil/Search";
 import axios from "axios";
-import Swal from "sweetalert2";
+import {
+  showSuccessMessage,
+  showErrorMessage,
+  showConfirmDialog,
+  STANDARD_MESSAGES
+} from "../utils/messageHelper";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTrash } from "@fortawesome/free-solid-svg-icons";
 const CommandeDetails = ({ produits, commande }) => {
@@ -69,35 +74,27 @@ const CommandeDetails = ({ produits, commande }) => {
     }
   };
   const statusCommandeDetails = commande.status_commandes;
-  const handleDeleteLigneCommande = (id) => {
-    const isConfirmed = window.confirm(
-      "Êtes-vous sûr de vouloir supprimer ce commande ?"
+  const handleDeleteLigneCommande = async (id) => {
+    const result = await showConfirmDialog(
+      "Confirmer la suppression",
+      "Êtes-vous sûr de vouloir supprimer cette ligne de commande ? Cette action est irréversible."
     );
 
-    if (isConfirmed) {
-      axios
-        .delete(`http://localhost:8000/api/ligneCommandes/${id}`)
-        .then(() => {
-          Swal.fire({
-            icon: "success",
-            title: "Succès!",
-            text: "Ligne Commande supprimé avec succès.",
-          });
-
-          setLigneCommandes((prevLigneCommandes) =>
-            prevLigneCommandes.filter(
-              (ligneCommande) => ligneCommande.id !== id
-            )
-          );
-        })
-        .catch((error) => {
-          console.error("Erreur lors de la suppression du commande:", error);
-          Swal.fire({
-            icon: "error",
-            title: "Erreur!",
-            text: "Échec de la suppression du commande.",
-          });
-        });
+    if (result.isConfirmed) {
+      try {
+        await axios.delete(`http://localhost:8000/api/ligneCommandes/${id}`);
+        showSuccessMessage("Succès", "Ligne de commande supprimée avec succès.");
+        setLigneCommandes((prevLigneCommandes) =>
+          prevLigneCommandes.filter(
+            (ligneCommande) => ligneCommande.id !== id
+          )
+        );
+      } catch (error) {
+        console.error("Erreur lors de la suppression:", error);
+        showErrorMessage("Erreur", "Échec de la suppression de la ligne de commande.");
+      }
+    }
+  };
     } else {
       console.log("Suppression annulée");
     }

@@ -59,11 +59,11 @@ const SocieteForm = ({ onSubmit, onCancel, initialData }) => {
     };
 
 
-    
+
     return (
         <>
-        <style>
-        {`
+            <style>
+                {`
         .societe-form-container {
             border: none;
             border-radius: 0;
@@ -178,20 +178,20 @@ const SocieteForm = ({ onSubmit, onCancel, initialData }) => {
         }
 
         .btn-primary-custom {
-            background-color: #00afaa;
-            border: 1px solid #00afaa;
+            background-color: #3a8a90;
+            border: 1px solid #3a8a90;
             color: white;
             padding: 0.75rem 1.5rem;
             border-radius: 6px;
             font-size: 0.875rem;
-            font-weight: 500;
-            min-width: 120px;
+            font-weight: 600;
+            min-width: 140px;
             transition: all 0.2s ease;
         }
 
         .btn-primary-custom:hover:not(:disabled) {
-            background-color: #009691;
-            border-color: #009691;
+            background-color: #2c767c;
+            border-color: #2c767c;
         }
 
         .btn-primary-custom:disabled {
@@ -200,21 +200,21 @@ const SocieteForm = ({ onSubmit, onCancel, initialData }) => {
         }
 
         .btn-secondary-custom {
-            background-color: #f3f4f6;
-            border: 1px solid #d1d5db;
-            color: #4b5563;
+            background-color: #3a8a90;
+            border: 1px solid #3a8a90;
+            color: white;
             padding: 0.75rem 1.5rem;
             border-radius: 6px;
             font-size: 0.875rem;
-            font-weight: 500;
-            min-width: 120px;
+            font-weight: 600;
+            min-width: 140px;
             transition: all 0.2s ease;
         }
 
         .btn-secondary-custom:hover:not(:disabled) {
-            background-color: #e5e7eb;
-            border-color: #9ca3af;
-            color: #374151;
+            background-color: #2c767c;
+            border-color: #2c767c;
+            color: white;
         }
 
         .btn-secondary-custom:disabled {
@@ -232,149 +232,149 @@ const SocieteForm = ({ onSubmit, onCancel, initialData }) => {
             margin-top: 1rem;
         }
         `}
-        </style>
+            </style>
 
-        <Card className="societe-form-container" style={{ height: '100%', width: '100%' }}>
-            <div className="societe-form-header">
-               <h5>
-               {initialData ? 'Modifier Société' : 'Ajouter Société'}
-               </h5>
-            </div>
-            
-            <div className="societe-form-body">
-                <Form onSubmit={handleSubmit}>
-                    <div className="form-group-wrapper">
-                        <Form.Label className="form-label-enhanced">
-                            <Building size={16} className="icon-accent" />
-                            Raison Sociale
-                        </Form.Label>
-                        <Form.Control
-                            type="text"
-                            name="RaisonSocial"
-                            value={formData.RaisonSocial}
-                            onChange={handleChange}
-                            className={`form-control-enhanced ${validationErrors.RaisonSocial ? 'is-invalid' : ''}`}
-                            placeholder="Entrez la raison sociale"
-                        />
-                        {validationErrors.RaisonSocial && (
-                            <span className="error-message">{validationErrors.RaisonSocial}</span>
-                        )}
-                    </div>
+            <Card className="societe-form-container" style={{ height: '100%', width: '100%' }}>
+                <div className="societe-form-header">
+                    <h5>
+                        {initialData ? 'Modifier Société' : 'Ajouter Société'}
+                    </h5>
+                </div>
 
-                    <div className="form-group-wrapper">
-                        <Form.Label className="form-label-enhanced">
-                            <CreditCard size={16} className="icon-accent" />
-                            ICE
-                        </Form.Label>
-                        <Form.Control
-                            type="text"
-                            name="ICE"
-                            value={formData.ICE}
-                            onChange={handleChange}
-                            className={`form-control-enhanced ${validationErrors.ICE ? 'is-invalid' : ''}`}
-                            placeholder="Entrez l'ICE"
-                        />
-                        {validationErrors.ICE && (
-                            <span className="error-message">{validationErrors.ICE}</span>
-                        )}
-                    </div>
-
-                    <div className="form-group-wrapper">
-                        <Form.Label className="form-label-enhanced">
-                            <Hash size={16} className="icon-accent" />
-                            Numéro CNSS
-                        </Form.Label>
-                        <Form.Control
-                            type="text"
-                            name="NumeroCNSS"
-                            value={formData.NumeroCNSS}
-                            onChange={handleChange}
-                            className="form-control-enhanced"
-                            placeholder="Entrez le numéro CNSS"
-                        />
-                    </div>
-
-                    <div className="form-group-wrapper">
-                        <Form.Label className="form-label-enhanced">
-                            <FileText size={16} className="icon-accent" />
-                            Numéro Fiscale
-                        </Form.Label>
-                        <Form.Control
-                            type="text"
-                            name="NumeroFiscale"
-                            value={formData.NumeroFiscale}
-                            onChange={handleChange}
-                            className="form-control-enhanced"
-                            placeholder="Entrez le numéro fiscale"
-                        />
-                    </div>
-
-                    <div className="form-group-wrapper">
-                        <Form.Label className="form-label-enhanced">
-                            <FileText size={16} className="icon-accent" />
-                            Registre Commercial
-                        </Form.Label>
-                        <Form.Control
-                            type="text"
-                            name="RegistreCommercial"
-                            value={formData.RegistreCommercial}
-                            onChange={handleChange}
-                            className="form-control-enhanced"
-                            placeholder="Entrez le registre commercial"
-                        />
-                    </div>
-
-                    <div className="form-group-wrapper">
-                        <Form.Label className="form-label-enhanced">
-                            <MapPin size={16} className="icon-accent" />
-                            Adresse
-                        </Form.Label>
-                        <Form.Control
-                            type="text"
-                            name="AdresseSociete"
-                            value={formData.AdresseSociete}
-                            onChange={handleChange}
-                            className="form-control-enhanced"
-                            placeholder="Entrez l'adresse"
-                        />
-                    </div>
-
-                    {error && (
-                        <div className="alert-custom">
-                            {error}
+                <div className="societe-form-body">
+                    <Form onSubmit={handleSubmit}>
+                        <div className="form-group-wrapper">
+                            <Form.Label className="form-label-enhanced">
+                                <Building size={16} className="icon-accent" />
+                                Raison Sociale
+                            </Form.Label>
+                            <Form.Control
+                                type="text"
+                                name="RaisonSocial"
+                                value={formData.RaisonSocial}
+                                onChange={handleChange}
+                                className={`form-control-enhanced ${validationErrors.RaisonSocial ? 'is-invalid' : ''}`}
+                                placeholder="Entrez la raison sociale"
+                            />
+                            {validationErrors.RaisonSocial && (
+                                <span className="error-message">{validationErrors.RaisonSocial}</span>
+                            )}
                         </div>
-                    )}
 
-                    <div className="form-actions">
-                        <Button 
-                            type="submit" 
-                            disabled={loading}
-                            className="btn-primary-custom"
-                        >
-                            {loading ? (
-                                <>
-                                    <Spinner 
-                                        animation="border" 
-                                        size="sm" 
-                                        className="me-2"
-                                    />
-                                    Chargement...
-                                </>
-                            ) : initialData ? 'Modifier' : 'Ajouter'}
-                        </Button>
-                        <Button 
-                            type="button"
-                            onClick={onCancel} 
-                            disabled={loading}
-                            className="btn-secondary-custom"
-                        >
-                            Annuler
-                        </Button>
+                        <div className="form-group-wrapper">
+                            <Form.Label className="form-label-enhanced">
+                                <CreditCard size={16} className="icon-accent" />
+                                ICE
+                            </Form.Label>
+                            <Form.Control
+                                type="text"
+                                name="ICE"
+                                value={formData.ICE}
+                                onChange={handleChange}
+                                className={`form-control-enhanced ${validationErrors.ICE ? 'is-invalid' : ''}`}
+                                placeholder="Entrez l'ICE"
+                            />
+                            {validationErrors.ICE && (
+                                <span className="error-message">{validationErrors.ICE}</span>
+                            )}
+                        </div>
 
-                    </div>
-                </Form>
-            </div>
-        </Card>
+                        <div className="form-group-wrapper">
+                            <Form.Label className="form-label-enhanced">
+                                <Hash size={16} className="icon-accent" />
+                                Numéro CNSS
+                            </Form.Label>
+                            <Form.Control
+                                type="text"
+                                name="NumeroCNSS"
+                                value={formData.NumeroCNSS}
+                                onChange={handleChange}
+                                className="form-control-enhanced"
+                                placeholder="Entrez le numéro CNSS"
+                            />
+                        </div>
+
+                        <div className="form-group-wrapper">
+                            <Form.Label className="form-label-enhanced">
+                                <FileText size={16} className="icon-accent" />
+                                Numéro Fiscale
+                            </Form.Label>
+                            <Form.Control
+                                type="text"
+                                name="NumeroFiscale"
+                                value={formData.NumeroFiscale}
+                                onChange={handleChange}
+                                className="form-control-enhanced"
+                                placeholder="Entrez le numéro fiscale"
+                            />
+                        </div>
+
+                        <div className="form-group-wrapper">
+                            <Form.Label className="form-label-enhanced">
+                                <FileText size={16} className="icon-accent" />
+                                Registre Commercial
+                            </Form.Label>
+                            <Form.Control
+                                type="text"
+                                name="RegistreCommercial"
+                                value={formData.RegistreCommercial}
+                                onChange={handleChange}
+                                className="form-control-enhanced"
+                                placeholder="Entrez le registre commercial"
+                            />
+                        </div>
+
+                        <div className="form-group-wrapper">
+                            <Form.Label className="form-label-enhanced">
+                                <MapPin size={16} className="icon-accent" />
+                                Adresse
+                            </Form.Label>
+                            <Form.Control
+                                type="text"
+                                name="AdresseSociete"
+                                value={formData.AdresseSociete}
+                                onChange={handleChange}
+                                className="form-control-enhanced"
+                                placeholder="Entrez l'adresse"
+                            />
+                        </div>
+
+                        {error && (
+                            <div className="alert-custom">
+                                {error}
+                            </div>
+                        )}
+
+                        <div className="form-actions">
+                            <Button
+                                type="submit"
+                                disabled={loading}
+                                className="btn-primary-custom"
+                            >
+                                {loading ? (
+                                    <>
+                                        <Spinner
+                                            animation="border"
+                                            size="sm"
+                                            className="me-2"
+                                        />
+                                        Chargement...
+                                    </>
+                                ) : initialData ? 'Modifier' : 'Ajouter'}
+                            </Button>
+                            <Button
+                                type="button"
+                                onClick={onCancel}
+                                disabled={loading}
+                                className="btn-secondary-custom"
+                            >
+                                Annuler
+                            </Button>
+
+                        </div>
+                    </Form>
+                </div>
+            </Card>
         </>
     );
 };

@@ -5,6 +5,7 @@ import React, { useState } from "react";
 import Drawer from "react-bootstrap/Drawer";
 import Button from "react-bootstrap/Button";
 import axios from "axios";
+import { showSuccessMessage, showErrorMessage } from '../utils/messageHelper';
 import swal from "sweetalert2";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
@@ -115,23 +116,17 @@ const AddCommande = ({ produits, clients, csrfToken, fetchCommandes }) => {
         }
       );
 
-      swal.fire({
-        icon: "success",
-        title: "Commande ajoutée avec succès!",
-        showConfirmButton: false,
-        timer: 1500,
-      });
+      showSuccessMessage("Succès", "Commande ajoutée avec succès !");
       setSelectedProducts([]);
       handleDrawerClose();
       fetchCommandes();
       console.log("Commande ajoutée avec succès!");
     } catch (error) {
       console.error("Error adding commande:", error);
-      swal.fire({
-        icon: "error",
-        title: "Error adding commande",
-        text: "An error occurred while adding the commande. Please try again.",
-      });
+      showErrorMessage(
+        "Erreur",
+        "Une erreur est survenue lors de l'ajout de la commande. Veuillez réessayer."
+      );
     }
   };
 

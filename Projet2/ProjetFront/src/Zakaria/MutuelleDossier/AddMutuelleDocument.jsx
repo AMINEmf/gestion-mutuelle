@@ -2,11 +2,18 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import Select from 'react-select';
 import { Form, Button, Modal } from 'react-bootstrap';
-import Swal from 'sweetalert2';
+import {
+  showSuccessMessage,
+  showErrorMessage,
+  showErrorFromResponse,
+  showConfirmDialog,
+  showInfoMessage,
+  STANDARD_MESSAGES
+} from '../../utils/messageHelper';
 
 const api = axios.create({
-  baseURL: "http://localhost:8000/api",
-  withCredentials: true,
+    baseURL: "http://localhost:8000/api",
+    withCredentials: true,
 });
 
 function AddMutuelleDocument({ operations, onClose, onSaved }) {
@@ -26,13 +33,12 @@ function AddMutuelleDocument({ operations, onClose, onSaved }) {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        
+
         if (!selectedOperation || !file) {
-            Swal.fire({
-                icon: 'warning',
-                title: 'Attention',
-                text: 'Veuillez sélectionner une opération et un fichier.'
-            });
+            showInfoMessage(
+                'Attention',
+                'Veuillez sélectionner une opération et un fichier.'
+            );
             return;
         }
 
@@ -48,22 +54,19 @@ function AddMutuelleDocument({ operations, onClose, onSaved }) {
                     'Content-Type': 'multipart/form-data'
                 }
             });
-            
-            Swal.fire({
-                icon: 'success',
-                title: 'Succès',
-                text: 'Document ajouté avec succès',
-                timer: 2000,
-                showConfirmButton: false
-            });
+
+            showSuccessMessage(
+                'Succès',
+                'Document ajouté avec succès',
+                { timer: 2000, showConfirmButton: false }
+            );
             onSaved();
         } catch (error) {
             console.error('Erreur upload:', error);
-            Swal.fire({
-                icon: 'error',
-                title: 'Erreur',
-                text: "Impossible d'ajouter le document."
-            });
+            showErrorMessage(
+                'Erreur',
+                "Impossible d'ajouter le document."
+            );
         } finally {
             setLoading(false);
         }
@@ -81,7 +84,7 @@ function AddMutuelleDocument({ operations, onClose, onSaved }) {
                         <Form onSubmit={handleSubmit}>
                             <Form.Group className="mb-3">
                                 <Form.Label>Opération concernée *</Form.Label>
-                                <Select 
+                                <Select
                                     options={operationOptions}
                                     value={selectedOperation}
                                     onChange={setSelectedOperation}
@@ -91,31 +94,36 @@ function AddMutuelleDocument({ operations, onClose, onSaved }) {
 
                             <Form.Group className="mb-3">
                                 <Form.Label>Nom du document (Optionnel)</Form.Label>
-                                <Form.Control 
-                                    type="text" 
-                                    value={nom} 
-                                    onChange={(e) => setNom(e.target.value)} 
+                                <Form.Control
+                                    type="text"
+                                    value={nom}
+                                    onChange={(e) => setNom(e.target.value)}
                                     placeholder="Ex: Facture, Ordonnance..."
                                 />
                             </Form.Group>
 
                             <Form.Group className="mb-4">
                                 <Form.Label>Fichier *</Form.Label>
-                                <Form.Control 
-                                    type="file" 
-                                    onChange={handleFileChange} 
+                                <Form.Control
+                                    type="file"
+                                    onChange={handleFileChange}
                                 />
                             </Form.Group>
 
-                            <div className="d-flex justify-content-end gap-2">
-                                <Button variant="secondary" onClick={onClose} disabled={loading}>
+                            <div className="d-flex justify-content-center gap-3 pt-3">
+                                <Button
+                                    variant="primary"
+                                    onClick={onClose}
+                                    disabled={loading}
+                                    style={{ backgroundColor: '#3a8a90', borderColor: '#3a8a90', padding: '8px 24px', fontWeight: 600 }}
+                                >
                                     Annuler
                                 </Button>
-                                <Button 
-                                    variant="primary" 
-                                    type="submit" 
+                                <Button
+                                    variant="primary"
+                                    type="submit"
                                     disabled={loading}
-                                    style={{ backgroundColor: '#3a8a90', borderColor: '#3a8a90' }}
+                                    style={{ backgroundColor: '#3a8a90', borderColor: '#3a8a90', padding: '8px 24px', fontWeight: 600 }}
                                 >
                                     {loading ? 'Envoi...' : 'Enregistrer'}
                                 </Button>

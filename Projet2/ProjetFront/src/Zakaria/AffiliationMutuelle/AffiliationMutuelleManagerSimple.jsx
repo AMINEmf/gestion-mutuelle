@@ -28,8 +28,8 @@ function AffiliationMutuelleManagerSimple() {
   const affiliationTableRef = useRef(null);
 
   useEffect(() => {
-    setTitle("Gestion des Affiliations Mutuelles");
-    
+    setTitle("Gestion des Affiliations Assurances");
+
     if (selectedDepartementId) {
       setOnPrint(() => () => affiliationTableRef.current?.handlePrint());
       setOnExportPDF(() => () => affiliationTableRef.current?.exportToPDF());
@@ -85,7 +85,7 @@ function AffiliationMutuelleManagerSimple() {
 
   const renderDepartement = (departement) => (
     <li key={departement.id} style={{ listStyleType: "none" }}>
-      <div 
+      <div
         className={`department-item ${departement.id === selectedDepartementId ? 'selected' : ''}`}
         ref={(el) => (departementRef.current[departement.id] = el)}
       >
@@ -108,7 +108,7 @@ function AffiliationMutuelleManagerSimple() {
           {!departement.children && (
             <div style={{ width: "24px", marginRight: "8px" }}></div>
           )}
-          
+
           <span
             onClick={() => handleDepartementClick(departement.id, departement.nom)}
             className={`common-text ${selectedDepartementId === departement.id ? 'selected' : ''}`}
@@ -118,7 +118,7 @@ function AffiliationMutuelleManagerSimple() {
           </span>
         </div>
       </div>
-      
+
       {expandedDepartements[departement.id] &&
         departement.children &&
         departement.children.length > 0 && (
@@ -132,17 +132,47 @@ function AffiliationMutuelleManagerSimple() {
   return (
     <ThemeProvider theme={createTheme()}>
       <Box sx={{ ...dynamicStyles }}>
-        <Box component="main" sx={{ flexGrow: 1, p: 0, mt: 12 }}>
-          <div className="departement_home1">
-            <ul className="departement_list">
+        <Box
+          component="main"
+          sx={{
+            flexGrow: 1,
+            p: "20px 20px 20px 5px",
+            mt: 9,
+            display: "flex",
+            flexDirection: "row",
+            gap: "15px",
+            height: "calc(100vh - 80px)",
+            boxSizing: "border-box",
+            overflow: "hidden"
+          }}
+        >
+          {/* Panel Gauche Indépendant (Départements) */}
+          <div style={{
+            width: "300px",
+            height: "100%",
+            flexShrink: 0
+          }}>
+            <ul className="departement_list" style={{
+              height: "100%",
+              margin: 0,
+              width: "100%",
+              display: "flex",
+              flexDirection: "column",
+              backgroundColor: "#fff",
+              borderRadius: "12px",
+              padding: "20px",
+              boxShadow: "0 6px 20px rgba(8, 179, 173, 0.08), 0 2px 6px rgba(8, 179, 173, 0.04)",
+              border: "1px solid rgba(8, 179, 173, 0.08)",
+              overflowY: "auto",
+              listStyle: "none"
+            }}>
               <li style={{ listStyleType: "none" }}>
-                <div className="checkbox-container" style={{ 
-                  marginTop:'5%', 
-                  width:'90%',
+                <div className="checkbox-container" style={{
+                  marginBottom: '15px',
+                  width: '100%',
                   display: 'flex',
-                  alignItems: 'center', 
-                  justifyContent:'center',
-                  marginLeft:'5%'
+                  alignItems: 'center',
+                  justifyContent: 'center'
                 }}>
                   <input
                     type="checkbox"
@@ -153,10 +183,18 @@ function AffiliationMutuelleManagerSimple() {
                   <label htmlFor="include-sub-deps">Inclure les sous-départements</label>
                 </div>
               </li>
-              <div className="separator" style={{marginTop:'-1%'}}></div>
+              <div className="separator" style={{ marginBottom: '15px' }}></div>
               {departements.map((departement) => renderDepartement(departement))}
             </ul>
+          </div>
 
+          {/* Panel Droit Indépendant (Affiliations) */}
+          <div style={{
+            flex: 1,
+            height: "100%",
+            minWidth: 0,
+            overflow: "hidden"
+          }}>
             <AffiliationMutuelleTable
               departementId={selectedDepartementId}
               departementName={selectedDepartementName}

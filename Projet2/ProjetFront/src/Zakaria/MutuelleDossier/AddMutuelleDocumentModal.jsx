@@ -3,7 +3,14 @@ import { Form, Alert } from "react-bootstrap";
 import { X, Upload, FileText } from "lucide-react";
 import Select from "react-select";
 import axios from "axios";
-import Swal from "sweetalert2";
+import {
+  showSuccessMessage,
+  showErrorMessage,
+  showErrorFromResponse,
+  showConfirmDialog,
+  showInfoMessage,
+  STANDARD_MESSAGES
+} from "../../utils/messageHelper";
 import "../AffiliationMutuelle/AddAffiliationMutuelle.css";
 
 const api = axios.create({
@@ -73,13 +80,11 @@ function AddMutuelleDocumentModal({ operations, onClose, onSaved }) {
                 }
             });
 
-            Swal.fire({
-                icon: "success",
-                title: "Document ajouté",
-                text: "Le document a été téléchargé avec succès",
-                timer: 2000,
-                showConfirmButton: false,
-            });
+            showSuccessMessage(
+                "Document ajouté",
+                "Le document a été téléchargé avec succès",
+                { timer: 2000, showConfirmButton: false }
+            );
 
             onSaved();
         } catch (err) {
@@ -87,11 +92,10 @@ function AddMutuelleDocumentModal({ operations, onClose, onSaved }) {
             const apiErrors = err.response?.data?.errors || {};
             setErrors(apiErrors);
 
-            Swal.fire({
-                icon: "error",
-                title: "Erreur",
-                text: err.response?.data?.message || "Impossible de télécharger le document",
-            });
+            showErrorMessage(
+                "Erreur",
+                err.response?.data?.message || "Impossible de télécharger le document"
+            );
         } finally {
             setSubmitting(false);
         }
@@ -208,12 +212,13 @@ function AddMutuelleDocumentModal({ operations, onClose, onSaved }) {
                         </Form.Group>
 
                         {/* Submit Button */}
-                        <div className="d-flex justify-content-end gap-2 mt-4">
+                        <div className="d-flex justify-content-center gap-3 mt-4">
                             <button
                                 type="button"
                                 onClick={onClose}
-                                className="btn btn-outline-secondary"
+                                className="btn btn-primary"
                                 disabled={submitting}
+                                style={{ backgroundColor: "#3a8a90", borderColor: "#3a8a90", padding: '8px 24px', fontWeight: 600 }}
                             >
                                 Annuler
                             </button>
@@ -221,18 +226,15 @@ function AddMutuelleDocumentModal({ operations, onClose, onSaved }) {
                                 type="submit"
                                 className="btn btn-primary"
                                 disabled={submitting}
-                                style={{ backgroundColor: "#14b8a6", borderColor: "#14b8a6" }}
+                                style={{ backgroundColor: "#3a8a90", borderColor: "#3a8a90", padding: '8px 24px', fontWeight: 600 }}
                             >
                                 {submitting ? (
                                     <>
                                         <span className="spinner-border spinner-border-sm me-2" />
-                                        Téléchargement...
+                                        Envoi...
                                     </>
                                 ) : (
-                                    <>
-                                        <Upload size={16} className="me-2" />
-                                        Télécharger
-                                    </>
+                                    "Télécharger"
                                 )}
                             </button>
                         </div>

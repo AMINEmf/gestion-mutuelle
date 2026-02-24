@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useMemo, useState, useCallback } from "react";
+import React, { createContext, useContext, useMemo, useState, useCallback, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 
 const HeaderContext = createContext(null);
 
@@ -9,6 +10,7 @@ export function HeaderProvider({ children }) {
   const [onExportPDF, setOnExportPDF] = useState(undefined);
   const [onExportExcel, setOnExportExcel] = useState(undefined);
   const [showSearch, setShowSearch] = useState(true);
+  const location = useLocation();
 
   const clearActions = useCallback(() => {
     setOnPrint(undefined);
@@ -16,12 +18,21 @@ export function HeaderProvider({ children }) {
     setOnExportExcel(undefined);
   }, []);
 
+  const clearSearch = useCallback(() => {
+    setSearchQuery("");
+  }, []);
+
+  useEffect(() => {
+    clearSearch();
+  }, [location.pathname, clearSearch]);
+
   const value = useMemo(
     () => ({
       title,
       setTitle,
       searchQuery,
       setSearchQuery,
+      clearSearch,
       onPrint,
       setOnPrint,
       onExportPDF,
@@ -32,7 +43,7 @@ export function HeaderProvider({ children }) {
       setShowSearch,
       clearActions,
     }),
-    [title, searchQuery, onPrint, onExportPDF, onExportExcel, showSearch, clearActions]
+    [title, searchQuery, onPrint, onExportPDF, onExportExcel, showSearch, clearActions, clearSearch]
   );
 
   return <HeaderContext.Provider value={value}>{children}</HeaderContext.Provider>;

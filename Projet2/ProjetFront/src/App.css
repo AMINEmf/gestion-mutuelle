@@ -1,18 +1,18 @@
-body {
-  margin-bottom: 70px;
-   /* Ajoutez une marge en bas pour éviter que le pied de page ne chevauche le contenu */
+﻿body {
+  margin-bottom: 32px;
+   /* Ajoutez une marge en bas pour Ã©viter que le pied de page ne chevauche le contenu */
 background-color: #ffffff !important;
 /* background-color: #f5f5f5 !important; */
 
   }
 
 .app-container {
-  min-height: calc(100vh - 110px); /* Calculez la hauteur minimale de votre contenu pour s'adapter à l'écran */
+  min-height: calc(100vh - 110px); /* Calculez la hauteur minimale de votre contenu pour s'adapter Ã  l'Ã©cran */
 }
 
 #formContainer {
   position: fixed;
-  right: -900px; /* Débutera hors de l'écran */
+  right: -900px; /* DÃ©butera hors de l'Ã©cran */
   width: 500px;
   height: auto;
   transition: right 0.3s ease; /* Effet de glissement du formulaire */
@@ -21,7 +21,7 @@ background-color: #ffffff !important;
 }
 #formContainer1SC {
   position: fixed;
-  right: -900px; /* Débutera hors de l'écran */
+  right: -900px; /* DÃ©butera hors de l'Ã©cran */
   width: 400px;
   height: auto;
   transition: right 0.3s ease; /* Effet de glissement du formulaire */
@@ -29,7 +29,7 @@ background-color: #ffffff !important;
   background-color: #fff;
 }
 #tableContainer {
- /* Espacement pour afficher le tableau à côté du formulaire */
+ /* Espacement pour afficher le tableau Ã  cÃ´tÃ© du formulaire */
 }
 
 a {
@@ -56,7 +56,7 @@ a {
 }
 #formContainer {
   position: fixed;
-  right: -100%; /* Débutera hors de l'écran */
+  right: -100%; /* DÃ©butera hors de l'Ã©cran */
   width: 30%;
   height: 100%;
   transition: right 0.3s ease; /* Effet de glissement du formulaire */
@@ -66,7 +66,7 @@ a {
 }
 #formContainerCommande {
   position: fixed;
-  right: -100%; /* Débutera hors de l'écran */
+  right: -100%; /* DÃ©butera hors de l'Ã©cran */
   width: 20%;
   height: 100%;
   transition: right 0.3s ease; /* Effet de glissement du formulaire */
@@ -76,7 +76,7 @@ a {
 }
 #formContainer1SC{
     position: fixed;
-    right:  -100; /* Débutera hors de l'écran */
+    right:  -100; /* DÃ©butera hors de l'Ã©cran */
     width: 30%;
     height: 100%;
     transition: right 0.3s ease; /* Effet de glissement du formulaire */
@@ -85,7 +85,7 @@ a {
     background-color:rgb(250, 250, 250);
 }
 #tableContainer {
-  /* Espacement pour afficher le tableau à côté du formulaire */
+  /* Espacement pour afficher le tableau Ã  cÃ´tÃ© du formulaire */
 }
 
 a{

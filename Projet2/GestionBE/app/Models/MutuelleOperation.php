@@ -14,6 +14,7 @@ class MutuelleOperation extends Model
         'numero_dossier',
         'beneficiaire_type',
         'beneficiaire_nom',
+        'lien_parente',
         'date_operation',
         'date_depot',
         'date_remboursement',

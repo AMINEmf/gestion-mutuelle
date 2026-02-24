@@ -8,6 +8,7 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEdit, faTrash, faFilePdf, faFileExcel, faPrint, faEye, faChevronDown, faChevronUp } from "@fortawesome/free-solid-svg-icons";
+import { showSuccessMessage, showErrorMessage, showInfoMessage, showSuccessToast, showErrorToast, showErrorFromResponse, STANDARD_MESSAGES } from '../../utils/messageHelper';
 import Swal from 'sweetalert2';
 import './AddEmp.css';
 import { User, CreditCard, Tag, BadgeCheck, Upload , Loader2, Calendar, MapPin , Flag, Users, Heart, Baby, FileText, Building , ShieldCheck, Mail, Phone, Printer, Briefcase, BarChart2, ArrowUpCircle, Percent, LogIn, UserPlus,Plus,
@@ -360,10 +361,10 @@ const initialContractState = {
         bulletins: assignedBulletinModeles
       });
   
-      alert('Bulletins enregistrés avec succès !');
+      showSuccessMessage('Succès', 'Bulletins enregistrés avec succès !');
     } catch (error) {
       console.error('Erreur lors de l\'enregistrement des bulletins:', error);
-      alert('Erreur lors de l\'enregistrement');
+      showErrorMessage('Erreur', 'Erreur lors de l\'enregistrement');
     }
   };
   
@@ -840,14 +841,12 @@ const initialContractState = {
         });
       }
   
-      Swal.fire({
-        icon: "success",
-        title: "Succès",
-        text: selectedEmployer
+      showSuccessMessage(
+        "Succès",
+        selectedEmployer
           ? "Employé mis à jour avec succès"
-          : "Employé ajouté avec succès",
-        confirmButtonText: "OK",
-      });
+          : "Employé ajouté avec succès"
+      );
   
       resetForm();
       setError(null);
@@ -862,12 +861,7 @@ const initialContractState = {
     } catch (error) {
       console.error("Erreur lors de la soumission :", error);
   
-      Swal.fire({
-        icon: "error",
-        title: "Erreur",
-        text: error.response ? error.response.data.message : "Une erreur s'est produite",
-        confirmButtonText: "OK",
-      });
+      showErrorFromResponse(error, "Erreur");
     }
   };
   
@@ -885,29 +879,11 @@ const initialContractState = {
   });
 
   const showSuccessNotification = (message) => {
-    toast.success(message, {
-      position: "top-right",
-      autoClose: 3000,
-      hideProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-      progress: undefined,
-      theme: "colored",
-    });
+    showSuccessToast(message, 3000);
   };
 
   const showErrorNotification = (message) => {
-    toast.error(message, {
-      position: "top-right",
-      autoClose: 3000,
-      hideProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-      progress: undefined,
-      theme: "colored",
-    });
+    showErrorToast(message, 3000);
   };
 
   ////////////////////////////////////// Section poste //////////////////////////////////////
@@ -1646,7 +1622,7 @@ const handleDeleteCommune = async (communeId) => {
 
     const handleAddBanque = async () => {
       if (!newBanque.trim()) {
-        alert("Le nom de la banque est obligatoire !");
+        showInfoMessage("Attention", "Le nom de la banque est obligatoire !");
         return;
       }
       try {

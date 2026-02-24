@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useState } from "react";
+﻿import React, { useEffect, useState, useMemo } from "react";
 import axios from "axios";
 import { useHeader } from "../../Acceuil/HeaderContext";
 import { useOpen } from "../../Acceuil/OpenProvider";
@@ -51,7 +51,7 @@ const COLORS = {
   textPrimary: "#1e293b",
   textSecondary: "#64748b",
   hoverBg: "#f8fafc",
-  bg: "#f1f5f9"
+  bg: "#ffffff"
 };
 
 const theme = createTheme({
@@ -296,7 +296,7 @@ const ChartSection = ({ distribution }) => {
         <Box sx={{ bgcolor: `${COLORS.secondary}15`, p: 1, borderRadius: 2, mr: 2, color: COLORS.secondary }}>
           <TrendingUp size={20} />
         </Box>
-        <Typography variant="h6">Répartition des Statuts (Dossiers)</Typography>
+        <Typography variant="h6">Répartition des Statuts (Opérations)</Typography>
       </Box>
 
       <Box sx={{ p: 3 }}>
@@ -343,29 +343,42 @@ function MutuelleDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const { setTitle } = useHeader();
+  const { setTitle, searchQuery } = useHeader();
   const { dynamicStyles } = useOpen();
+  const normalizedSearch = (searchQuery || "").toLowerCase().trim();
 
   // Responsive handling
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const isTablet = useMediaQuery(theme.breakpoints.between('sm', 'lg'));
 
   useEffect(() => {
-    setTitle("Tableau de bord Mutuelle");
+    setTitle("Tableau de Bord Assurances");
   }, [setTitle]);
 
   useEffect(() => {
     const fetchStats = async () => {
+      // Tentative de récupération depuis le cache pour un chargement instantané
+      const cachedData = sessionStorage.getItem('mutuelle_dashboard_cache');
+      const cacheTimestamp = sessionStorage.getItem('mutuelle_dashboard_timestamp');
+      const now = Date.now();
+
+      if (cachedData && cacheTimestamp && (now - parseInt(cacheTimestamp)) < 120000) { // 2 minutes de cache
+        setData(JSON.parse(cachedData));
+        setLoading(false);
+        return;
+      }
+
       setLoading(true);
       setError(null);
       try {
         const resp = await api.get("/mutuelle/dashboard-stats");
-        console.log("Dashboard Data:", resp.data);
         setData(resp.data);
+        // Mise en cache des résultats
+        sessionStorage.setItem('mutuelle_dashboard_cache', JSON.stringify(resp.data));
+        sessionStorage.setItem('mutuelle_dashboard_timestamp', now.toString());
       } catch (e) {
         console.error("Dashboard Error:", e);
         setError("Impossible de charger les données.");
-        // Fallback dummy data for display purposes if API fails
         setData({
           kpis: { affiliations_actives: 0, affiliations_inactives: 0, dossiers_en_cours: 0, dossiers_termines: 0 },
           latest_affiliations: [],
@@ -390,6 +403,20 @@ function MutuelleDashboard() {
 
   // Calculate specific counters if missing in KPI object but present in lists
   const rawAffList = data?.latest_affiliations || data?.recentAffiliations || [];
+  const filteredAffiliations = useMemo(() => {
+    if (!normalizedSearch) return rawAffList;
+    return rawAffList.filter((a) => {
+      const values = [
+        a.employe?.nom,
+        a.employe?.prenom,
+        a.employe?.matricule,
+        a.statut,
+        a.date_adhesion || a.date_affiliation,
+      ];
+      return values.some((v) => v && v.toString().toLowerCase().includes(normalizedSearch));
+    });
+  }, [rawAffList, normalizedSearch]);
+
   const computedActive = data?.kpis?.affiliations_actives ?? rawAffList.filter(a => (a.statut || "").trim() === "ACTIVE").length;
   const computedInactive = data?.kpis?.affiliations_inactives ?? rawAffList.filter(a => (a.statut || "").trim() === "RESILIE").length;
 
@@ -400,14 +427,28 @@ function MutuelleDashboard() {
     completed: kpis.dossiers_termines || 0
   };
 
-  const affRows = (data?.latest_affiliations || data?.recentAffiliations || []).slice(0, 5).map(a => [
+  const affRows = filteredAffiliations.slice(0, 5).map(a => [
     `${a.employe?.nom || ""} ${a.employe?.prenom || ""}`,
     a.employe?.matricule || "-",
     formatDate(a.date_adhesion || a.date_affiliation),
     a.statut || "-"
   ]);
 
-  const dosRows = (data?.latest_dossiers || data?.recentDossiers || []).slice(0, 5).map(d => [
+  const filteredDossiers = useMemo(() => {
+    const list = data?.latest_dossiers || data?.recentDossiers || [];
+    if (!normalizedSearch) return list;
+    return list.filter((d) => {
+      const values = [
+        d.type_operation || d.type,
+        d.statut,
+        d.date_operation || d.date,
+        `${d.employe?.nom || ""} ${d.employe?.prenom || ""}`,
+      ];
+      return values.some((v) => v && v.toString().toLowerCase().includes(normalizedSearch));
+    });
+  }, [data, normalizedSearch]);
+
+  const dosRows = filteredDossiers.slice(0, 5).map(d => [
     formatDate(d.date_operation || d.date),
     d.type_operation || d.type || "-",
     `${d.employe?.nom || ""} ${d.employe?.prenom || ""}`,
@@ -443,8 +484,8 @@ function MutuelleDashboard() {
 
         {/* Header */}
         <Box sx={{ mb: 4 }}>
-          <Typography variant="h4" gutterBottom>Tableau de Bord Mutuelle</Typography>
-          <Typography variant="subtitle1">Aperçu global des affiliations et des dossiers médicaux</Typography>
+          <Typography variant="h4" gutterBottom>Tableau de Bord Assurances</Typography>
+          <Typography variant="subtitle1">Aperçu global des affiliations et des opérations</Typography>
         </Box>
 
         {/* KPIs Grid */}
@@ -467,7 +508,7 @@ function MutuelleDashboard() {
           </Grid>
           <Grid item xs={12} sm={6} lg={3}>
             <StatCard
-              title="Dossiers En Cours"
+              title="Opérations En Cours"
               value={displayKpis.pending}
               icon={Clock}
               color={COLORS.info} // Blue for specific info/pending state
@@ -475,13 +516,18 @@ function MutuelleDashboard() {
           </Grid>
           <Grid item xs={12} sm={6} lg={3}>
             <StatCard
-              title="Dossiers Traités"
+              title="Opérations Traitées"
               value={displayKpis.completed}
               icon={CheckCircle}
               color={COLORS.success}
             />
           </Grid>
         </Grid>
+
+        {/* Distribution Chart */}
+        <Box sx={{ mb: 4 }}>
+          <ChartSection distribution={distribution} />
+        </Box>
 
         {/* Tables Section */}
         <Grid container spacing={3} sx={{ mb: 4 }}>
@@ -497,20 +543,15 @@ function MutuelleDashboard() {
           </Grid>
           <Grid item xs={12} xl={6}>
             <TableSection
-              title="Derniers Dossiers"
+              title="Dernières Opérations"
               icon={FileText}
               columns={["Date", "Type", "Employé", "Statut"]}
               data={dosRows}
-              emptyMessage="Aucun dossier récent"
+              emptyMessage="Aucune opération récente"
               statusIndex={3}
             />
           </Grid>
         </Grid>
-
-        {/* Distribution Chart */}
-        <Box sx={{ mb: 4 }}>
-          <ChartSection distribution={distribution} />
-        </Box>
 
       </Box>
     </ThemeProvider>
@@ -518,3 +559,6 @@ function MutuelleDashboard() {
 }
 
 export default MutuelleDashboard;
+
+
+
