@@ -654,38 +654,35 @@ function GestionOperationsEmployes() {
 
     return (
       <div style={{ padding: '0px 20px 15px 60px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px', color: '#1a3353', lineHeight: 1 }}>
-          <FontAwesomeIcon icon={faFileAlt} style={{ fontSize: '14px' }} />
-          <h6 style={{ margin: 0, fontSize: '13px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.02em' }}>
-            DOCUMENTS DE L'OPÉRATION
-          </h6>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', color: '#475569', fontSize: '0.95rem', fontWeight: 600 }}>
+          <FontAwesomeIcon icon={faFileAlt} style={{ fontSize: '20px' }} />
+          DOCUMENTS DE L'OPÉRATION
         </div>
         <div style={{
-          backgroundColor: '#fff',
-          borderRadius: '10px',
-          border: '1px solid #e1e6ed',
-          overflow: 'hidden',
-          boxShadow: '0 2px 4px rgba(0,0,0,0.02)'
+          backgroundColor: '#ffffff',
+          borderRadius: '8px',
+          border: '1px solid #e5e7eb',
+          overflow: 'hidden'
         }}>
-          <table className="table mb-0" style={{ fontSize: '13px', borderCollapse: 'collapse' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
             <thead>
-              <tr style={{ borderBottom: '1px solid #edf2f7' }}>
-                <th style={{ padding: '12px 20px', fontWeight: '700', color: '#000' }}>Fichier</th>
-                <th style={{ padding: '12px 20px', fontWeight: '700', color: '#000' }}>Date</th>
-                <th style={{ padding: '12px 20px', fontWeight: '700', color: '#000', textAlign: 'right' }}>Actions</th>
+              <tr style={{ backgroundColor: '#f9fafb', borderBottom: '1px solid #e5e7eb' }}>
+                <th style={{ padding: '12px 16px', textAlign: 'left', color: '#6b7280', fontWeight: '600' }}>Fichier</th>
+                <th style={{ padding: '12px 16px', textAlign: 'left', color: '#6b7280', fontWeight: '600' }}>Date</th>
+                <th style={{ padding: '12px 16px', textAlign: 'right', color: '#6b7280', fontWeight: '600' }}>Actions</th>
               </tr>
             </thead>
             <tbody>
               {op.documents.map((doc) => (
-                <tr key={doc.id} style={{ borderBottom: '1px solid #f8fafc' }}>
-                  <td style={{ padding: '12px 20px', color: '#333' }}>{doc.nom || doc.file_name}</td>
-                  <td style={{ padding: '12px 20px', color: '#444' }}>{doc.created_at ? new Date(doc.created_at).toLocaleString() : '-'}</td>
-                  <td style={{ padding: '12px 20px', textAlign: 'right' }}>
+                <tr key={doc.id}>
+                  <td style={{ padding: '12px 16px', color: '#111827', fontWeight: '600' }}>{doc.nom || doc.file_name}</td>
+                  <td style={{ padding: '12px 16px', color: '#111827', fontWeight: '600' }}>{doc.created_at ? new Date(doc.created_at).toLocaleString() : '-'}</td>
+                  <td style={{ padding: '12px 16px', textAlign: 'right' }}>
                     <div style={{ display: 'flex', gap: '15px', justifyContent: 'flex-end' }}>
                       <a href={`http://localhost:8000/storage/${doc.file_path}`} target="_blank" rel="noopener noreferrer" style={{ color: '#007580' }}>
                         <FaEye size={16} />
                       </a>
-                      <a href={`http://localhost:8000/api/mutuelles/documents/${doc.id}/download`} style={{ color: '#17a2b8' }}>
+                      <a href={`http://localhost:8000/api/mutuelles/documents/${doc.id}/download`} style={{ color: '#64748b' }}>
                         <FontAwesomeIcon icon={faDownload} size="lg" />
                       </a>
                       <button onClick={async (e) => {
@@ -703,7 +700,7 @@ function GestionOperationsEmployes() {
                             showErrorMessage('Erreur', 'Impossible de supprimer le document.');
                           }
                         }
-                      }} style={{ border: 'none', background: 'transparent', color: '#dc3545', padding: 0 }}>
+                      }} style={{ border: 'none', background: 'transparent', color: '#dc3545', padding: 0, cursor: 'pointer' }}>
                         <FontAwesomeIcon icon={faTrash} size="lg" />
                       </button>
                     </div>

@@ -668,61 +668,74 @@ const AffiliationMutuelleTable = forwardRef((props, ref) => {
             colSpan={visibleColumns.length + 3}
             style={{ backgroundColor: "#f8fbfb", padding: "10px 20px 20px 60px" }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', color: '#4b5563', lineHeight: 1 }}>
-              <FileText size={16} color="#64748b" />
-              <h6 style={{ margin: 0, fontSize: '13px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.02em' }}>
+            <div style={{ marginBottom: '16px' }}>
+              <div style={{
+                display: "flex",
+                alignItems: "center",
+                gap: '8px',
+                marginBottom: '8px',
+                color: "#475569",
+                fontSize: "0.95rem",
+                fontWeight: 600,
+              }}>
+                <FileText size={20} />
                 DÉTAILS DE L'AFFILIATION
-              </h6>
-            </div>
+              </div>
 
-            <div style={{
-              backgroundColor: '#fff',
-              borderRadius: '8px',
-              border: '1px solid #e5e7eb',
-              overflow: 'hidden',
-              boxShadow: '0 2px 4px rgba(0,0,0,0.02)'
-            }}>
-              <table className="table mb-0" style={{ fontSize: '13px', borderCollapse: 'collapse', width: '100%' }}>
-                <thead>
-                  <tr style={{ borderBottom: '1px solid #f3f4f6', backgroundColor: '#f9fafb' }}>
-                    <th style={{ padding: '10px 15px', fontWeight: '700', color: '#4b5563', width: '25%' }}>Champ</th>
-                    <th style={{ padding: '10px 15px', fontWeight: '700', color: '#4b5563' }}>Valeur</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr style={{ borderBottom: '1px solid #f9fafb' }}>
-                    <td style={{ padding: '10px 15px', color: '#6b7280', fontWeight: '500' }}>Numéro d'adhérent</td>
-                    <td style={{ padding: '10px 15px', color: '#111827', fontWeight: '600' }}>{affiliation.numero_adherent || "-"}</td>
-                  </tr>
-                  <tr style={{ borderBottom: '1px solid #f9fafb' }}>
-                    <td style={{ padding: '10px 15px', color: '#6b7280', fontWeight: '500' }}>Date d'affiliation</td>
-                    <td style={{ padding: '10px 15px', color: '#111827', fontWeight: '600' }}>{formatDate(affiliation.date_adhesion)}</td>
-                  </tr>
-                  <tr style={{ borderBottom: '1px solid #f9fafb' }}>
-                    <td style={{ padding: '10px 15px', color: '#6b7280', fontWeight: '500' }}>Statut</td>
-                    <td style={{ padding: '10px 15px', color: '#111827', fontWeight: '600' }}>{affiliation.statut || "-"}</td>
-                  </tr>
-                  <tr style={{ borderBottom: '1px solid #f9fafb' }}>
-                    <td style={{ padding: '10px 15px', color: '#6b7280', fontWeight: '500' }}>Répartition</td>
-                    <td style={{ padding: '10px 15px', color: '#111827', fontWeight: '600' }}>
-                      Employeur: <span style={{ color: '#00afaa' }}>{affiliation.regime?.part_employeur_pct ?? "-"}%</span> |
-                      Employé: <span style={{ color: '#00afaa' }}>{affiliation.regime?.part_employe_pct ?? "-"}%</span>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td style={{ padding: '10px 15px', color: '#6b7280', fontWeight: '500' }}>Observations</td>
-                    <td style={{ padding: '10px 15px', color: '#111827', fontStyle: affiliation.commentaire ? 'normal' : 'italic' }}>
-                      {affiliation.commentaire || "Aucune observation"}
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
+              <div style={{
+                backgroundColor: "#ffffff",
+                borderRadius: "8px",
+                border: "1px solid #e5e7eb",
+                overflow: "hidden"
+              }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
+                  <thead>
+                    <tr style={{ backgroundColor: '#f9fafb', borderBottom: '1px solid #e5e7eb' }}>
+                      <th style={{ padding: '12px 16px', textAlign: 'left', color: '#6b7280', fontWeight: '600' }}>
+                        Numéro d'adhérent
+                      </th>
+                      <th style={{ padding: '12px 16px', textAlign: 'left', color: '#6b7280', fontWeight: '600' }}>
+                        Date d'affiliation
+                      </th>
+                      <th style={{ padding: '12px 16px', textAlign: 'left', color: '#6b7280', fontWeight: '600' }}>
+                        Statut
+                      </th>
+                      <th style={{ padding: '12px 16px', textAlign: 'left', color: '#6b7280', fontWeight: '600' }}>
+                        Répartition
+                      </th>
+                      <th style={{ padding: '12px 16px', textAlign: 'left', color: '#6b7280', fontWeight: '600' }}>
+                        Observations
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td style={{ padding: '12px 16px', color: '#111827', fontWeight: '600' }}>
+                        {affiliation.numero_adherent || "-"}
+                      </td>
+                      <td style={{ padding: '12px 16px', color: '#111827', fontWeight: '600' }}>
+                        {formatDate(affiliation.date_adhesion)}
+                      </td>
+                      <td style={{ padding: '12px 16px', color: '#111827', fontWeight: '600' }}>
+                        {affiliation.statut || "-"}
+                      </td>
+                      <td style={{ padding: '12px 16px', color: '#111827', fontWeight: '600' }}>
+                        Employeur: <span style={{ color: '#00afaa' }}>{affiliation.regime?.part_employeur_pct ?? "-"}%</span> |
+                        Employé: <span style={{ color: '#00afaa' }}>{affiliation.regime?.part_employe_pct ?? "-"}%</span>
+                      </td>
+                      <td style={{ padding: '12px 16px', color: '#111827', fontStyle: affiliation.commentaire ? 'normal' : 'italic' }}>
+                        {affiliation.commentaire || "Aucune observation"}
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
             </div>
           </td>
         </tr>
       );
     },
-    [visibleColumns.length]
+    [visibleColumns.length, formatDate]
   );
 
   // --------------------------
