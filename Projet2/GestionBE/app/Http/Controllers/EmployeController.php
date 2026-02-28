@@ -37,6 +37,7 @@ class EmployeController extends Controller
     public function listLight()
     {
         return Employe::select('id', 'nom', 'prenom', 'matricule', 'departement_id', 'cin', 'fonction', 'date_entree')
+            ->with('departement:id,nom')
             ->where('active', 1)
             ->get();
     }

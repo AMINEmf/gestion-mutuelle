@@ -5,6 +5,7 @@ const HeaderContext = createContext(null);
 export function HeaderProvider({ children }) {
   const [title, setTitle] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
+  const [showSearch, setShowSearch] = useState(true);
   const [onPrint, setOnPrint] = useState(undefined);
   const [onExportPDF, setOnExportPDF] = useState(undefined);
   const [onExportExcel, setOnExportExcel] = useState(undefined);
@@ -21,6 +22,8 @@ export function HeaderProvider({ children }) {
       setTitle,
       searchQuery,
       setSearchQuery,
+      showSearch,
+      setShowSearch,
       onPrint,
       setOnPrint,
       onExportPDF,
@@ -29,7 +32,7 @@ export function HeaderProvider({ children }) {
       setOnExportExcel,
       clearActions,
     }),
-    [title, searchQuery, onPrint, onExportPDF, onExportExcel, clearActions]
+    [title, searchQuery, showSearch, onPrint, onExportPDF, onExportExcel, clearActions]
   );
 
   return <HeaderContext.Provider value={value}>{children}</HeaderContext.Provider>;

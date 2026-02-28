@@ -65,6 +65,13 @@ class Employe extends Model
 {
     return $this->belongsToMany(Departement::class, 'employe_departement', 'employe_id', 'departement_id');
 }
+
+    // Relation belongsTo pour le département principal
+    public function departement()
+    {
+        return $this->belongsTo(Departement::class, 'departement_id');
+    }
+
 public function contrat()
     {
         return $this->hasMany(Contrat::class);
@@ -94,6 +101,21 @@ public function demandesConges()
     return $this->hasMany(GpDemandeConge::class, 'employe_id');
 }
 
+/**
+ * Un employé peut avoir plusieurs affiliations mutuelle
+ */
+public function affiliationsMutuelle()
+{
+    return $this->hasMany(AffiliationMutuelle::class, 'employe_id');
+}
+
+/**
+ * Un employé peut avoir plusieurs documents mutuelle
+ */
+public function mutuelleDocuments()
+{
+    return $this->hasMany(MutuelleDocument::class, 'employe_id');
+}
 
 
 

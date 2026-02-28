@@ -64,7 +64,10 @@ use App\Http\Controllers\RegleCompensationController;
 use App\Http\Controllers\PaysController;
 use App\Http\Controllers\GpCalendrierEmployeController;
 use App\Http\Controllers\DetailsCalendrieController;
-
+use App\Http\Controllers\ConflitController;
+use App\Http\Controllers\ConflitResourceController;
+use App\Http\Controllers\SanctionController;
+use App\Http\Controllers\SanctionResourceController;
 
 use App\Models\Role;
 use Illuminate\Http\Request;
@@ -396,8 +399,9 @@ Route::post('/departements/{departement}/children', [DepartementController::clas
 Route::get('/departements/{departementId}/employes', [EmployeController::class, 'index']);
 // // Route::post('/departements/employes', [EmployeController::class, 'storeEmployeForDepartement']);
 
-Route::put('/employes/{employe}', [EmployeController::class, 'update']);
-Route::delete('/employes/{employe}', [EmployeController::class, 'destroy']);
+Route::put('/employes/{employe}', [EmployeController::class, 'update'])->where('employe', '[0-9]+');
+Route::delete('/employes/{employe}', [EmployeController::class, 'destroy'])->where('employe', '[0-9]+');
+Route::get('/employes/{employe}', [EmployeController::class, 'show'])->where('employe', '[0-9]+');
 
 
 Route::get('/employe-departements', [EmployeDepartementController::class, 'index']);
@@ -621,6 +625,51 @@ Route::apiResource('cimr-declarations', CimrDeclarationController::class);
 Route::apiResource('accident-lieux', AccidentLieuController::class);
 Route::apiResource('accident-types', AccidentTypeController::class);
 Route::apiResource('accident-natures', AccidentNatureController::class);
+
+// Conflits / Incidents API
+Route::get('conflits/dashboard-stats', [ConflitController::class, 'dashboardStats']);
+Route::get('conflits/labels', [ConflitController::class, 'getLabels']);
+Route::post('conflits/{conflit}/fichiers', [ConflitController::class, 'uploadFile']);
+Route::delete('conflits/{conflit}/fichiers/{pieceJointe}', [ConflitController::class, 'deleteFile']);
+Route::apiResource('conflits', ConflitController::class);
+
+// Conflit Resources (Lieux, Types, Statuts)
+Route::get('conflit-lieux', [ConflitResourceController::class, 'indexLieux']);
+Route::post('conflit-lieux', [ConflitResourceController::class, 'storeLieu']);
+Route::put('conflit-lieux/{id}', [ConflitResourceController::class, 'updateLieu']);
+Route::delete('conflit-lieux/{id}', [ConflitResourceController::class, 'destroyLieu']);
+
+Route::get('conflit-types', [ConflitResourceController::class, 'indexTypes']);
+Route::post('conflit-types', [ConflitResourceController::class, 'storeType']);
+Route::put('conflit-types/{id}', [ConflitResourceController::class, 'updateType']);
+Route::delete('conflit-types/{id}', [ConflitResourceController::class, 'destroyType']);
+
+Route::get('conflit-statuts', [ConflitResourceController::class, 'indexStatuts']);
+Route::post('conflit-statuts', [ConflitResourceController::class, 'storeStatut']);
+Route::put('conflit-statuts/{id}', [ConflitResourceController::class, 'updateStatut']);
+Route::delete('conflit-statuts/{id}', [ConflitResourceController::class, 'destroyStatut']);
+
+// Sanctions Disciplinaires API
+Route::get('sanctions/dashboard-stats', [SanctionController::class, 'dashboardStats']);
+Route::get('sanctions/employee-history/{matricule}', [SanctionController::class, 'employeeHistory']);
+Route::apiResource('sanctions', SanctionController::class);
+
+// Sanction Resources (Types, Gravités, Statuts)
+Route::get('sanction-types', [SanctionResourceController::class, 'indexTypes']);
+Route::post('sanction-types', [SanctionResourceController::class, 'storeType']);
+Route::put('sanction-types/{sanction_type}', [SanctionResourceController::class, 'updateType']);
+Route::delete('sanction-types/{sanction_type}', [SanctionResourceController::class, 'destroyType']);
+
+Route::get('sanction-gravites', [SanctionResourceController::class, 'indexGravites']);
+Route::post('sanction-gravites', [SanctionResourceController::class, 'storeGravite']);
+Route::put('sanction-gravites/{sanction_gravite}', [SanctionResourceController::class, 'updateGravite']);
+Route::delete('sanction-gravites/{sanction_gravite}', [SanctionResourceController::class, 'destroyGravite']);
+
+Route::get('sanction-statuts', [SanctionResourceController::class, 'indexStatuts']);
+Route::post('sanction-statuts', [SanctionResourceController::class, 'storeStatut']);
+Route::put('sanction-statuts/{sanction_statut}', [SanctionResourceController::class, 'updateStatut']);
+Route::delete('sanction-statuts/{sanction_statut}', [SanctionResourceController::class, 'destroyStatut']);
+
 Route::get('/departements/employes', [EmployeController::class, 'index']);
 // Endpoint léger pour AccidentTable, CimrTable (sans relations lourdes)
 Route::get('/employes/light', [EmployeController::class, 'listLight']);
@@ -1204,5 +1253,161 @@ Route::apiResource('horaire-exceptionnel', HoraireExceptionnelController::class)
 
 });
 
+// ========================================
+// ROUTES MUTUELLE / ASSURANCE (Public Access)
+// ========================================
+use App\Http\Controllers\MutuelleController;
+use App\Http\Controllers\RegimeMutuelleController;
+use App\Http\Controllers\AffiliationMutuelleController;
+use App\Http\Controllers\MutuelleDossierController;
+use App\Http\Controllers\MutuelleDocumentController;
+use App\Http\Controllers\MutuelleOperationController;
+use App\Http\Controllers\TypeOperationController;
+use App\Http\Controllers\TypeDocumentController;
+use App\Http\Controllers\MutuelleDashboardController;
+
+// Dashboard Mutuelle
+Route::get('/mutuelle/dashboard-stats', [MutuelleDashboardController::class, 'dashboardStats']);
+
+// Routes pour mutuelles
+Route::prefix('mutuelles')->group(function () {
+    // Dossiers - Routes spécifiques AVANT les routes wildcard
+    Route::get('/dossiers', [MutuelleDossierController::class, 'index']);
+    Route::get('/dossiers/{employe}/documents', [MutuelleDocumentController::class, 'index']);
+    Route::get('/dossiers/{employe}/operations', [MutuelleOperationController::class, 'indexByEmploye']);
+    Route::post('/dossiers/{employe}/documents', [MutuelleDocumentController::class, 'storeByEmploye']);
+    Route::post('/dossiers/{employe}/operations', [MutuelleOperationController::class, 'storeByEmploye']);
+    // Route wildcard EN DERNIER
+    Route::get('/dossiers/{numero_dossier}', [MutuelleDossierController::class, 'show'])->where('numero_dossier', '.*');
+
+    // Mutuelles CRUD
+    Route::get('/', [MutuelleController::class, 'index']);
+    Route::get('/{id}', [MutuelleController::class, 'show']);
+    Route::get('/{mutuelle_id}/regimes', [MutuelleController::class, 'regimes']);
+    Route::post('/{mutuelle_id}/regimes', [RegimeMutuelleController::class, 'storeForMutuelle']);
+    Route::put('/{mutuelle_id}/regimes/{id}', [RegimeMutuelleController::class, 'updateForMutuelle']);
+    Route::delete('/{mutuelle_id}/regimes/{id}', [RegimeMutuelleController::class, 'destroyForMutuelle']);
+    Route::post('/', [MutuelleController::class, 'store']);
+    Route::put('/{id}', [MutuelleController::class, 'update']);
+    Route::delete('/{id}', [MutuelleController::class, 'destroy']);
+
+    // Operations (General)
+    Route::put('/operations/{operation}', [MutuelleOperationController::class, 'update']);
+    Route::delete('/operations/{operation}', [MutuelleOperationController::class, 'destroy']);
+
+    // Documents (General)
+    Route::post('/documents', [MutuelleDocumentController::class, 'store']);
+    Route::delete('/documents/{document}', [MutuelleDocumentController::class, 'destroy']);
+    Route::get('/documents/{document}/download', [MutuelleDocumentController::class, 'download']);
+
+    // Parametrage Types Operations
+    Route::get('/parametrage/types-operations', [TypeOperationController::class, 'index']);
+    Route::post('/parametrage/types-operations', [TypeOperationController::class, 'store']);
+    Route::get('/parametrage/types-operations/{id}', [TypeOperationController::class, 'show']);
+    Route::put('/parametrage/types-operations/{id}', [TypeOperationController::class, 'update']);
+    Route::delete('/parametrage/types-operations/{id}', [TypeOperationController::class, 'destroy']);
+
+    // Parametrage Types Documents
+    Route::get('/parametrage/types-documents', [TypeDocumentController::class, 'index']);
+    Route::post('/parametrage/types-documents', [TypeDocumentController::class, 'store']);
+    Route::get('/parametrage/types-documents/{id}', [TypeDocumentController::class, 'show']);
+    Route::put('/parametrage/types-documents/{id}', [TypeDocumentController::class, 'update']);
+    Route::delete('/parametrage/types-documents/{id}', [TypeDocumentController::class, 'destroy']);
+});
+
+// Régimes & Affiliations (Public/Read)
+Route::get('/regimes-mutuelle', [RegimeMutuelleController::class, 'index']);
+Route::get('/regimes-mutuelle/{id}', [RegimeMutuelleController::class, 'show']);
+Route::get('/regimes-mutuelle/mutuelle/{mutuelle_id}', [RegimeMutuelleController::class, 'getByMutuelle']);
+
+Route::get('/employes/eligibles-mutuelle', [AffiliationMutuelleController::class, 'employesEligibles']);
+Route::get('/employes/affilies-mutuelle', [AffiliationMutuelleController::class, 'employesAffilies']);
+Route::get('/employes/{id}/affiliations-mutuelle', [AffiliationMutuelleController::class, 'getByEmploye']);
+Route::get('/affiliations-mutuelle', [AffiliationMutuelleController::class, 'index']);
+Route::get('/affiliations-mutuelle/{id}', [AffiliationMutuelleController::class, 'show']);
+
+// Actions pour Régimes & Affiliations
+Route::post('/regimes-mutuelle', [RegimeMutuelleController::class, 'store']);
+Route::put('/regimes-mutuelle/{id}', [RegimeMutuelleController::class, 'update']);
+Route::delete('/regimes-mutuelle/{id}', [RegimeMutuelleController::class, 'destroy']);
+Route::post('/affiliations-mutuelle', [AffiliationMutuelleController::class, 'store']);
+Route::put('/affiliations-mutuelle/{id}', [AffiliationMutuelleController::class, 'update']);
+Route::delete('/affiliations-mutuelle/{id}', [AffiliationMutuelleController::class, 'destroy']);
+Route::put('/affiliations-mutuelle/{id}/resilier', [AffiliationMutuelleController::class, 'resilier']);
+
+// ========================================
+// ROUTES CNSS / SECURITE SOCIALE (Public Access)
+// ========================================
+use App\Http\Controllers\CnssAffiliationController;
+use App\Http\Controllers\CnssDashboardController;
+use App\Http\Controllers\CnssDossierController;
+use App\Http\Controllers\CnssOperationController;
+use App\Http\Controllers\CnssDocumentController;
+use App\Http\Controllers\CnssDeclarationController;
+use App\Http\Controllers\DeclarationIndividuelleCnssController;
+
+// Dashboard CNSS
+Route::get('/cnss/dashboard', [CnssDashboardController::class, 'dashboardStats']);
+Route::get('/cnss/dashboard-stats', [CnssDashboardController::class, 'dashboardStats']);
+
+// Routes pour CNSS
+Route::prefix('cnss')->group(function () {
+    // Affiliations CNSS
+    Route::get('/affiliations', [CnssAffiliationController::class, 'index']);
+    Route::get('/affiliations/{id}', [CnssAffiliationController::class, 'show']);
+    Route::post('/affiliations', [CnssAffiliationController::class, 'store']);
+    Route::put('/affiliations/{id}', [CnssAffiliationController::class, 'update']);
+    Route::delete('/affiliations/{id}', [CnssAffiliationController::class, 'destroy']);
+    
+    // Dossiers
+    Route::get('/dossiers', [CnssDossierController::class, 'index']);
+    Route::get('/dossiers/{employe}', [CnssDossierController::class, 'show']);
+    
+    // Operations par employé
+    Route::get('/dossiers/{employe}/operations', [CnssOperationController::class, 'index']);
+    Route::post('/dossiers/{employe}/operations', [CnssOperationController::class, 'store']);
+    
+    // Documents par employé
+    Route::post('/dossiers/{employe}/documents', [CnssDocumentController::class, 'store']);
+    
+    // Operations CRUD
+    Route::get('/operations/{operation}', [CnssOperationController::class, 'show']);
+    Route::put('/operations/{operation}', [CnssOperationController::class, 'update']);
+    Route::delete('/operations/{operation}', [CnssOperationController::class, 'destroy']);
+    
+    // Documents par opération
+    Route::post('/operations/{operation}/documents', [CnssDocumentController::class, 'storeForOperation']);
+    
+    // Documents CRUD
+    Route::get('/documents/{document}/download', [CnssDocumentController::class, 'download']);
+    Route::delete('/documents/{document}', [CnssDocumentController::class, 'destroy']);
+    
+    // Déclarations CNSS mensuelles
+    Route::get('/declarations', [CnssDeclarationController::class, 'index']);
+    Route::get('/declarations/eligible-employees', [CnssDeclarationController::class, 'eligibleEmployees']);
+    Route::get('/declarations/{id}', [CnssDeclarationController::class, 'show']);
+    Route::post('/declarations', [CnssDeclarationController::class, 'store']);
+    Route::put('/declarations/{id}', [CnssDeclarationController::class, 'update']);
+    Route::delete('/declarations/{id}', [CnssDeclarationController::class, 'destroy']);
+    
+    // Déclarations individuelles CNSS
+    Route::get('/declarations-individuelles', [DeclarationIndividuelleCnssController::class, 'index']);
+    Route::get('/declarations-individuelles/{id}', [DeclarationIndividuelleCnssController::class, 'show']);
+    Route::post('/declarations-individuelles', [DeclarationIndividuelleCnssController::class, 'store']);
+    Route::put('/declarations-individuelles/{id}', [DeclarationIndividuelleCnssController::class, 'update']);
+    Route::delete('/declarations-individuelles/{id}', [DeclarationIndividuelleCnssController::class, 'destroy']);
+});
+
+// Alias routes for CNSS (backwards compatibility)
+Route::get('/employes/eligibles-cnss', [CnssAffiliationController::class, 'employesEligibles']);
+Route::get('/employes/{id}/affiliations-cnss', [CnssAffiliationController::class, 'getByEmploye']);
+Route::get('/employes/{id}/declarations-individuelles-cnss', [DeclarationIndividuelleCnssController::class, 'byEmploye'])->where('id', '[0-9]+');
+Route::get('/affiliations-cnss', [CnssAffiliationController::class, 'index']);
+Route::post('/affiliations-cnss', [CnssAffiliationController::class, 'store']);
+Route::put('/affiliations-cnss/{id}', [CnssAffiliationController::class, 'update']);
+Route::delete('/affiliations-cnss/{id}', [CnssAffiliationController::class, 'destroy']);
+
+// Alias for employees (English) to employes endpoint
+Route::get('/employees/{employe}', [EmployeController::class, 'show']);
 
   

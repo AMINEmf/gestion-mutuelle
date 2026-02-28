@@ -74,11 +74,16 @@ import RequestQuoteIcon from "@mui/icons-material/RequestQuote";
 import BeachAccessIcon from "@mui/icons-material/BeachAccess";
 import GavelIcon from "@mui/icons-material/Gavel";
 import ReportProblemIcon from "@mui/icons-material/ReportProblem";
+import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 import FunctionsIcon from "@mui/icons-material/Functions";
 import SettingsIcon from "@mui/icons-material/Settings";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import AlarmIcon from "@mui/icons-material/Alarm";
 import AssignmentIndIcon from '@mui/icons-material/AssignmentInd';
+import AssignmentIcon from '@mui/icons-material/Assignment';
+import PersonIcon from '@mui/icons-material/Person';
+import LocalHospitalIcon from '@mui/icons-material/LocalHospital';
+import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
 import { useOpen } from "./OpenProvider";
 
 
@@ -386,6 +391,8 @@ const Navigation = () => {
   const [isCongeOpen, setIsCongeOpen] = useState(false);
   const [isSocieteOpen, setIsSocieteOpen] = useState(false);
   const [isCimrOpen, setIsCimrOpen] = useState(false);
+  const [isMutuelleOpen, setIsMutuelleOpen] = useState(false);
+  const [isCnssOpen, setIsCnssOpen] = useState(false);
   const [isThemeOpen, setIsThemeOpen] = useState(false);
 
 
@@ -458,6 +465,14 @@ const Navigation = () => {
 
   const handleCimrClick = () => {
     setIsCimrOpen(!isCimrOpen);
+  };
+
+  const handleMutuelleClick = () => {
+    setIsMutuelleOpen(!isMutuelleOpen);
+  };
+
+  const handleCnssClick = () => {
+    setIsCnssOpen(!isCnssOpen);
   };
 
 
@@ -871,6 +886,34 @@ const Navigation = () => {
               <ListItemText primary="Accidents de travail" />
             </ListItem>
 
+            {/* Menu Conflits / Incidents */}
+            <ListItem
+              button
+              component={Link}
+              to="/conflits"
+              style={{ color: "white" }}
+              sx={{ "& .MuiListItemIcon-root": { minWidth: 56 } }}
+            >
+              <ListItemIcon>
+                <WarningAmberIcon style={{ fontSize: "1.6rem", color: "white" }} />
+              </ListItemIcon>
+              <ListItemText primary="Conflits / Incidents" />
+            </ListItem>
+
+            {/* Menu Sanctions disciplinaires */}
+            <ListItem
+              button
+              component={Link}
+              to="/sanctions"
+              style={{ color: "white" }}
+              sx={{ "& .MuiListItemIcon-root": { minWidth: 56 } }}
+            >
+              <ListItemIcon>
+                <GavelIcon style={{ fontSize: "1.6rem", color: "white" }} />
+              </ListItemIcon>
+              <ListItemText primary="Sanctions disciplinaires" />
+            </ListItem>
+
             {/* Menu Gestion CIMR */}
             <ListItem
               button
@@ -904,6 +947,92 @@ const Navigation = () => {
                     <AssignmentIndIcon />
                   </ListItemIcon>
                   <ListItemText primary="Déclarations CIMR" />
+                </SubMenuItem>
+              </List>
+            </Collapse>
+
+            {/* Menu Gestion Mutuelle */}
+            <ListItem
+              button
+              onClick={handleMutuelleClick}
+              sx={{ "& .MuiListItemIcon-root": { minWidth: 56 } }}
+              style={{ color: "white", display: "flex" }}
+            >
+              <ListItemIcon>
+                <LocalHospitalIcon style={{ fontSize: "1.6rem", color: "white" }} />
+              </ListItemIcon>
+              <ListItemText primary="Gestion Mutuelle" />
+              {isMutuelleOpen ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
+            </ListItem>
+
+            <Collapse in={isMutuelleOpen} timeout="auto" unmountOnExit>
+              <List component="div" disablePadding>
+                <SubMenuItem button component={Link} to="/mutuelle/dashboard">
+                  <ListItemIcon>
+                    <DashboardIcon />
+                  </ListItemIcon>
+                  <ListItemText primary="Tableau de bord" />
+                </SubMenuItem>
+                <SubMenuItem button component={Link} to="/affiliation-mutuelle">
+                  <ListItemIcon>
+                    <AssignmentIndIcon />
+                  </ListItemIcon>
+                  <ListItemText primary="Affiliations" />
+                </SubMenuItem>
+                <SubMenuItem button component={Link} to="/mutuelle/dossiers">
+                  <ListItemIcon>
+                    <DescriptionIcon />
+                  </ListItemIcon>
+                  <ListItemText primary="Dossiers/Opérations" />
+                </SubMenuItem>
+              </List>
+            </Collapse>
+
+            {/* Menu Gestion CNSS */}
+            <ListItem
+              button
+              onClick={handleCnssClick}
+              sx={{ "& .MuiListItemIcon-root": { minWidth: 56 } }}
+              style={{ color: "white", display: "flex" }}
+            >
+              <ListItemIcon>
+                <AccountBalanceIcon style={{ fontSize: "1.6rem", color: "white" }} />
+              </ListItemIcon>
+              <ListItemText primary="Gestion CNSS" />
+              {isCnssOpen ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
+            </ListItem>
+
+            <Collapse in={isCnssOpen} timeout="auto" unmountOnExit>
+              <List component="div" disablePadding>
+                <SubMenuItem button component={Link} to="/cnss/dashboard">
+                  <ListItemIcon>
+                    <DashboardIcon />
+                  </ListItemIcon>
+                  <ListItemText primary="Tableau de bord" />
+                </SubMenuItem>
+                <SubMenuItem button component={Link} to="/cnss-affiliations">
+                  <ListItemIcon>
+                    <AssignmentIndIcon />
+                  </ListItemIcon>
+                  <ListItemText primary="Affiliations" />
+                </SubMenuItem>
+                <SubMenuItem button component={Link} to="/cnss/dossiers">
+                  <ListItemIcon>
+                    <DescriptionIcon />
+                  </ListItemIcon>
+                  <ListItemText primary="Dossiers/Opérations" />
+                </SubMenuItem>
+                <SubMenuItem button component={Link} to="/cnss/declarations">
+                  <ListItemIcon>
+                    <AssignmentIcon />
+                  </ListItemIcon>
+                  <ListItemText primary="Déclarations" />
+                </SubMenuItem>
+                <SubMenuItem button component={Link} to="/cnss/declarations-individuelles">
+                  <ListItemIcon>
+                    <PersonIcon />
+                  </ListItemIcon>
+                  <ListItemText primary="Déclarations individuelles" />
                 </SubMenuItem>
               </List>
             </Collapse>
