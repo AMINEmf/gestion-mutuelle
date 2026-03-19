@@ -14,11 +14,17 @@ class Unite extends Model
     protected $fillable = [
         'nom',
         'service_id',
+        'departement_id',
     ];
 
     public function service()
     {
         return $this->belongsTo(Service::class, 'service_id');
+    }
+
+    public function departement()
+    {
+        return $this->belongsTo(Departement::class, 'departement_id');
     }
 
     public function postes()

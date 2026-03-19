@@ -28,10 +28,9 @@ import {
 } from "lucide-react";
 import { useHeader } from "../../Acceuil/HeaderContext";
 import { useOpen } from "../../Acceuil/OpenProvider";
+import { API_ORIGIN } from "../../services/apiConfig";
 
-const API_BASE = window.location.hostname === "localhost"
-  ? "http://localhost:8000"
-  : "http://127.0.0.1:8000";
+const API_BASE = API_ORIGIN;
 
 const themeColors = {
   teal: "#2c767c",
@@ -65,7 +64,7 @@ const CNSSDashboard = () => {
   });
 
   useEffect(() => {
-    setTitle("Dashboard CNSS");
+    setTitle("Tableau de bord CNSS");
     return () => {
       clearActions();
     };
@@ -233,13 +232,13 @@ const CNSSDashboard = () => {
 
   const getStatusStyle = (status) => {
     const normalized = String(status || "").toUpperCase();
-    if (["ACTIVE", "TERMINÉE", "PAYE"].includes(normalized))
-      return { color: themeColors.success, bg: `${themeColors.success}33` };
+    if (["ACTIVE", "ACTIF", "TERMINÉE", "TERMINEE", "PAYE"].includes(normalized))
+      return { color: themeColors.success, bg: `${themeColors.success}15` };
     if (["EN_COURS", "EN_ATTENTE", "DECLARE"].includes(normalized))
-      return { color: themeColors.warning, bg: `${themeColors.warning}33` };
-    if (["RESILIE", "REFUSÉE", "ANNULÉE", "ERREUR"].includes(normalized))
-      return { color: themeColors.error, bg: `${themeColors.error}33` };
-    return { color: themeColors.textSecondary, bg: `${themeColors.textSecondary}33` };
+      return { color: themeColors.warning, bg: `${themeColors.warning}15` };
+    if (["RESILIE", "REFUSÉE", "ANNULÉE", "ERREUR", "SUSPENDU", "INACTIF"].includes(normalized))
+      return { color: themeColors.error, bg: `${themeColors.error}15` };
+    return { color: themeColors.textSecondary, bg: `${themeColors.textSecondary}15` };
   };
 
   const StatusChip = ({ status }) => {
@@ -251,11 +250,13 @@ const CNSSDashboard = () => {
         sx={{
           backgroundColor: style.bg,
           color: style.color,
-          fontWeight: 500,
-          fontSize: "0.75rem",
-          borderRadius: "0.5rem",
+          fontWeight: 700,
+          fontSize: "0.65rem",
+          borderRadius: "6px",
           border: "none",
-          height: "1.5rem"
+          height: "1.5rem",
+          textTransform: "uppercase",
+          letterSpacing: "0.3px"
         }}
       />
     );
@@ -266,7 +267,7 @@ const CNSSDashboard = () => {
       <Box
         sx={{
           ...dynamicStyles,
-          backgroundColor: "#f8fafc",
+          backgroundColor: "#ffffff",
           height: "100vh",
           overflowY: "auto",
           minHeight: "100vh",
@@ -286,7 +287,7 @@ const CNSSDashboard = () => {
         {/* Page Title */}
         <Box sx={{ mb: 4 }}>
           <Typography variant="h4" sx={{ fontSize: "1.5rem", fontWeight: 700, color: themeColors.textPrimary }}>
-            Dashboard CNSS
+            Tableau de bord CNSS
           </Typography>
           <Typography variant="body2" sx={{ color: themeColors.textSecondary, mt: 0.5 }}>
             Suivi des affiliations, déclarations et opérations
@@ -305,6 +306,63 @@ const CNSSDashboard = () => {
               />
             </Grid>
           ))}
+        </Grid>
+
+        {/* Status Graph Section */}
+        <Grid container spacing={3} sx={{ mb: 4 }}>
+          <Grid item xs={12} md={6}>
+            <Card
+              sx={{
+                borderRadius: "24px",
+                boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
+                border: `1px solid ${themeColors.divider}`,
+              }}
+            >
+              <CardContent sx={{ p: 3 }}>
+                <Box sx={{ display: "flex", alignItems: "center", mb: 3 }}>
+                  <Box
+                    sx={{
+                      backgroundColor: `${themeColors.info}26`,
+                      borderRadius: "12px",
+                      p: 1,
+                      mr: 2,
+                    }}
+                  >
+                    <CheckCircle size={20} color={themeColors.info} />
+                  </Box>
+                  <Typography variant="h6" sx={{ fontWeight: 700, fontSize: "1.1rem", color: themeColors.textPrimary }}>
+                    Répartition des Statuts
+                  </Typography>
+                </Box>
+
+                {statusRows.map((row) => (
+                  <Box key={row.label} sx={{ mb: "1.25rem" }}>
+                    <Box sx={{ display: "flex", justifyContent: "space-between", mb: "0.5rem", flexWrap: "wrap", gap: "0.5rem" }}>
+                      <Typography variant="body2" sx={{ fontWeight: 600, color: themeColors.textPrimary }}>
+                        {row.label}
+                      </Typography>
+                      <Typography variant="body2" sx={{ fontWeight: 700, color: row.color }}>
+                        {row.count} ({row.percentage}%)
+                      </Typography>
+                    </Box>
+                    <LinearProgress
+                      variant="determinate"
+                      value={row.percentage}
+                      sx={{
+                        height: "0.375rem",
+                        borderRadius: "0.625rem",
+                        backgroundColor: "#e2e8f0",
+                        "& .MuiLinearProgress-bar": {
+                          backgroundColor: row.color,
+                          borderRadius: "0.625rem",
+                        },
+                      }}
+                    />
+                  </Box>
+                ))}
+              </CardContent>
+            </Card>
+          </Grid>
         </Grid>
 
         {/* Tables Section */}
@@ -445,62 +503,7 @@ const CNSSDashboard = () => {
           </Grid>
         </Grid>
 
-        {/* Status Graph Section */}
-        <Grid container spacing={3}>
-          <Grid item xs={12} md={6}>
-            <Card
-              sx={{
-                borderRadius: "24px",
-                boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
-                border: `1px solid ${themeColors.divider}`,
-              }}
-            >
-              <CardContent sx={{ p: 3 }}>
-                <Box sx={{ display: "flex", alignItems: "center", mb: 3 }}>
-                  <Box
-                    sx={{
-                      backgroundColor: `${themeColors.info}26`,
-                      borderRadius: "12px",
-                      p: 1,
-                      mr: 2,
-                    }}
-                  >
-                    <CheckCircle size={20} color={themeColors.info} />
-                  </Box>
-                  <Typography variant="h6" sx={{ fontWeight: 700, fontSize: "1.1rem", color: themeColors.textPrimary }}>
-                    Répartition des Statuts
-                  </Typography>
-                </Box>
 
-                {statusRows.map((row) => (
-                  <Box key={row.label} sx={{ mb: "1.25rem" }}>
-                    <Box sx={{ display: "flex", justifyContent: "space-between", mb: "0.5rem", flexWrap: "wrap", gap: "0.5rem" }}>
-                      <Typography variant="body2" sx={{ fontWeight: 600, color: themeColors.textPrimary }}>
-                        {row.label}
-                      </Typography>
-                      <Typography variant="body2" sx={{ fontWeight: 700, color: row.color }}>
-                        {row.count} ({row.percentage}%)
-                      </Typography>
-                    </Box>
-                    <LinearProgress
-                      variant="determinate"
-                      value={row.percentage}
-                      sx={{
-                        height: "0.375rem",
-                        borderRadius: "0.625rem",
-                        backgroundColor: "#e2e8f0",
-                        "& .MuiLinearProgress-bar": {
-                          backgroundColor: row.color,
-                          borderRadius: "0.625rem",
-                        },
-                      }}
-                    />
-                  </Box>
-                ))}
-              </CardContent>
-            </Card>
-          </Grid>
-        </Grid>
       </Box>
     </ThemeProvider>
   );

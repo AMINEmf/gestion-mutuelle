@@ -364,7 +364,7 @@ function EmpHistorique() {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await axios.get("http://127.0.0.1:8000/api/departements");
+      const response = await axios.get("/api/departements");
       setDepartements(buildDepartementTree(response.data));
     } catch (error) {
       console.error("Error fetching departments:", error);
@@ -382,7 +382,7 @@ function EmpHistorique() {
   // Employee history functions
   const fetchEmployeeHistory = async (employeeId, currentEmployee) => {
     try {
-      const response = await axios.get(`http://127.0.0.1:8000/api/employee-history?employeeId=${employeeId}`);
+      const response = await axios.get(`/api/employee-history?employeeId=${employeeId}`);
       return response.data
         .filter(record => record.matricule === currentEmployee.matricule)
         .map((record, index) => ({

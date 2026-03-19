@@ -103,7 +103,7 @@ const DevisList = () => {
     };
     const fetchExistingLigneDevis = async (devisId) => {
         axios
-            .get(`http://localhost:8000/api/ligneDevis/${devisId}`)
+            .get(`/api/ligneDevis/${devisId}`)
             .then((ligneDevisResponse) => {
                 const existingLigneDevis =
                     ligneDevisResponse.data.ligneDevis;
@@ -157,7 +157,7 @@ const DevisList = () => {
         setSelectedProductsData(updatedSelectedProductsData);
         if (id) {
             axios
-                .delete(`http://localhost:8000/api/ligneDevis/${id}`)
+                .delete(`/api/ligneDevis/${id}`)
                 .then(() => {
                     fetchDevis();
                 });
@@ -167,33 +167,33 @@ const DevisList = () => {
         try {
 
             const factureResponse = await axios.get(
-                "http://localhost:8000/api/factures"
+                "/api/factures"
             );
             setFactures(factureResponse.data.facture);
             console.log("factures ",factures)
             const clientResponse = await axios.get(
-                "http://localhost:8000/api/clients"
+                "/api/clients"
             );
             // console.log("API Response:", response.data);
             setClients(clientResponse.data.client);
-            const response = await axios.get("http://localhost:8000/api/devises");
+            const response = await axios.get("/api/devises");
             setDevises(response.data.devis);
 
             const ligneDevisResponse = await axios.get(
-                "http://localhost:8000/api/ligneDevis"
+                "/api/ligneDevis"
             );
             setLigneDevis(ligneDevisResponse.data.ligneDevis);
 
 
 
             const produitResponse = await axios.get(
-                "http://localhost:8000/api/produits"
+                "/api/produits"
             );
             setProduits(produitResponse.data.produit);
 
 
             const userResponse = await axios.get(
-                "http://localhost:8000/api/user"
+                "/api/user"
             );
             console.log("user authentifie ",userResponse)
             setAuthId(userResponse.data.id);
@@ -332,7 +332,7 @@ const DevisList = () => {
     const fetchLigneDevis = async (devisId) => {
         try {
             const response = await axios.get(
-                `http://localhost:8000/api/devises/${devisId}/ligneDevis`
+                `/api/devises/${devisId}/ligneDevis`
             );
             console.log("fetch lign devis ", response.data.lignedevis);
             return response.data.lignedevis;
@@ -388,7 +388,7 @@ const DevisList = () => {
     //
     //         // Envoyer une requête POST pour créer la facture
     //         const factureResponse = await axios.post(
-    //             "http://localhost:8000/api/factures",
+    //             "/api/factures",
     //             factureData
     //         );
     //
@@ -412,7 +412,7 @@ const DevisList = () => {
 
             // 2. Envoyer une requête POST pour créer la facture
             const factureResponse = await axios.post(
-                "http://localhost:8000/api/factures",
+                "/api/factures",
                 factureData
             );
             console.log("factureResponse", factureResponse);
@@ -421,7 +421,7 @@ const DevisList = () => {
 
             // 3. Récupérer les lignes de devis associées au devis
             const lignesDevisResponse = await axios.get(
-                `http://localhost:8000/api/ligneDevis/${devis.id}`
+                `/api/ligneDevis/${devis.id}`
             );
 
             console.log("ligneDevis Response : ", lignesDevisResponse);
@@ -439,7 +439,7 @@ const DevisList = () => {
             for (const ligneFactureData of lignesFactureData) {
                 // Sinon, il s'agit d'une nouvelle ligne de Devis
                 await axios.post(
-                    "http://localhost:8000/api/ligneFacture",
+                    "/api/ligneFacture",
                     ligneFactureData
                 );
             }
@@ -476,7 +476,7 @@ const DevisList = () => {
 
             // Envoyer une requête POST pour créer le bon de livraison
             const bonLivraisonResponse = await axios.post(
-                "http://localhost:8000/api/livraisons",
+                "/api/livraisons",
                 bonLivraisonData
             );
 
@@ -486,7 +486,7 @@ const DevisList = () => {
 
             // 3. Récupérer les lignes de devis associées au devis
             const lignesDevisResponsee = await axios.get(
-                `http://localhost:8000/api/ligneDevis/${devis.id}`
+                `/api/ligneDevis/${devis.id}`
             );
 
 
@@ -506,7 +506,7 @@ const DevisList = () => {
             for (const lignebonLivraisonData of lignesbonLivraisonData) {
                 // Sinon, il s'agit d'une nouvelle ligne de Devis
                 await axios.post(
-                    "http://localhost:8000/api/lignelivraisons",
+                    "/api/lignelivraisons",
                     lignebonLivraisonData
                 );
             }
@@ -520,7 +520,7 @@ const DevisList = () => {
         e.preventDefault();
 
         try {
-            // const userResponse = await axios.get("http://localhost:8000/api/users", {
+            // const userResponse = await axios.get("/api/users", {
             //   withCredentials: true,
             //   headers: {
             //     "X-CSRF-TOKEN": csrfToken,
@@ -546,7 +546,7 @@ const DevisList = () => {
             if (editingDevis) {
                 // Mettre à jour le Devis existant
                 response = await axios.put(
-                    `http://localhost:8000/api/devises/${editingDevis.id}`,
+                    `/api/devises/${editingDevis.id}`,
                     {
                         date: formData.date,
                         status: formData.status,
@@ -558,7 +558,7 @@ const DevisList = () => {
                     }
                 );
                 const existingLigneDevisResponse = await axios.get(
-                    `http://localhost:8000/api/ligneDevis/${editingDevis.id}`
+                    `/api/ligneDevis/${editingDevis.id}`
                 );
 
                 const existingLigneDevis =
@@ -589,7 +589,7 @@ const DevisList = () => {
                     if (ligneDevisData.id) {
                         // If exists, update the existing ligneDevis
                         await axios.put(
-                            `http://localhost:8000/api/ligneDevis/${ligneDevisData.id}`,
+                            `/api/ligneDevis/${ligneDevisData.id}`,
                             ligneDevisData,
                             {
                                 withCredentials: true,
@@ -601,7 +601,7 @@ const DevisList = () => {
                     } else {
                         // If doesn't exist, create a new ligneDevis
                         await axios.post(
-                            "http://localhost:8000/api/ligneDevis",
+                            "/api/ligneDevis",
                             ligneDevisData,
                             {
                                 withCredentials: true,
@@ -620,7 +620,7 @@ const DevisList = () => {
             } else {
                 // Créer un nouveau Devis
                 response = await axios.post(
-                    "http://localhost:8000/api/devises",
+                    "/api/devises",
                     DevisData
                 );
                 //console.log(response.data.devi)
@@ -642,7 +642,7 @@ const DevisList = () => {
                 for (const ligneDevisData of selectedPrdsData) {
                     // Sinon, il s'agit d'une nouvelle ligne de Devis
                     await axios.post(
-                        "http://localhost:8000/api/ligneDevis",
+                        "/api/ligneDevis",
                         ligneDevisData
                     );
                 }
@@ -736,7 +736,7 @@ const DevisList = () => {
 
 
                 // Ensuite, supprimer le devis
-                axios.delete(`http://localhost:8000/api/devises/${id}`)
+                axios.delete(`/api/devises/${id}`)
                     .then(() => {
                         fetchDevis();
                         Swal.fire({

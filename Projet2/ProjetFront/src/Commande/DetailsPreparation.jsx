@@ -16,8 +16,8 @@ const DetailsPreparation = () => {
   };
   useEffect(() => {
     Promise.all([
-      axios.get("http://localhost:8000/api/commandes"),
-      axios.get("http://localhost:8000/api/produits"),
+      axios.get("/api/commandes"),
+      axios.get("/api/produits"),
     ])
       .then(([commandesResponse, produitsResponse]) => {
         console.log("Commandes response:", commandesResponse.data);
@@ -153,3 +153,4 @@ const DetailsPreparation = () => {
 };
 
 export default DetailsPreparation;
+

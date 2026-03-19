@@ -29,7 +29,7 @@ function OffresTable({ offres, handleEdit, handleDelete, handleSelectOffre, hand
 
     const fetchGroupes = async () => {
         try {
-            const response = await axios.get('http://localhost:8000/api/groupes');
+            const response = await axios.get('/api/groupes');
             setGroupes(response.data);
         } catch (error) {
             console.error('Error fetching groupes:', error);
@@ -40,7 +40,7 @@ function OffresTable({ offres, handleEdit, handleDelete, handleSelectOffre, hand
         setLoading(prev => ({ ...prev, [offreId]: true }));
         setError(prev => ({ ...prev, [offreId]: null }));
         try {
-            const response = await axios.get(`http://localhost:8000/api/offres/${offreId}/offre_details`);
+            const response = await axios.get(`/api/offres/${offreId}/offre_details`);
             setOffreDetails(prevDetails => ({
                 ...prevDetails,
                 [offreId]: Array.isArray(response.data.offreDetails) ? response.data.offreDetails : []
@@ -71,7 +71,7 @@ function OffresTable({ offres, handleEdit, handleDelete, handleSelectOffre, hand
         console.log('Sending data to server:', { offreId, groupe_clients: selectedGroupeIds });
         
         try {
-            const response = await axios.put(`http://localhost:8000/api/offres/${offreId}/update-groupes`, { groupe_clients: selectedGroupeIds });
+            const response = await axios.put(`/api/offres/${offreId}/update-groupes`, { groupe_clients: selectedGroupeIds });
             console.log('Server response:', response.data);
             
             if (response.data.message === 'Groupe clients updated successfully') {
@@ -222,7 +222,7 @@ export default OffresTable;
 
 //     const fetchGroupes = async () => {
 //         try {
-//             const response = await axios.get('http://localhost:8000/api/groupes');
+//             const response = await axios.get('/api/groupes');
 //             setGroupes(response.data);
 //         } catch (error) {
 //             console.error('Error fetching groupes:', error);

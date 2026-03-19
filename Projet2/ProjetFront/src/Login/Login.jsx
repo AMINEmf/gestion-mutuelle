@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+﻿import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import Avatar from "@mui/material/Avatar";
@@ -53,13 +53,12 @@ export default function Login() {
 
     try {
       const response = await axios.post(
-        "http://localhost:8000/api/login",
+        "/api/login",
         {
           email: email,
           password: password,
         },
         {
-          withCredentials: true,
           headers: {
             "Content-Type": "application/json",
           },
@@ -190,3 +189,4 @@ export default function Login() {
     </ThemeProvider>
   );
 }
+

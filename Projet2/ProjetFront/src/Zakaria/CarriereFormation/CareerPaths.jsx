@@ -1,10 +1,10 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState, useCallback } from "react";
 import { Box, ThemeProvider, createTheme, LinearProgress } from "@mui/material";
 import { X } from "lucide-react";
 import ExpandRTable from "../Employe/ExpandRTable";
 import { useHeader } from "../../Acceuil/HeaderContext";
 import { useOpen } from "../../Acceuil/OpenProvider";
-import { careerEmployees } from "./mockData";
+import apiClient from "../../services/apiClient";
 import { useMockTable } from "./useMockTable";
 import "../Style.css";
 import "./CareerTraining.css";
@@ -13,24 +13,40 @@ const CareerPaths = ({ embedded = false, showHeader = true }) => {
   const { setTitle, clearActions, searchQuery } = useHeader();
   const { dynamicStyles } = useOpen();
   const [selectedEmployee, setSelectedEmployee] = useState(null);
+  const [employees, setEmployees] = useState([]);
 
   useEffect(() => {
     if (embedded) return;
     setTitle("Carrieres & Parcours des employes");
-    return () => {
-      clearActions();
-    };
+    return () => { clearActions(); };
   }, [setTitle, clearActions, embedded]);
 
-  const tableData = useMemo(() => careerEmployees.map((emp) => ({
-    id: emp.id,
+  useEffect(() => {
+    apiClient.get("/carrieres")
+      .then((res) => {
+        const data = Array.isArray(res.data) ? res.data : (res.data?.data ?? []);
+        // Garder la derniere entree par employe
+        const latest = {};
+        data.forEach((c) => {
+          const id = c.employe_id;
+          if (!id) return;
+          if (!latest[id] || (c.date_debut_poste || "") > (latest[id].date_debut_poste || ""))
+            latest[id] = c;
+        });
+        setEmployees(Object.values(latest));
+      })
+      .catch(() => setEmployees([]));
+  }, []);
+
+  const tableData = useMemo(() => employees.map((emp) => ({
+    id: emp.employe_id ?? emp.id,
     matricule: emp.matricule,
     full_name: emp.full_name,
-    departement: emp.departement,
+    departement: emp.departement_name ?? emp.departement,
     poste_actuel: emp.poste_actuel,
     grade: emp.grade,
-    derniere_promotion: emp.derniere_promotion
-  })), []);
+    derniere_promotion: emp.derniere_promotion ?? emp.date_debut_poste
+  })), [employees]);
 
   const {
     selectedItems,
@@ -56,7 +72,7 @@ const CareerPaths = ({ embedded = false, showHeader = true }) => {
     { key: "derniere_promotion", label: "Derniere promotion" }
   ]), []);
 
-  const renderCustomActions = (item) => (
+  const renderCustomActions = useCallback((item) => (
     <button
       type="button"
       className="btn btn-sm"
@@ -69,13 +85,42 @@ const CareerPaths = ({ embedded = false, showHeader = true }) => {
       }}
       onClick={(event) => {
         event.stopPropagation();
-        const emp = careerEmployees.find((entry) => entry.id === item.id);
-        setSelectedEmployee(emp || null);
+        apiClient.get(`/employes/${item.id}/parcours`)
+          .then((res) => {
+            const d = res.data;
+            setSelectedEmployee({
+              employe_id: d.employe_id,
+              full_name: d.full_name,
+              poste_actuel: d.parcours?.[0]?.poste ?? item.poste_actuel ?? "—",
+              grade: d.parcours?.[0]?.grade ?? item.grade ?? "—",
+              departement: item.departement ?? "—",
+              promotions: (d.parcours || []).map((p) => ({
+                date: p.date_debut,
+                poste: p.poste,
+                grade: p.grade,
+              })),
+              competences: (d.competences || []).map((c) => ({
+                nom: c.nom,
+                niveau: c.niveau ?? c.niveau_acquis ?? 0,
+              })),
+              formations: [],
+            });
+          })
+          .catch(() => {
+            // fallback: afficher les donnees de la table
+            setSelectedEmployee({
+              ...item,
+              departement: item.departement ?? "—",
+              promotions: [],
+              competences: [],
+              formations: [],
+            });
+          });
       }}
     >
       Voir parcours
     </button>
-  );
+  ), []);
 
   const closeDrawer = () => setSelectedEmployee(null);
   const isDrawerOpen = Boolean(selectedEmployee);

@@ -49,7 +49,7 @@ const CommandeDetails = ({ produits, commande }) => {
   const fetchLigneCommandes = async () => {
     try {
       const response = await axios.get(
-        "http://localhost:8000/api/ligneCommandes"
+        "/api/ligneCommandes"
       );
 
       console.log("API Response for ligneCommandes:", response.data);
@@ -60,7 +60,7 @@ const CommandeDetails = ({ produits, commande }) => {
   const fetchStatusCommandes = async () => {
     try {
       const response = await axios.get(
-        "http://localhost:8000/api/statusCommande"
+        "/api/statusCommande"
       );
 
       console.log("API Response for ligneCommandes:", response.data);
@@ -76,7 +76,7 @@ const CommandeDetails = ({ produits, commande }) => {
 
     if (isConfirmed) {
       axios
-        .delete(`http://localhost:8000/api/ligneCommandes/${id}`)
+        .delete(`/api/ligneCommandes/${id}`)
         .then(() => {
           Swal.fire({
             icon: "success",

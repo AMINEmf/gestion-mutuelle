@@ -98,9 +98,9 @@ const Societe = () => {
   });
 
   const fetchAgent = async () => {
-    const response = await axios.get('http://localhost:8000/api/societes');
+    const response = await axios.get('/api/societes');
     const societes = response.data;
-    const usersResponse = await axios.get('http://localhost:8000/api/user');
+    const usersResponse = await axios.get('/api/user');
     const user = usersResponse.data.id;
     return { societes, user };
   };
@@ -181,7 +181,7 @@ const Societe = () => {
       if (result.isConfirmed) {
         selectedItems.forEach((id) => {
           axios
-            .delete(`http://localhost:8000/api/agents/${id}`)
+            .delete(`/api/agents/${id}`)
             .then((response) => {
               refetch();            
             })
@@ -228,7 +228,7 @@ const Societe = () => {
     }).then((result) => {
       if (result.isConfirmed) {
         axios
-          .delete(`http://localhost:8000/api/societes/${id}`)
+          .delete(`/api/societes/${id}`)
           .then((response) => {
             refetch();
               Swal.fire({
@@ -286,8 +286,8 @@ const Societe = () => {
   const handleSubmit = async (formData) => {
     try {
       const apiUrl = editingProduit
-        ? `http://localhost:8000/api/societes/${editingProduit.id}`
-        : `http://localhost:8000/api/societes`;
+        ? `/api/societes/${editingProduit.id}`
+        : `/api/societes`;
 
       const method = editingProduit ? "put" : "post";
 
@@ -322,7 +322,7 @@ const Societe = () => {
   const handleDeletecatgeorie = async (categorieId) => {
     try {
       const response = await axios.delete(
-        `http://localhost:8000/api/categories/${categorieId}`
+        `/api/categories/${categorieId}`
       );
       console.log(response.data);
       Swal.fire({
@@ -577,7 +577,7 @@ console.log('produit',produits)
         </Box>
       </Box>
     </ThemeProvider>
-    <style jsx>{`     
+    <style>{`     
             
             /* Styles de section header */
             .section-header {

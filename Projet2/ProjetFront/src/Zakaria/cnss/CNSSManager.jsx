@@ -36,7 +36,7 @@ function CNSSManager() {
   useEffect(() => {
     const fetchPerms = async () => {
       try {
-        const resp = await axios.get("http://localhost:8000/api/user", { withCredentials: true });
+        const resp = await axios.get("/api/user", { withCredentials: true });
         const roles = Array.isArray(resp.data) ? resp.data[0]?.roles : resp.data?.roles;
         const perms = roles && roles[0]?.permissions ? roles[0].permissions.map(p => p.name) : [];
         setPermissions(perms);
@@ -81,7 +81,7 @@ function CNSSManager() {
 
   const fetchDepartmentHierarchy = async () => {
     try {
-      const response = await axios.get('http://127.0.0.1:8000/api/departements/hierarchy');
+      const response = await axios.get('/api/departements/hierarchy');
       console.log('CNSS: Departments fetched:', response.data);
       setDepartements(response.data);
       localStorage.setItem('departmentHierarchy', JSON.stringify(response.data));
@@ -115,14 +115,17 @@ function CNSSManager() {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await axios.get("http://127.0.0.1:8000/api/departements");
+      const response = await axios.get("/api/departements");
       const departmentsTree = buildDepartementTree(response.data);
       setDepartements(departmentsTree);
       localStorage.setItem('departements', JSON.stringify(departmentsTree));
     } catch (error) {
       console.error("Error fetching departments:", error);
-      setError("An error occurred while fetching departments. Please try again.");
-      setDepartements([]);
+      const hasCachedData = localStorage.getItem('departementHierarchy') || localStorage.getItem('departements');
+      if (!hasCachedData) {
+        setError("An error occurred while fetching departments. Please try again.");
+        setDepartements([]);
+      }
       if (error.response && error.response.status === 403) {
         Swal.fire({
           icon: "error",
@@ -176,7 +179,7 @@ function CNSSManager() {
     if (editingDepartement) {
       try {
         const response = await axios.put(
-          `http://127.0.0.1:8000/api/departements/${editingDepartement.id}`,
+          `/api/departements/${editingDepartement.id}`,
           { nom: editingDepartement.name }
         );
         setDepartements((prevDepartements) => {
@@ -215,7 +218,7 @@ function CNSSManager() {
 
     try {
       const response = await axios.post(
-        "http://127.0.0.1:8000/api/departements",
+        "/api/departements",
         {
           nom: departmentNameToAdd,
           parent_id: parentId,
@@ -451,7 +454,7 @@ function CNSSManager() {
     setError(null);
     try {
       const response = await axios.post(
-        "http://127.0.0.1:8000/api/departements",
+        "/api/departements",
         {
           nom: newDepartementName,
           parent_id: parentDepartementId,
@@ -497,7 +500,7 @@ function CNSSManager() {
         throw new Error("Département ID is null or undefined");
       }
       const response = await axios.put(
-        `http://127.0.0.1:8000/api/departements/${editingDepartementId}`,
+        `/api/departements/${editingDepartementId}`,
         { nom: newName }
       );
       if (response.data && response.data.id) {
@@ -542,7 +545,7 @@ function CNSSManager() {
     if (result.isConfirmed) {
       try {
         await axios.delete(
-          `http://127.0.0.1:8000/api/departements/${departementId}`
+          `/api/departements/${departementId}`
         );
 
         setDepartements((prevDepartements) => {
@@ -631,11 +634,11 @@ function CNSSManager() {
 
   return (
     <ThemeProvider theme={createTheme()}>
-      <Box sx={{ ...dynamicStyles, minHeight: '100vh', backgroundColor: '#f5f5f5' }}>
+      <Box sx={{ ...dynamicStyles, minHeight: '100vh', backgroundColor: '#ffffff' }}>
         <Box component="main"
-          sx={{ flexGrow: 1, p: 0, mt: 12, minHeight: 'calc(100vh - 160px)' }}
+          sx={{ flexGrow: 1, p: 0, mt: 12, minHeight: 'calc(100vh - 130px)' }}
         >
-          <div className="departement_home1">
+          <div className="departement_home1" style={{ gap: '8px', padding: '8px' }}>
             <ul className="departement_list">
               <li style={{ listStyleType: "none" }}>
                 <div className="checkbox-container" style={{ marginTop: '5%', width: '90%', display: 'flex', alignItems: 'center', justifyContent: 'center', marginLeft: '5%' }}>
@@ -750,3 +753,4 @@ function CNSSManager() {
 }
 
 export default CNSSManager;
+

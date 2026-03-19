@@ -52,7 +52,7 @@ const CalendrieForm = ({ onSubmit, onCancel, initialData, selectedGroup, selecte
 
     const fetchGroups = async () => {
         try {
-            const response = await axios.get('http://127.0.0.1:8000/api/groupes-horaires');
+            const response = await axios.get('/api/groupes-horaires');
             setGroups(response.data);
             setIsLoading(false);
         } catch (error) {
@@ -89,7 +89,7 @@ const CalendrieForm = ({ onSubmit, onCancel, initialData, selectedGroup, selecte
     useEffect(() => {
         const fetchGroups = async () => {
             try {
-                const response = await axios.get('http://127.0.0.1:8000/api/horaires-periodiques');
+                const response = await axios.get('/api/horaires-periodiques');
                 console.log("Groupes Horaires Data:", response.data);
                 if (Array.isArray(response.data.horairePeriodique)) {
                     setGroups(response.data.horairePeriodique);

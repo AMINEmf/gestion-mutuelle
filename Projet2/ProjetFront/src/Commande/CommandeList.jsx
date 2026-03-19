@@ -79,15 +79,15 @@ const CommandeList = () => {
 
   // const fetchData = async () => {
   //   try {
-  //     const response = await axios.get("http://localhost:8000/api/commandes");
+  //     const response = await axios.get("/api/commandes");
   //     setCommandes(response.data.commandes);
   //     const clientResponse = await axios.get(
-  //       "http://localhost:8000/api/clients"
+  //       "/api/clients"
   //     );
   //     setClients(clientResponse.data.client);
 
   //     const produitResponse = await axios.get(
-  //       "http://localhost:8000/api/produits"
+  //       "/api/produits"
   //     );
   //     setProduits(produitResponse.data.produit);
   //   } catch (error) {
@@ -111,7 +111,7 @@ const CommandeList = () => {
 
   const fetchExistingLigneCommandes = async (commandId) => {
     axios
-      .get(`http://localhost:8000/api/ligneCommandes/${commandId}`)
+      .get(`/api/ligneCommandes/${commandId}`)
       .then((ligneCommandesResponse) => {
         const existingLigneCommandes =
           ligneCommandesResponse.data.ligneCommandes;
@@ -183,11 +183,11 @@ const CommandeList = () => {
         siteClientResponse,
         produitsResponse,
       ] = await Promise.all([
-        axios.get("http://localhost:8000/api/user"),
-        axios.get("http://localhost:8000/api/commandes"),
-        axios.get("http://localhost:8000/api/clients"),
-        axios.get("http://localhost:8000/api/siteclients"),
-        axios.get("http://localhost:8000/api/produits"),
+        axios.get("/api/user"),
+        axios.get("/api/commandes"),
+        axios.get("/api/clients"),
+        axios.get("/api/siteclients"),
+        axios.get("/api/produits"),
       ]);
       setAuthId(userResponse.data.id);
       setCommandes(commandesResponse.data.commandes);
@@ -275,7 +275,7 @@ const CommandeList = () => {
     e.preventDefault();
 
     try {
-      // const userResponse = await axios.get("http://localhost:8000/api/users", {
+      // const userResponse = await axios.get("/api/users", {
       //   withCredentials: true,
       //   headers: {
       //     "X-CSRF-TOKEN": csrfToken,
@@ -298,7 +298,7 @@ const CommandeList = () => {
       if (editingCommandes) {
         // Mettre à jour le Commandes existant
         response = await axios.put(
-          `http://localhost:8000/api/commandes/${editingCommandes.id}`,
+          `/api/commandes/${editingCommandes.id}`,
           {
             dateCommande: formData.dateCommande,
             status: formData.status,
@@ -309,7 +309,7 @@ const CommandeList = () => {
           }
         );
         const existingLigneCommandesResponse = await axios.get(
-          `http://localhost:8000/api/ligneCommandes/${editingCommandes.id}`
+          `/api/ligneCommandes/${editingCommandes.id}`
         );
 
         const existingLigneCommandes =
@@ -343,7 +343,7 @@ const CommandeList = () => {
           if (ligneCommandeData.id) {
             console.log(ligneCommandeData.id);
             await axios.put(
-              `http://localhost:8000/api/ligneCommandes/${ligneCommandeData.id}`,
+              `/api/ligneCommandes/${ligneCommandeData.id}`,
               ligneCommandeData,
               {
                 withCredentials: true,
@@ -354,7 +354,7 @@ const CommandeList = () => {
             );
           } else {
             await axios.post(
-              "http://localhost:8000/api/ligneCommandes",
+              "/api/ligneCommandes",
               ligneCommandeData,
               {
                 withCredentials: true,
@@ -367,7 +367,7 @@ const CommandeList = () => {
         }
 
         const existingStatusesResponse = await axios.get(
-          "http://localhost:8000/api/statusCommande"
+          "/api/statusCommande"
         );
         const existingStatuses = existingStatusesResponse.data.StatusCommande;
 
@@ -382,7 +382,7 @@ const CommandeList = () => {
         };
         // if (!statusExists) {
         await axios.post(
-          `http://localhost:8000/api/statusCommande/`,
+          `/api/statusCommande/`,
           statusCommandeData,
           {
             withCredentials: true,
@@ -394,7 +394,7 @@ const CommandeList = () => {
       } else {
         // Créer un nouveau Commandes
         response = await axios.post(
-          "http://localhost:8000/api/commandes",
+          "/api/commandes",
           CommandesData
         );
         const selectedPrdsData = selectedProductsData.map(
@@ -415,7 +415,7 @@ const CommandeList = () => {
         for (const ligneCommandesData of selectedPrdsData) {
           // Sinon, il s'agit d'une nouvelle ligne de Commandes
           await axios.post(
-            "http://localhost:8000/api/ligneCommandes",
+            "/api/ligneCommandes",
             ligneCommandesData
           );
         }
@@ -424,7 +424,7 @@ const CommandeList = () => {
           status: "En cours",
         };
         await axios.post(
-          "http://localhost:8000/api/statusCommande",
+          "/api/statusCommande",
           statusCommandeData,
           {
             withCredentials: true,
@@ -597,7 +597,7 @@ const CommandeList = () => {
     }).then((result) => {
       if (result.isConfirmed) {
         axios
-          .delete(`http://localhost:8000/api/commandes/${id}`)
+          .delete(`/api/commandes/${id}`)
           .then(() => {
             Swal.fire({
               icon: "success",
@@ -858,7 +858,7 @@ const CommandeList = () => {
     setSelectedProductsData(updatedSelectedProductsData);
     if (id) {
       axios
-        .delete(`http://localhost:8000/api/ligneCommandes/${id}`)
+        .delete(`/api/ligneCommandes/${id}`)
         .then(() => {
           fetchData();
         });
@@ -922,7 +922,7 @@ const CommandeList = () => {
       if (result.isConfirmed) {
         const promises = selectedItems.map((id) => {
           return axios
-            .delete(`http://localhost:8000/api/commandes/${id}`)
+            .delete(`/api/commandes/${id}`)
             .then(() => {
               return { id, success: true };
             })
@@ -2024,3 +2024,4 @@ const CommandeList = () => {
 };
 
 export default CommandeList;
+

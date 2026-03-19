@@ -75,7 +75,7 @@ const Rubrique = () => {
     useEffect(() => {
         const fetchPerms = async () => {
             try {
-                const resp = await axios.get("http://localhost:8000/api/user", { withCredentials: true });
+                const resp = await axios.get("/api/user", { withCredentials: true });
                 const roles = Array.isArray(resp.data) ? resp.data[0]?.roles : resp.data?.roles;
                 const perms = roles && roles[0]?.permissions ? roles[0].permissions.map(p => p.name) : [];
                 setPermissions(perms);
@@ -104,7 +104,7 @@ const Rubrique = () => {
         const initializeData = async () => {
             setIsLoading(true);
             try {
-                const response = await axios.get('http://127.0.0.1:8000/api/group-rubriques');
+                const response = await axios.get('/api/group-rubriques');
                 setGroups(response.data);
                 console.log("groups:", response.data)
                 setRubriques([]); // Initialiser avec un tableau vide
@@ -133,7 +133,7 @@ const Rubrique = () => {
             
             setIsLoading(true);
             try {
-                const response = await axios.get(`http://127.0.0.1:8000/api/rubriques?group=${selectedGroup.id}`);
+                const response = await axios.get(`/api/rubriques?group=${selectedGroup.id}`);
                 setRubriques(response.data);
             } catch (error) {
                 console.error('Erreur lors du chargement des rubriques:', error);
@@ -182,7 +182,7 @@ const Rubrique = () => {
         setSelectedGroup(group);
         setIsLoading(true);
         try {
-            const response = await axios.get(`http://127.0.0.1:8000/api/rubriques?group=${group.id}`);
+            const response = await axios.get(`/api/rubriques?group=${group.id}`);
             setRubriques(response.data);
         } catch (error) {
             console.error('Erreur lors du chargement des rubriques:', error);
@@ -235,7 +235,7 @@ const Rubrique = () => {
                 try {
                     await Promise.all(
                         selectedZones.map((id) =>
-                            axios.delete(`http://localhost:8000/api/zones/${id}`)
+                            axios.delete(`/api/zones/${id}`)
                         )
                     );
 
@@ -284,7 +284,7 @@ const Rubrique = () => {
                 try {
                     await Promise.all(
                         groups.map((id) =>
-                            axios.delete(`http://127.0.0.1:8000/api/group-motifs/${id}`)
+                            axios.delete(`/api/group-motifs/${id}`)
                         )
                     );
 
@@ -332,7 +332,7 @@ const Rubrique = () => {
             let response;
             if (editingRubrique) {
                 response = await axios.put(
-                    `http://127.0.0.1:8000/api/rubriques/${editingRubrique.id}`,
+                    `/api/rubriques/${editingRubrique.id}`,
                     formData
                 );
 
@@ -342,7 +342,7 @@ const Rubrique = () => {
                     text: 'Rubrique mise à jour avec succès.',
                 });
             } else {
-                response = await axios.post('http://127.0.0.1:8000/api/rubriques', formData);
+                response = await axios.post('/api/rubriques', formData);
 
                 Swal.fire({
                     icon: 'success',
@@ -390,7 +390,7 @@ const Rubrique = () => {
         }).then(async (result) => {
             if (result.isConfirmed) {
                 try {
-                    await axios.delete(`http://127.0.0.1:8000/api/rubriques/${id}`);
+                    await axios.delete(`/api/rubriques/${id}`);
     
                     setRubriques((prevRubriques) =>
                         prevRubriques.filter((rubrique) => rubrique.id !== id)
@@ -571,7 +571,7 @@ const Rubrique = () => {
                 return;
             }
     
-            const response = await axios.post("http://127.0.0.1:8000/api/group-rubriques", {
+            const response = await axios.post("/api/group-rubriques", {
                 designation: newCategory.categorie,
             });
     
@@ -615,7 +615,7 @@ const Rubrique = () => {
     
         if (result.isConfirmed) {
             try {
-                const response = await axios.delete(`http://127.0.0.1:8000/api/group-rubriques/${groupId}`);
+                const response = await axios.delete(`/api/group-rubriques/${groupId}`);
                 console.log("Réponse de l'API :", response.data);
                 setGroups(prevGroups => prevGroups.filter(group => group.id !== groupId));
             } catch (error) {
@@ -660,7 +660,7 @@ const Rubrique = () => {
         if (result.isConfirmed) {
             try {
                 await Promise.all(
-                    selectedRubriques.map(id => axios.delete(`http://127.0.0.1:8000/api/rubriques/${id}`))
+                    selectedRubriques.map(id => axios.delete(`/api/rubriques/${id}`))
                 );
                 
                 setRubriques(prev => prev.filter(rubrique => !selectedRubriques.includes(rubrique.id)));
@@ -1253,7 +1253,7 @@ marginRight: "15px",
                     </button>
                 </Modal.Footer>
             </Modal>
-            <style jsx>{`
+            <style>{`
             /* Styles identiques à AbsenceTable */
             .expand-button {
                 background: transparent;
@@ -1555,3 +1555,4 @@ marginRight: "15px",
 };
 
 export default Rubrique;
+

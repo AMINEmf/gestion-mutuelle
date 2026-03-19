@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import Select from 'react-select';
 import axios from 'axios';
+import apiClient from "../../services/apiClient";
 import { Button, Card, Tab, Tabs, Table, Modal,Form } from 'react-bootstrap';
 
 import { useDropzone } from 'react-dropzone';
@@ -16,6 +17,7 @@ import { User, CreditCard, Tag, BadgeCheck, Upload , Loader2, Calendar, MapPin ,
    Activity, Save, List, Trash2, X } from "lucide-react";
 import { FaPlusCircle } from "react-icons/fa";
 import { FaMoneyBillWave } from "react-icons/fa";
+import { API_ORIGIN } from "../../services/apiConfig";
 
 
 
@@ -98,8 +100,8 @@ const [newCommune, setNewCommune] = useState('');
 const [newPays, setNewPays] = useState('');
 const [newVille, setNewVille] = useState('');
 
-const [postes, setPostes] = useState([
-]);
+const [postes, setPostes] = useState([]);
+const [loadingPostes, setLoadingPostes] = useState(true);
 
 
 
@@ -287,6 +289,7 @@ const initialContractState = {
     remarque: '',
     centreCout: '',
     departement_id: '',
+    poste_id: '',
     salaire: {
       bulletin_modele: "",
       salaire_base: "",
@@ -331,7 +334,7 @@ const initialContractState = {
 
   const loadBulletinModeles = async () => {
     try {
-      const response = await fetch('http://127.0.0.1:8000/api/bultinmodels');
+      const response = await fetch('/api/bultinmodels');
       const data = await response.json();
       setBulletinModeles(data);
     } catch (error) {
@@ -353,10 +356,10 @@ const initialContractState = {
   
   const handleAddBulletinModele = async () => {
     try {
-      console.log("Envoi des bulletins à :", `http://127.0.0.1:8000/api/employes/${employeId}/bulletins`);
+      console.log("Envoi des bulletins à :", `/api/employes/${employeId}/bulletins`);
       console.log("Données envoyées :", assignedBulletinModeles);
   
-      const response = await axios.post(`http://127.0.0.1:8000/api/employes/${employeId}/bulletins`, {
+      const response = await axios.post(`/api/employes/${employeId}/bulletins`, {
         bulletins: assignedBulletinModeles
       });
   
@@ -426,18 +429,30 @@ const initialContractState = {
         ...initialFormState,
         ...selectedEmployer,
         departement_id: idDep,
+        poste_id: selectedEmployer.poste_id || selectedEmployer.poste?.id || '',
         contrat: selectedEmployer.contrat?.[0] || {}
       }));
       setImagePreview(
         selectedEmployer.url_img
-          ? `http://127.0.0.1:8000/storage/${selectedEmployer.url_img}`
+          ? `${API_ORIGIN}/storage/${selectedEmployer.url_img}`
           : null
       );
       fetchContracts(selectedEmployer.id);
+
+      // Set the selected poste for the Poste tab dropdown
+      if (selectedEmployer.poste) {
+        setSelectedPoste(selectedEmployer.poste);
+      } else if (selectedEmployer.poste_id && postes.length > 0) {
+        const found = postes.find(p => p.id === selectedEmployer.poste_id || String(p.id) === String(selectedEmployer.poste_id));
+        if (found) setSelectedPoste(found);
+      } else {
+        setSelectedPoste(null);
+      }
     } else {
       resetForm();
+      setSelectedPoste(null);
     }
-  }, [selectedEmployer, idDep]);
+  }, [selectedEmployer, idDep, postes]);
 
   
 
@@ -451,7 +466,7 @@ const initialContractState = {
 
   const fetchContractTypes = async () => {
     try {
-      const response = await axios.get('http://127.0.0.1:8000/api/contract-types');
+      const response = await axios.get('/api/contract-types');
       setContractTypes(response.data);
     } catch (error) {
       console.error('Error fetching contract types', error);
@@ -463,7 +478,7 @@ const initialContractState = {
 
   const handleAddContractType = async () => {
     try {
-      const response = await axios.post('http://127.0.0.1:8000/api/contract-types', {
+      const response = await axios.post('/api/contract-types', {
         name: newContractType
       });
 
@@ -477,7 +492,7 @@ const initialContractState = {
   };
   const handleUpdateContractType = async () => {
     try {
-      const response = await axios.put(`http://127.0.0.1:8000/api/contract-types/${editingContractTypeId}`, {
+      const response = await axios.put(`/api/contract-types/${editingContractTypeId}`, {
         name: newContractType
       });
 
@@ -499,7 +514,7 @@ const initialContractState = {
 
   const handleDeleteContractType = async (typeId) => {
     try {
-      await axios.delete(`http://127.0.0.1:8000/api/contract-types/${typeId}`);
+      await axios.delete(`/api/contract-types/${typeId}`);
 
       const updatedTypes = contractTypes.filter(type => type.id !== typeId);
       setContractTypes(updatedTypes);
@@ -513,7 +528,7 @@ const initialContractState = {
 
   const fetchContracts = async (employeId) => {
     try {
-      const response = await axios.get(`http://127.0.0.1:8000/api/employes/${employeId}/contrats`);
+      const response = await axios.get(`/api/employes/${employeId}/contrats`);
       setContracts(response.data);
     } catch (error) {
       console.error('Error fetching contracts', error);
@@ -525,6 +540,7 @@ const initialContractState = {
     setImagePreview(null);
     setUrl_img(null);
     setContracts([]);
+    setSelectedPoste(null);
   };
 
   const handleChange = (e) => {
@@ -637,7 +653,7 @@ const initialContractState = {
     if (window.confirm('Êtes-vous sûr de vouloir supprimer ce contrat ?')) {
       try {
         if (typeof contractId === 'number') {
-          await axios.delete(`http://127.0.0.1:8000/api/contrats/${contractId}`);
+          await axios.delete(`/api/contrats/${contractId}`);
         }
         setContracts(prevContracts => prevContracts.filter(c => c.id !== contractId));
         setEditingContractId(null);
@@ -664,7 +680,7 @@ const initialContractState = {
 
   const handleSaveContractEdit = async (contractId) => {
     try {
-      const response = await axios.put(`http://127.0.0.1:8000/api/contrats/${contractId}`, editedContract);
+      const response = await axios.put(`/api/contrats/${contractId}`, editedContract);
       setContracts(contracts.map(c => c.id === contractId ? response.data : c));
       setEditingRow(null);
       setEditedContract(null);
@@ -742,7 +758,7 @@ const initialContractState = {
   
       if (selectedEmployer) {
         response = await axios.post(
-          `http://127.0.0.1:8000/api/employes/${selectedEmployer.id}?_method=PUT`,
+          `/api/employes/${selectedEmployer.id}?_method=PUT`,
           submitData,
           {
             headers: { "Content-Type": "multipart/form-data" },
@@ -758,12 +774,12 @@ const initialContractState = {
               if (contract.id && typeof contract.id === "number") {
                 console.log(`Mise à jour du contrat ID: ${contract.id}`);
                 await axios.put(
-                  `http://127.0.0.1:8000/api/contrats/${contract.id}`,
+                  `/api/contrats/${contract.id}`,
                   contract
                 );
               } else {
                 console.log("Ajout d'un nouveau contrat :", contract);
-                await axios.post(`http://127.0.0.1:8000/api/contrats`, {
+                await axios.post(`/api/contrats`, {
                   ...contract,
                   employe_id: selectedEmployer.id,
                 });
@@ -781,9 +797,9 @@ const initialContractState = {
       }
   
       else {
-        console.log("==> Appel API création employé : POST http://127.0.0.1:8000/api/employe");
+        console.log("==> Appel API création employé : POST /api/employes");
 
-        response = await axios.post(`http://127.0.0.1:8000/api/employe`, submitData, {
+        response = await axios.post(`/api/employes`, submitData, {
           headers: { "Content-Type": "multipart/form-data" },
         });
   
@@ -792,7 +808,7 @@ const initialContractState = {
         if (assignedBulletinModeles?.length > 0) {
           try {
             const resBulletins = await axios.post(
-              `http://127.0.0.1:8000/api/employes/${employeId}/bulletins`,
+              `/api/employes/${employeId}/bulletins`,
               {
                 bulletins: assignedBulletinModeles,
               }
@@ -819,7 +835,7 @@ const initialContractState = {
         await Promise.all(
           contractsToSubmit.map(async (contract) => {
             try {
-              const res = await axios.post(`http://127.0.0.1:8000/api/contrats`, {
+              const res = await axios.post(`/api/contrats`, {
                 ...contract,
                 employe_id: employeId,
               });
@@ -836,7 +852,7 @@ const initialContractState = {
         onEmployeAdded({
           ...response.data,
           employe_id: employeId,
-          date_début: formData.date_entree,
+          date_debut: formData.date_entree,
         });
       }
   
@@ -865,7 +881,10 @@ const initialContractState = {
       Swal.fire({
         icon: "error",
         title: "Erreur",
-        text: error.response ? error.response.data.message : "Une erreur s'est produite",
+        text:
+          error.response?.data?.message ||
+          error.response?.data?.error ||
+          "Une erreur s'est produite",
         confirmButtonText: "OK",
       });
     }
@@ -981,7 +1000,7 @@ const loadHierarchyFromDepartementId = async (departementId) => {
   try {
     console.log(" Chargement de la hiérarchie pour selectedDepartementId:", departementId);
     
-    const response = await axios.get('http://127.0.0.1:8000/api/departements');
+    const response = await axios.get('/api/departements');
     const departements = response.data;
 
     const hierarchy = organizeHierarchyFromDepartement(departements, departementId);
@@ -1014,13 +1033,22 @@ const loadHierarchyFromDepartementId = async (departementId) => {
 };
 
 const loadPostes = async () => {
+  setLoadingPostes(true);
   try {
-    const response = await axios.get(`http://127.0.0.1:8000/api/postes`);
-    console.log("Tous les postes chargés :", response.data);
-    setPostes(Array.isArray(response.data) ? response.data : []);
+    const response = await apiClient.get("/postes");
+    const payload = response?.data;
+    const rows = Array.isArray(payload)
+      ? payload
+      : Array.isArray(payload?.data)
+        ? payload.data
+        : [];
+    console.log("Tous les postes chargés :", payload);
+    setPostes(rows);
   } catch (error) {
     console.error('Erreur lors du chargement des postes', error);
     setPostes([]);
+  } finally {
+    setLoadingPostes(false);
   }
 };
 useEffect(() => {
@@ -1057,7 +1085,7 @@ useEffect(() => {
 
 const loadAllDepartements = async () => {
   try {
-    const response = await axios.get('http://127.0.0.1:8000/api/departements');
+    const response = await axios.get('/api/departements');
     setDepartements(response.data);
   } catch (error) {
     console.error('Erreur lors du chargement des départements', error);
@@ -1095,9 +1123,19 @@ const handlePosteChange = (selectedOption) => {
   if (selectedOption && formData) {
     setFormData({
       ...formData,
+      poste_id: selectedOption.id,
       poste: {
         ...formData.poste,
         id: selectedOption.id
+      }
+    });
+  } else {
+    setFormData({
+      ...formData,
+      poste_id: '',
+      poste: {
+        ...formData.poste,
+        id: ''
       }
     });
   }
@@ -1107,7 +1145,7 @@ const handlePosteChange = (selectedOption) => {
 
 const handleAddPoste = async () => {
   try {
-    const response = await axios.post("http://127.0.0.1:8000/api/postes", {
+    const response = await axios.post("/api/postes", {
       nom: newPosteName,
       unite_id: selectedUnite.id
     });
@@ -1198,7 +1236,7 @@ const handleSaveCalendrier = async (index) => {
 
 const fetchCalendriers = async () => {
   try {
-    const response = await axios.get('http://127.0.0.1:8000/api/calendrie');
+    const response = await axios.get('/api/calendrie');
     console.log('calendriers responssssssssssssssssse :', response);
 
     setCalendriers(response.data.calendrie); 
@@ -1234,7 +1272,7 @@ useEffect(() => {
     // <-------------------Pays-------------------->
 const handleAddPays = async () => {
   try {
-    const response = await axios.post('http://127.0.0.1:8000/api/pays', {
+    const response = await axios.post('/api/pays', {
       nom: newPays,
       code_pays: newCodePays
     });
@@ -1251,7 +1289,7 @@ const handleAddPays = async () => {
 
 const handleUpdatePays = async () => {
   try {
-    const response = await axios.put(`http://127.0.0.1:8000/api/pays/${editingPaysId}`, {
+    const response = await axios.put(`/api/pays/${editingPaysId}`, {
       nom: newPays,
       code_pays: newCodePays
     });
@@ -1273,7 +1311,7 @@ const handleUpdatePays = async () => {
 
 const handleDeletePays = async (paysId) => {
   try {
-    await axios.delete(`http://127.0.0.1:8000/api/pays/${paysId}`);
+    await axios.delete(`/api/pays/${paysId}`);
 
     const updatedPays = pays.filter(p => p.id !== paysId);
     setPays(updatedPays);
@@ -1292,7 +1330,7 @@ const handleDeletePays = async (paysId) => {
 // Ajouter une ville
 const handleAddVille = async () => {
   try {
-    const response = await axios.post('http://127.0.0.1:8000/api/villes', {
+    const response = await axios.post('/api/villes', {
       nom: newVille,
       pays_id: selectedPaysId
     });
@@ -1308,7 +1346,7 @@ const handleAddVille = async () => {
 
 const handleUpdateVille = async () => {
   try {
-    const response = await axios.put(`http://127.0.0.1:8000/api/villes/${editingVilleId}`, {
+    const response = await axios.put(`/api/villes/${editingVilleId}`, {
       nom: newVille,
       pays_id: selectedPaysId
     });
@@ -1330,7 +1368,7 @@ const handleUpdateVille = async () => {
 
 const handleDeleteVille = async (villeId) => {
   try {
-    await axios.delete(`http://127.0.0.1:8000/api/villes/${villeId}`);
+    await axios.delete(`/api/villes/${villeId}`);
 
     const updatedVilles = villes.filter(v => v.id !== villeId);
     setVilles(updatedVilles);
@@ -1346,7 +1384,7 @@ const handleDeleteVille = async (villeId) => {
 
   const fetchPays = async () => {
     try {
-      const response = await axios.get('http://127.0.0.1:8000/api/pays');
+      const response = await axios.get('/api/pays');
       setPays(response.data);
       console.log("payyyyyyyys",response.data)
     } catch (error) {
@@ -1362,7 +1400,7 @@ const handleDeleteVille = async (villeId) => {
   // Ajouter une commune
 const handleAddCommune = async () => {
   try {
-    const response = await axios.post('http://127.0.0.1:8000/api/communes', {
+    const response = await axios.post('/api/communes', {
       nom: newCommune,
       ville_id: selectedVilleId
     });
@@ -1379,7 +1417,7 @@ const handleAddCommune = async () => {
 
 const handleUpdateCommune = async () => {
   try {
-    const response = await axios.put(`http://127.0.0.1:8000/api/communes/${editingCommuneId}`, {
+    const response = await axios.put(`/api/communes/${editingCommuneId}`, {
       nom: newCommune,
       ville_id: selectedVilleId
     });
@@ -1400,7 +1438,7 @@ const handleUpdateCommune = async () => {
 
 const handleDeleteCommune = async (communeId) => {
   try {
-    await axios.delete(`http://127.0.0.1:8000/api/communes/${communeId}`);
+    await axios.delete(`/api/communes/${communeId}`);
 
     const updatedCommunes = communes.filter(c => c.id !== communeId);
     setCommunes(updatedCommunes);
@@ -1414,7 +1452,7 @@ const handleDeleteCommune = async (communeId) => {
 
   // const fetchVilles = async () => {
   //   try {
-  //     const response = await axios.get('http://127.0.0.1:8000/api/villes');
+  //     const response = await axios.get('/api/villes');
   //     setVilles(response.data);
   //     console.log("villlllllllllllllllllllllles",response.data)
   //   } catch (error) {
@@ -1424,7 +1462,7 @@ const handleDeleteCommune = async (communeId) => {
   // };
   // const fetchCommunes = async () => {
   //   try {
-  //     const response = await axios.get('http://127.0.0.1:8000/api/communes');
+  //     const response = await axios.get('/api/communes');
   //     setCommunes(response.data);
   //   } catch (error) {
   //     console.error('Erreur lors de la récupération des communes', error);
@@ -1434,7 +1472,7 @@ const handleDeleteCommune = async (communeId) => {
   const fetchVillesByPays = async (paysId) => {
     console.log('Pays ID:', paysId);
     try {
-      const response = await axios.get(`http://127.0.0.1:8000/api/villes?pays_id=${paysId}`);
+      const response = await axios.get(`/api/villes?pays_id=${paysId}`);
       console.log("Villes récupérées:", response.data);
       setVilles(response.data);
     } catch (error) {
@@ -1447,7 +1485,7 @@ const handleDeleteCommune = async (communeId) => {
     console.log('villeId ID:', villeId);
   
     try {
-      const response = await axios.get(`http://127.0.0.1:8000/api/communes?ville_id=${villeId}`);
+      const response = await axios.get(`/api/communes?ville_id=${villeId}`);
       setCommunes(response.data);
       setSelectedVilleId(villeId);
     } catch (error) {
@@ -1572,7 +1610,7 @@ const handleDeleteCommune = async (communeId) => {
 
   const handleAddAgence = async () => {
     try {
-      const { data } = await axios.post('http://127.0.0.1:8000/api/agences', {
+      const { data } = await axios.post('/api/agences', {
         nom: newAgence,
         banque_id: selectedBanqueId
       });
@@ -1586,7 +1624,7 @@ const handleDeleteCommune = async (communeId) => {
   
   const handleUpdateAgence = async () => {
     try {
-      await axios.put(`http://127.0.0.1:8000/api/agences/${editingAgenceId}`, {
+      await axios.put(`/api/agences/${editingAgenceId}`, {
         nom: newAgence,
         banque_id: selectedBanqueId
       });
@@ -1603,7 +1641,7 @@ const handleDeleteCommune = async (communeId) => {
   
   const handleDeleteAgence = async (id) => {
     try {
-      await axios.delete(`http://127.0.0.1:8000/api/agences/${id}`);
+      await axios.delete(`/api/agences/${id}`);
       setAgences(agences.filter(a => a.id !== id));
       showSuccessNotification('Agence supprimée');
     } catch (e) {
@@ -1620,9 +1658,14 @@ const handleDeleteCommune = async (communeId) => {
   
   
   const fetchBanques = async () => {
-    const res = await axios.get('http://127.0.0.1:8000/api/banque');
-    console.log("bannnnnnnnnnnnnnnnnnnnnnque:", res.data);
-    setBanques(Array.isArray(res.data) ? res.data : res.data.data);
+    try {
+      const res = await axios.get('/api/banque');
+      console.log("bannnnnnnnnnnnnnnnnnnnnnque:", res.data);
+      setBanques(Array.isArray(res.data) ? res.data : res.data.data);
+    } catch (error) {
+      console.warn('Impossible de charger les banques:', error?.response?.status || error.message);
+      setBanques([]);
+    }
 
   };
   
@@ -1632,9 +1675,14 @@ const handleDeleteCommune = async (communeId) => {
 
   
   const fetchAgences = async () => {
-    const res = await axios.get('http://127.0.0.1:8000/api/agences');
-    console.log(res.data);
-    setAgences(Array.isArray(res.data) ? res.data : res.data.data);
+    try {
+      const res = await axios.get('/api/agences');
+      console.log(res.data);
+      setAgences(Array.isArray(res.data) ? res.data : res.data.data);
+    } catch (error) {
+      console.warn('Impossible de charger les agences:', error?.response?.status || error.message);
+      setAgences([]);
+    }
   };
   
     
@@ -1650,7 +1698,7 @@ const handleDeleteCommune = async (communeId) => {
         return;
       }
       try {
-        const res = await axios.post('http://127.0.0.1:8000/api/banque', { nom: newBanque.trim() });
+        const res = await axios.post('/api/banque', { nom: newBanque.trim() });
         setBanques(prev => [...prev, res.data]);
         setNewBanque('');
         setShowBanqueModal(false);
@@ -1662,7 +1710,7 @@ const handleDeleteCommune = async (communeId) => {
     
     const handleUpdateBanque = async () => {
       try {
-        await axios.put(`http://127.0.0.1:8000/api/banque/${editingBanqueId}`, { nom: newBanque });
+        await axios.put(`/api/banque/${editingBanqueId}`, { nom: newBanque });
         setBanques(banques.map(b =>
           b.id === editingBanqueId ? { ...b, nom: newBanque } : b
         ));
@@ -1676,7 +1724,7 @@ const handleDeleteCommune = async (communeId) => {
     
     const handleDeleteBanque = async (id) => {
       try {
-        await axios.delete(`http://127.0.0.1:8000/api/banque/${id}`);
+        await axios.delete(`/api/banque/${id}`);
         setBanques(banques.filter(b => b.id !== id));
         showSuccessNotification('Banque supprimée');
       } catch (e) {
@@ -2849,13 +2897,21 @@ style={{ height: "150px", width: "100%", maxWidth: "150px" }}
                   options={postes}
                   value={selectedPoste}
                   onChange={handlePosteChange}
-                  placeholder={postes.length > 0 ? "Sélectionner un poste" : "Aucun poste disponible"}
+                  placeholder={
+                    loadingPostes
+                      ? "Chargement des postes..."
+                      : postes.length > 0
+                        ? "Sélectionner un poste"
+                        : "Aucun poste disponible"
+                  }
                   getOptionLabel={(e) => e.nom}
                   getOptionValue={(e) => e.id}
                   className="flex-grow-1"
                   isClearable={true}
-                  isDisabled={postes.length === 0}
-                  noOptionsMessage={() => "Aucun poste disponible pour cette sélection"}
+                  isDisabled={loadingPostes || postes.length === 0}
+                  noOptionsMessage={() =>
+                    loadingPostes ? "Chargement..." : "Aucun poste disponible pour cette sélection"
+                  }
                 />
                 <Button
                   variant="outline-secondary"
@@ -4360,3 +4416,5 @@ style={{ height: "150px", width: "100%", maxWidth: "150px" }}
 }
 
 export default AddEmp;
+
+

@@ -72,37 +72,37 @@ const EncaissementList = () => {
 
     const fetchEncaissements = async () => {
         try {
-            const factureResponse = await axios.get("http://localhost:8000/api/factures");
+            const factureResponse = await axios.get("/api/factures");
             console.log("API Response for facture:", factureResponse.data.facture);
             setFactures(factureResponse.data.facture);
             localStorage.setItem('factures', JSON.stringify(factureResponse.data.facture));
 
-            const clientResponse = await axios.get("http://localhost:8000/api/clients");
+            const clientResponse = await axios.get("/api/clients");
             console.log("API Response for clients:", clientResponse.data.client);
             setClients(clientResponse.data.client);
             localStorage.setItem('clients', JSON.stringify(clientResponse.data.client));
 
-            const compteResponse = await axios.get("http://localhost:8000/api/comptes");
+            const compteResponse = await axios.get("/api/comptes");
             console.log("API Response for Comptes:", compteResponse.data.comptes);
             setComptes(compteResponse.data.comptes);
             localStorage.setItem('comptes', JSON.stringify(compteResponse.data.comptes));
 
-            const response = await axios.get("http://localhost:8000/api/encaissements");
+            const response = await axios.get("/api/encaissements");
             setEncaissements(response.data.encaissements);
             localStorage.setItem('encaissements', JSON.stringify(response.data.encaissements));
             console.log("API Response for encaissements:", response.data.encaissements);
 
-            const responsebanques = await axios.get("http://localhost:8000/api/banques");
+            const responsebanques = await axios.get("/api/banques");
             setBanques(responsebanques.data.banques);
             localStorage.setItem('banques', JSON.stringify(responsebanques.data.banques));
             console.log("API Response for Banques:", responsebanques.data.banques);
 
-            const responseLigneentrer = await axios.get("http://localhost:8000/api/ligneentrercompte");
+            const responseLigneentrer = await axios.get("/api/ligneentrercompte");
             setLigneEntrerComptes(responseLigneentrer.data.ligneentrercomptes);
             localStorage.setItem('ligneEntrerComptes', JSON.stringify(responseLigneentrer.data.ligneentrercomptes));
             console.log("API Response for ligneentrercomptes:", responseLigneentrer.data.ligneentrercomptes);
 
-            const ligneEncaissementResponse = await axios.get("http://localhost:8000/api/ligneencaissement");
+            const ligneEncaissementResponse = await axios.get("/api/ligneencaissement");
             setLigneEncaissements(ligneEncaissementResponse.data.ligneencaissements);
             localStorage.setItem('ligneEncaissements', JSON.stringify(ligneEncaissementResponse.data.ligneencaissements));
             console.log("API Response for ligneencaissement:", ligneEncaissementResponse.data.ligneencaissements);
@@ -213,7 +213,7 @@ const EncaissementList = () => {
             if (result.isConfirmed) {
                 selectedItems.forEach((id) => {
                     axios
-                        .delete(`http://localhost:8000/api/encaissements/${id}`)
+                        .delete(`/api/encaissements/${id}`)
                         .then((response) => {
                             fetchEncaissements();
                             Swal.fire({
@@ -542,7 +542,7 @@ const EncaissementList = () => {
         }).then((result) => {
             if (result.isConfirmed) {
                 axios
-                    .delete(`http://localhost:8000/api/encaissements/${id}`)
+                    .delete(`/api/encaissements/${id}`)
                     .then((response) => {
                         if (response.data) {
                             // Successful deletion
@@ -629,7 +629,7 @@ const EncaissementList = () => {
     // const handleSubmit =  (e) => {
     //     e.preventDefault();
     //
-    //     const url = editingEncaissement ? `http://localhost:8000/api/encaissements/${editingEncaissement.id}` : 'http://localhost:8000/api/encaissements';
+    //     const url = editingEncaissement ? `/api/encaissements/${editingEncaissement.id}` : '/api/encaissements';
     //     const method = editingEncaissement ? 'put' : 'post';
     //     axios({
     //         method: method,
@@ -672,7 +672,7 @@ const EncaissementList = () => {
         e.preventDefault();
         console.log("e",e)
         try {
-            // const userResponse = await axios.get("http://localhost:8000/api/users", {
+            // const userResponse = await axios.get("/api/users", {
             //   withCredentials: true,
             //   headers: {
             //     "X-CSRF-TOKEN": csrfToken,
@@ -711,7 +711,7 @@ const EncaissementList = () => {
             if (editingEncaissement) {
                 // Mettre à jour le Encaissement existant
                 response = await axios.put(
-                    `http://localhost:8000/api/encaissements/${editingEncaissement.id}`,
+                    `/api/encaissements/${editingEncaissement.id}`,
                     {
                         referencee: formData.referencee,
                         date_encaissement: formData.date_encaissement,
@@ -723,7 +723,7 @@ const EncaissementList = () => {
                     }
                 );
                 const existingligneencaissementResponse = await axios.get(
-                    `http://localhost:8000/api/ligneencaissement/${editingEncaissement.id}`
+                    `/api/ligneencaissement/${editingEncaissement.id}`
                 );
 
                 const existingligneencaissement =
@@ -750,7 +750,7 @@ const EncaissementList = () => {
                     if (ligneencaissementData.id) {
                         // If exists, update the existing ligneencaissement
                         await axios.put(
-                            `http://localhost:8000/api/ligneencaissement/${ligneencaissementData.id}`,
+                            `/api/ligneencaissement/${ligneencaissementData.id}`,
                             ligneencaissementData,
                             {
                                 withCredentials: true,
@@ -762,7 +762,7 @@ const EncaissementList = () => {
                     } else {
                         // If doesn't exist, create a new ligneencaissement
                         await axios.post(
-                            "http://localhost:8000/api/ligneencaissement",
+                            "/api/ligneencaissement",
                             ligneencaissementData,
                             {
                                 withCredentials: true,
@@ -781,7 +781,7 @@ const EncaissementList = () => {
             } else {
                 // Créer un nouveau Encaissement
                 response = await axios.post(
-                    "http://localhost:8000/api/encaissements",
+                    "/api/encaissements",
                     EncaissementData
                 );
                 //console.log(response.data.devi)
@@ -798,7 +798,7 @@ const EncaissementList = () => {
                 for (const ligneencaissementData of selectedData) {
                     // Sinon, il s'agit d'une nouvelle ligne de Encaissement
                     await axios.post(
-                        "http://localhost:8000/api/ligneencaissement",
+                        "/api/ligneencaissement",
                         ligneencaissementData
                     );
                 }

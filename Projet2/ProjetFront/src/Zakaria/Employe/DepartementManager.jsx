@@ -36,7 +36,7 @@ function DepartementManager() {
   useEffect(() => {
     const fetchPerms = async () => {
       try {
-        const resp = await axios.get("http://localhost:8000/api/user", { withCredentials: true });
+        const resp = await axios.get("/api/user", { withCredentials: true });
         const roles = Array.isArray(resp.data) ? resp.data[0]?.roles : resp.data?.roles;
         const perms = roles && roles[0]?.permissions ? roles[0].permissions.map(p => p.name) : [];
         setPermissions(perms);
@@ -79,43 +79,16 @@ function DepartementManager() {
   }, [setTitle, setOnPrint, setOnExportPDF, setOnExportExcel, clearActions]);
 
 
-  const fetchDepartmentHierarchy = async () => {
-    try {
-      const response = await axios.get('http://127.0.0.1:8000/api/departements/hierarchy');
-      setDepartements(response.data);
-      localStorage.setItem('departmentHierarchy', JSON.stringify(response.data));
-    } catch (error) {
-      console.error("Error fetching department hierarchy:", error);
-      if (error.response && error.response.status === 403) {
-        Swal.fire({
-          icon: "error",
-          title: "Accès refusé",
-          text: "Vous n'avez pas l'autorisation de voir la hiérarchie des départements.",
-        });
-      }
-    }
-  };
-
-
-
-  useEffect(() => {
-    const departmentsFromStorage = localStorage.getItem('departmentHierarchy');
-
-    if (departmentsFromStorage) {
-      setDepartements(JSON.parse(departmentsFromStorage));
-    }
-
-    fetchDepartmentHierarchy();
-  }, []);
-
   const fetchDepartements = useCallback(async () => {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await axios.get("http://127.0.0.1:8000/api/departements");
-      const departmentsTree = buildDepartementTree(response.data);
-      setDepartements(departmentsTree);
-      localStorage.setItem('departements', JSON.stringify(departmentsTree));
+      // Use hierarchy endpoint so departments are fetched with the same logic
+      // as the other modules and without hitting protected list endpoint.
+      const response = await axios.get("/api/departements/hierarchy");
+      setDepartements(response.data);
+      localStorage.setItem("departmentHierarchy", JSON.stringify(response.data));
+      localStorage.setItem("departements", JSON.stringify(response.data));
     } catch (error) {
       console.error("Error fetching departments:", error);
       setError("An error occurred while fetching departments. Please try again.");
@@ -123,8 +96,8 @@ function DepartementManager() {
       if (error.response && error.response.status === 403) {
         Swal.fire({
           icon: "error",
-          title: "Accès refusé",
-          text: "Vous n'avez pas l'autorisation de voir la liste des départements.",
+          title: "Acces refuse",
+          text: "Vous n'avez pas l'autorisation de voir la liste des departements.",
         });
       }
     } finally {
@@ -133,10 +106,17 @@ function DepartementManager() {
   }, []);
 
   useEffect(() => {
-    const departementsFromStorage = localStorage.getItem('departements');
+    const cachedDepartements =
+      localStorage.getItem("departmentHierarchy") ||
+      localStorage.getItem("departements");
 
-    if (departementsFromStorage) {
-      setDepartements(JSON.parse(departementsFromStorage));
+    if (cachedDepartements) {
+      try {
+        setDepartements(JSON.parse(cachedDepartements));
+      } catch (e) {
+        localStorage.removeItem("departmentHierarchy");
+        localStorage.removeItem("departements");
+      }
       setIsLoading(false);
     }
 
@@ -147,26 +127,6 @@ function DepartementManager() {
       document.removeEventListener("click", handleClickOutside);
     };
   }, [fetchDepartements]);
-
-  const buildDepartementTree = (flatDepartements) => {
-    const departementMap = {};
-    const tree = [];
-
-    flatDepartements.forEach((dept) => {
-      dept.children = [];
-      departementMap[dept.id] = dept;
-    });
-
-    flatDepartements.forEach((dept) => {
-      if (dept.parent_id && departementMap[dept.parent_id]) {
-        departementMap[dept.parent_id].children.push(dept);
-      } else {
-        tree.push(dept);
-      }
-    });
-
-    return tree;
-  };
 
   const handleStartEditing = (departementId, departementName) => {
     setEditingDepartement({ id: departementId, name: departementName });
@@ -182,7 +142,7 @@ function DepartementManager() {
     if (editingDepartement) {
       try {
         const response = await axios.put(
-          `http://127.0.0.1:8000/api/departements/${editingDepartement.id}`,
+          `/api/departements/${editingDepartement.id}`,
           { nom: editingDepartement.name }
         );
         setDepartements((prevDepartements) => {
@@ -221,7 +181,7 @@ function DepartementManager() {
 
     try {
       const response = await axios.post(
-        "http://127.0.0.1:8000/api/departements",
+        "/api/departements",
         {
           nom: departmentNameToAdd,
           parent_id: parentId,
@@ -236,7 +196,7 @@ function DepartementManager() {
         confirmButtonText: 'OK',
       });
 
-      fetchDepartmentHierarchy();
+      fetchDepartements();
     } catch (error) {
       console.error("Error adding sub-department:", error);
 
@@ -450,7 +410,7 @@ function DepartementManager() {
     setError(null);
     try {
       const response = await axios.post(
-        "http://127.0.0.1:8000/api/departements",
+        "/api/departements",
         {
           nom: newDepartementName,
           parent_id: parentDepartementId,
@@ -496,7 +456,7 @@ function DepartementManager() {
         throw new Error("Département ID is null or undefined");
       }
       const response = await axios.put(
-        `http://127.0.0.1:8000/api/departements/${editingDepartementId}`,
+        `/api/departements/${editingDepartementId}`,
         { nom: newName }
       );
       if (response.data && response.data.id) {
@@ -541,7 +501,7 @@ function DepartementManager() {
     if (result.isConfirmed) {
       try {
         await axios.delete(
-          `http://127.0.0.1:8000/api/departements/${departementId}`
+          `/api/departements/${departementId}`
         );
 
         setDepartements((prevDepartements) => {
@@ -568,7 +528,7 @@ function DepartementManager() {
           'success'
         );
 
-        fetchDepartmentHierarchy();
+        fetchDepartements();
       } catch (error) {
         console.error("Erreur lors de la suppression du département:", error);
         Swal.fire(
@@ -743,3 +703,5 @@ function DepartementManager() {
 }
 
 export default DepartementManager;
+
+

@@ -75,7 +75,7 @@ const Calendrie = () => {
     useEffect(() => {
         const fetchPerms = async () => {
             try {
-                const resp = await axios.get("http://localhost:8000/api/user", { withCredentials: true });
+                const resp = await axios.get("/api/user", { withCredentials: true });
                 const roles = Array.isArray(resp.data) ? resp.data[0]?.roles : resp.data?.roles;
                 const perms = roles && roles[0]?.permissions ? roles[0].permissions.map(p => p.name) : [];
                 setPermissions(perms);
@@ -163,7 +163,7 @@ const Calendrie = () => {
 
 
       const fetchGroups = async () => {
-        const { data } = await axios.get('http://127.0.0.1:8000/api/calendrie');
+        const { data } = await axios.get('/api/calendrie');
         console.log("GGGGGGGGGGGGGGGGGGGGGGET data:", data)
         return data;
     };
@@ -313,7 +313,7 @@ const Calendrie = () => {
     const fetchHoraires = async (groupId = null) => {
         try {
             if (!groupId) return;
-            const response = await axios.get(`http://127.0.0.1:8000/api/details-calendrie?groupe_horaire_id=${groupId}`);
+            const response = await axios.get(`/api/details-calendrie?groupe_horaire_id=${groupId}`);
             setHoraires(response.data);
         } catch (error) {
             console.error('Error fetching horaires:', error);
@@ -364,7 +364,7 @@ const Calendrie = () => {
                 });
                 return;
             }
-            const response = await axios.put(`http://127.0.0.1:8000/api/calendrie/${groupId}`, {
+            const response = await axios.put(`/api/calendrie/${groupId}`, {
                 nom: editingGroupData.nom,
             });
             // Update the state with the edited group
@@ -404,7 +404,7 @@ const Calendrie = () => {
                 try {
                     await Promise.all(
                         selectedZones.map((id) =>
-                            axios.delete(`http://localhost:8000/api/zones/${id}`)
+                            axios.delete(`/api/zones/${id}`)
                         )
                     );
                     setZones((prevZones) =>
@@ -449,7 +449,7 @@ const Calendrie = () => {
                 try {
                     await Promise.all(
                         selectedGroups.map((id) =>
-                            axios.delete(`http://127.0.0.1:8000/api/group-motifs/${id}`)
+                            axios.delete(`/api/group-motifs/${id}`)
                         )
                     );
 
@@ -512,7 +512,7 @@ const Calendrie = () => {
                         jourDebut: formData.jourDebut || null
                     };
                     await axios.put(
-                        `http://127.0.0.1:8000/api/details-calendrie/${id}`,
+                        `/api/details-calendrie/${id}`,
                         horaireData
                     );
                 }));
@@ -541,13 +541,13 @@ const Calendrie = () => {
                 );
                 if (editingHoraire) {
                     await axios.put(
-                        `http://127.0.0.1:8000/api/details-calendrie/${editingHoraire.id}`,
+                        `/api/details-calendrie/${editingHoraire.id}`,
                         horaireData
                     );
                 } else {
                     console.log("Sending to API:", horaireData);
                     await axios.post(
-                        'http://127.0.0.1:8000/api/details-calendrie',
+                        '/api/details-calendrie',
                         horaireData
                     );      
 
@@ -744,7 +744,7 @@ const Calendrie = () => {
                 cancelButtonText: "Annuler"
             });
             if (result.isConfirmed) {
-                await axios.delete(`http://127.0.0.1:8000/api/details-calendrie/${id}`);
+                await axios.delete(`/api/details-calendrie/${id}`);
                 setHoraires(horaires.filter(horaire => horaire.id !== id));
                 Swal.fire({
                     icon: "success",
@@ -786,7 +786,7 @@ const Calendrie = () => {
                 });
                 return;
             }
-            const response = await axios.post("http://127.0.0.1:8000/api/calendrie", {
+            const response = await axios.post("/api/calendrie", {
                 nom: newCategory.categorie,
             });
             // setGroups(prevGroups => [...prevGroups, response.data]);
@@ -821,7 +821,7 @@ const Calendrie = () => {
                 cancelButtonText: "Annuler"
             });
             if (result.isConfirmed) {
-                const gdhhhs = await axios.delete(`http://127.0.0.1:8000/api/calendrie/${id}`);
+                const gdhhhs = await axios.delete(`/api/calendrie/${id}`);
                 console.log('fds', gdhhhs)
 
                 // setGroups(prevGroups => prevGroups.filter(group => group.id !== id));
@@ -872,7 +872,7 @@ const Calendrie = () => {
             });
             if (result.isConfirmed) {
                 await Promise.all(selectedRows.map(id =>
-                    axios.delete(`http://127.0.0.1:8000/api/details-calendrie/${id}`)
+                    axios.delete(`/api/details-calendrie/${id}`)
                 ));
                 setHoraires(prev => prev.filter(horaire => !selectedRows.includes(horaire.id)));
                 setSelectedRows([]);
@@ -938,7 +938,7 @@ const Calendrie = () => {
 
     const fetchHoraireForDetail = async (groupe_horaire_id) => {
         try {
-            const response = await axios.get(`http://127.0.0.1:8000/api/details-calendrie?groupe_horaire_id=${groupe_horaire_id}`);
+            const response = await axios.get(`/api/details-calendrie?groupe_horaire_id=${groupe_horaire_id}`);
             setTableData(prev => {
                 const newItems = response.data.filter(item =>
                     !prev.some(existing => existing.id === item.id)
@@ -1642,7 +1642,7 @@ useEffect(() => {
 
 
 
-            <style jsx>{`     
+            <style>{`     
             
             /* Styles pour les boutons d'expansion */
             .expand-button {

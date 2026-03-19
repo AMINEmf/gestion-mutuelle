@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+﻿import React, { useState, useEffect } from "react";
 import Drawer from "@mui/material/Drawer";
 import Button from "@mui/material/Button";
 import axios from "axios";
@@ -30,7 +30,7 @@ const EditCommande = ({
     // Fetch data for existing commande and populate the form
     if (editCommandeId) {
       axios
-        .get(`http://localhost:8000/api/commandes/${editCommandeId}`)
+        .get(`/api/commandes/${editCommandeId}`)
         .then((response) => {
           const existingCommandeData = response.data.commande;
           setCommandeData({
@@ -46,7 +46,7 @@ const EditCommande = ({
 
           // Fetch related ligne commandes
           axios
-            .get(`http://localhost:8000/api/ligneCommandes/${editCommandeId}`)
+            .get(`/api/ligneCommandes/${editCommandeId}`)
             .then((ligneCommandesResponse) => {
               const existingLigneCommandes =
                 ligneCommandesResponse.data.ligneCommandes;
@@ -102,7 +102,7 @@ const EditCommande = ({
       console.log(getElementValueById("client_id"));
       // Step 1: Update the Commande
       await axios.put(
-        `http://localhost:8000/api/commandes/${editCommandeId}`,
+        `/api/commandes/${editCommandeId}`,
         {
           client_id: getElementValueById("client_id"),
           //user_id: findUserId(getElementValueById("user_id")),
@@ -119,7 +119,7 @@ const EditCommande = ({
 
       // Step 2: Update the LigneCommande
       const existingLigneCommandesResponse = await axios.get(
-        `http://localhost:8000/api/ligneCommandes/${editCommandeId}`
+        `/api/ligneCommandes/${editCommandeId}`
       );
       const existingLigneCommandes =
         existingLigneCommandesResponse.data.ligneCommandes;
@@ -146,7 +146,7 @@ const EditCommande = ({
         if (ligneCommandeData.id) {
           // If exists, update the existing ligneCommande
           await axios.put(
-            `http://localhost:8000/api/ligneCommandes/${ligneCommandeData.id}`,
+            `/api/ligneCommandes/${ligneCommandeData.id}`,
             ligneCommandeData,
             {
               withCredentials: true,
@@ -158,7 +158,7 @@ const EditCommande = ({
         } else {
           // If doesn't exist, create a new ligneCommande
           await axios.post(
-            "http://localhost:8000/api/ligneCommandes",
+            "/api/ligneCommandes",
             ligneCommandeData,
             {
               withCredentials: true,
@@ -173,7 +173,7 @@ const EditCommande = ({
       // Step 3: Update the StatusCommande
       // Assuming statusCommandeData is fetched from somewhere
       const existingStatusesResponse = await axios.get(
-        "http://localhost:8000/api/statusCommande"
+        "/api/statusCommande"
       );
       const existingStatuses = existingStatusesResponse.data.StatusCommande;
 
@@ -188,7 +188,7 @@ const EditCommande = ({
       };
       // if (!statusExists) {
       await axios.post(
-        `http://localhost:8000/api/statusCommande/`,
+        `/api/statusCommande/`,
         statusCommandeData,
         {
           withCredentials: true,

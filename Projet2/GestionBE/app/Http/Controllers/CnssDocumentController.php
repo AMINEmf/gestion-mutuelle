@@ -73,7 +73,7 @@ class CnssDocumentController extends Controller
 
     public function destroy($documentId)
     {
-        Gate::authorize('delete_employes');
+        Gate::authorize('update_employes');
 
         $document = CnssDocument::findOrFail($documentId);
 

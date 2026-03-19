@@ -48,7 +48,7 @@ import AddCircleIcon from "@mui/icons-material/AddCircle";
 import SupervisorAccountIcon from "@mui/icons-material/SupervisorAccount";
 import StarHalfIcon from "@mui/icons-material/StarHalf";
 import WorkIcon from "@mui/icons-material/Work";
-import { Link } from "react-router-dom";
+import { Link, NavLink, useLocation } from "react-router-dom";
 import CssBaseline from "@mui/material/CssBaseline";
 import TimeToLeaveIcon from "@mui/icons-material/TimeToLeave";
 import MuiAppBar from "@mui/material/AppBar";
@@ -362,6 +362,7 @@ const Drawer = styled(MuiDrawer, {
 }));
 
 const defaultTheme = createTheme();
+const NAV_CAREER_FORMATION_KEY = "nav:isCareerFormationOpen";
 
 const Navigation = () => {
   const [selectedOption, setSelectedOption] = useState("");
@@ -372,10 +373,26 @@ const Navigation = () => {
   const [users, setUsers] = useState([]);
   const navigate = useNavigate();
   const [permissions, setPermissions] = useState([]);
+  const location = useLocation();
   const [isCommandsOpen, setIsCommandsOpen] = useState(false);
   const [isEmployeesOpen, setIsEmployeesOpen] = useState(false);
   const [isCnssOpen, setIsCnssOpen] = useState(false);
-  const [isCareerFormationOpen, setIsCareerFormationOpen] = useState(false);
+  const [isCareerFormationOpen, setIsCareerFormationOpen] = useState(() => {
+    try {
+      const storedValue = localStorage.getItem(NAV_CAREER_FORMATION_KEY);
+      if (storedValue !== null) {
+        return storedValue === "true";
+      }
+    } catch (error) {
+      console.error("Error reading career navigation state:", error);
+    }
+
+    if (typeof window !== "undefined") {
+      return window.location.pathname.startsWith("/carrieres-formations");
+    }
+
+    return false;
+  });
   const [isPlanificationOpen, setIsPlanificationOpen] = useState(false);
   const [isPlanificationPaieOpen, setIsPlanificationPaieOpen] = useState(false);
   const [isTraitementPaieOpen, setIsTraitementPaieOpen] = useState(false);
@@ -429,7 +446,7 @@ const Navigation = () => {
   };
 
   const handleCareerFormationClick = () => {
-    setIsCareerFormationOpen(!isCareerFormationOpen);
+    setIsCareerFormationOpen((prev) => !prev);
   };
 
   const handlePlanificationClick = () => {
@@ -493,12 +510,26 @@ const Navigation = () => {
     }
   }, [isAuthenticated, navigate]);
 
+  useEffect(() => {
+    if (location.pathname.startsWith("/carrieres-formations")) {
+      setIsCareerFormationOpen(true);
+    }
+  }, [location.pathname]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(NAV_CAREER_FORMATION_KEY, String(isCareerFormationOpen));
+    } catch (error) {
+      console.error("Error saving career navigation state:", error);
+    }
+  }, [isCareerFormationOpen]);
+
 
 
   // useEffect(() => {
   //   const fetchUserData = async () => {
   //     try {
-  //       const response = await axios.get("http://localhost:8000/api/user", {
+  //       const response = await axios.get("/api/user", {
   //         withCredentials: true,
   //       });
   //       setUser(response.data);
@@ -514,7 +545,7 @@ const Navigation = () => {
   // useEffect(() => {
   //   const fetchUsersData = async () => {
   //     try {
-  //       const response = await axios.get("http://localhost:8000/api/users", {
+  //       const response = await axios.get("/api/users", {
   //         withCredentials: true,
   //       });
   //       setUsers(response.data);
@@ -530,7 +561,7 @@ const Navigation = () => {
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const response = await axios.get("http://localhost:8000/api/user", {
+        const response = await axios.get("/api/user", {
           withCredentials: true,
         });
         if (response.data && response.data.length > 0) {
@@ -592,10 +623,13 @@ const Navigation = () => {
 
     <ThemeProvider theme={defaultTheme}>
       <Box sx={{
-        marginLeft: "-20px",
-        marginTop: '-20px',
-        maxHeight: '1400px',
+        marginLeft: 0,
+        marginTop: 0,
+        width: "100%",
+        maxWidth: "100%",
+        minHeight: "100vh",
         overflowY: 'auto',
+        overflowX: 'hidden',
         scrollbarColor: "#2c767c #e0e0e0" /* Scrollbar colors for Firefox */,
         "&::-webkit-scrollbar": {
           width: "8px" /* Adjust width as needed */,
@@ -825,7 +859,12 @@ const Navigation = () => {
               <List component="div" disablePadding>
 
                 {permissions.includes("view_all_employes") && (
-                  <SubMenuItem button component={Link} to="/employes">
+                  <SubMenuItem
+                    button
+                    component={NavLink}
+                    to="/employes"
+                    onClick={() => navigate("/employes")}
+                  >
                     <ListItemIcon>
                       <ListIcon />
                     </ListItemIcon>
@@ -864,11 +903,12 @@ const Navigation = () => {
 
             <Collapse in={isCareerFormationOpen} timeout="auto" unmountOnExit>
               <List component="div" disablePadding>
+                
                 <SubMenuItem button component={Link} to="/carrieres-formations/dashboard-carrieres">
                   <ListItemIcon>
                     <ListIcon />
                   </ListItemIcon>
-                  <ListItemText primary="Dashboard Carrieres" />
+                  <ListItemText primary="Tableau de bord Carrieres" />
                 </SubMenuItem>
                 <SubMenuItem button component={Link} to="/carrieres-formations/carrieres">
                   <ListItemIcon>
@@ -880,19 +920,32 @@ const Navigation = () => {
                   <ListItemIcon>
                     <ListIcon />
                   </ListItemIcon>
-                  <ListItemText primary="Postes & Grades" />
+                  <ListItemText primary="Postes" />
                 </SubMenuItem>
+                <SubMenuItem button component={Link} to="/carrieres-formations/demandes-mobilite">
+                  <ListItemIcon>
+                    <ListIcon />
+                  </ListItemIcon>
+                  <ListItemText primary="Demandes de mobilité" />
+                </SubMenuItem>
+               
                 <SubMenuItem button component={Link} to="/carrieres-formations/dashboard-formations">
                   <ListItemIcon>
                     <ListIcon />
                   </ListItemIcon>
-                  <ListItemText primary="Dashboard Formations" />
+                  <ListItemText primary="Tableau de bord Formations" />
                 </SubMenuItem>
                 <SubMenuItem button component={Link} to="/carrieres-formations/formations">
                   <ListItemIcon>
                     <ListIcon />
                   </ListItemIcon>
                   <ListItemText primary="Formations" />
+                </SubMenuItem>
+                 <SubMenuItem button component={Link} to="/carrieres-formations/demandes-formation">
+                  <ListItemIcon>
+                    <ListIcon />
+                  </ListItemIcon>
+                  <ListItemText primary="Demandes de formation" />
                 </SubMenuItem>
               </List>
             </Collapse>
@@ -917,7 +970,7 @@ const Navigation = () => {
                   <ListItemIcon>
                     <ListIcon />
                   </ListItemIcon>
-                  <ListItemText primary="Dashboard CNSS" />
+                  <ListItemText primary="Tableau de bord CNSS" />
                 </SubMenuItem>
                 <SubMenuItem button component={Link} to="/cnss">
                   <ListItemIcon>
@@ -935,7 +988,7 @@ const Navigation = () => {
                   <ListItemIcon>
                     <ListIcon />
                   </ListItemIcon>
-                  <ListItemText primary="Dossier CNSS" />
+                  <ListItemText primary="Gestion des opérations" />
                 </SubMenuItem>
               </List>
             </Collapse>
@@ -1062,3 +1115,4 @@ const Navigation = () => {
 };
 
 export default Navigation;
+

@@ -100,14 +100,14 @@ const ChargeCommande = () => {
   const fetchChargementCommandes = async () => {
     try {
       const livreurResponse = await axios.get(
-        "http://localhost:8000/api/vehicule-livreurs"
+        "/api/vehicule-livreurs"
       );
 
       console.log("API Response for Livreurs:", livreurResponse.data.livreurs);
 
       setVehicule_livreurs(livreurResponse.data.vehicule_livreurs);
       const produitsResponse = await axios.get(
-        "http://localhost:8000/api/produits"
+        "/api/produits"
       );
 
       console.log(
@@ -117,7 +117,7 @@ const ChargeCommande = () => {
 
       setProduits(produitsResponse.data.produit);
       const commandesResponse = await axios.get(
-        "http://localhost:8000/api/commandes"
+        "/api/commandes"
       );
 
       console.log(
@@ -127,7 +127,7 @@ const ChargeCommande = () => {
 
       setCommandes(commandesResponse.data.commandes);
       const response = await axios.get(
-        "http://localhost:8000/api/chargementCommandes"
+        "/api/chargementCommandes"
       );
 
       console.log("API Response:", response.data);
@@ -256,7 +256,7 @@ const ChargeCommande = () => {
       if (result.isConfirmed) {
         selectedItems.forEach((id) => {
           axios
-            .delete(`http://localhost:8000/api/chargementCommandes/${id}`)
+            .delete(`/api/chargementCommandes/${id}`)
             .then((response) => {
               fetchChargementCommandes();
               Swal.fire({
@@ -541,7 +541,7 @@ const ChargeCommande = () => {
     }).then((result) => {
       if (result.isConfirmed) {
         axios
-          .delete(`http://localhost:8000/api/chargementCommandes/${id}`)
+          .delete(`/api/chargementCommandes/${id}`)
           .then((response) => {
             if (response.data.message) {
               // Successful deletion
@@ -634,8 +634,8 @@ const ChargeCommande = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     const url = editingChargementCommande
-      ? `http://localhost:8000/api/chargementCommandes/${editingChargementCommande.id}`
-      : "http://localhost:8000/api/chargementCommandes";
+      ? `/api/chargementCommandes/${editingChargementCommande.id}`
+      : "/api/chargementCommandes";
     const method = editingChargementCommande ? "put" : "post";
     axios({
       method: method,
@@ -1538,3 +1538,4 @@ const ChargeCommande = () => {
 };
 
 export default ChargeCommande;
+

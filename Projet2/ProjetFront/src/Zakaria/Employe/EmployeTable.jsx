@@ -23,6 +23,7 @@ import { motion, AnimatePresence, color } from 'framer-motion';
 import { FaPlusCircle } from "react-icons/fa";
 import EmployeFichePrint from "./EmployeFichePrint";
 import { useOpen } from "../../Acceuil/OpenProvider";
+import { API_ORIGIN } from "../../services/apiConfig";
 
 
 
@@ -79,6 +80,7 @@ const EmployeTable = forwardRef((props, ref) => {
       salaire_reference_annuel: true,
       remarque: true,
       centreCout: true,
+      poste_nom: true,
     };
   };
 
@@ -196,7 +198,7 @@ const EmployeTable = forwardRef((props, ref) => {
     'centreCout', 'departement_id', 'delivree_par', 'date_expiration', 'carte_sejour',
     'motif_depart', 'dernier_jour_travaille', 'notification_rupture', 'engagement_procedure',
     'signature_rupture_conventionnelle', 'transaction_en_cours', 'bulletin_modele',
-    'salaire_moyen', 'salaire_reference_annuel'
+    'salaire_moyen', 'salaire_reference_annuel', 'poste_id'
   ];
 
   const [selectedFields, setSelectedFields] = useState([]);
@@ -227,7 +229,7 @@ const EmployeTable = forwardRef((props, ref) => {
       render: (item) => (
         item.url_img ? (
           <img
-            src={`http://127.0.0.1:8000/storage/${item.url_img}`}
+            src={`${API_ORIGIN}/storage/${item.url_img}`}
             alt={`${item.nom} ${item.prenom}`}
             className="zoomable-image"
 
@@ -258,6 +260,11 @@ const EmployeTable = forwardRef((props, ref) => {
     { key: "num_badge", label: "Num Badge" },
     { key: "nom", label: "Nom" },
     { key: "prenom", label: "Prenom" },
+    {
+      key: "poste_nom",
+      label: "Poste",
+      render: (item) => item.poste?.nom || item.poste_nom || "-"
+    },
     {
       key: "contrat",
       label: "Contrat",
@@ -357,7 +364,7 @@ const EmployeTable = forwardRef((props, ref) => {
 
   const fetchCalendriers = async () => {
     try {
-      const response = await axios.get('http://127.0.0.1:8000/api/calendrie');
+      const response = await axios.get('/api/calendrie');
       setCalendriers(response.data.calendrie);
       console.log(' Données reçues calendriers :', response.data.calendrie);
 
@@ -370,17 +377,29 @@ const EmployeTable = forwardRef((props, ref) => {
     fetchCalendriers();
   }, []);
 
+  const normalizeEmployees = useCallback((employees) => {
+    if (!Array.isArray(employees)) return [];
+
+    return employees.map((employee) => ({
+      ...employee,
+      poste_nom: employee?.poste?.nom || employee?.poste_nom || "",
+    }));
+  }, []);
+
   const fetchEmployersWithContracts = useCallback(async () => {
     try {
-      const response = await axios.get(`http://127.0.0.1:8000/api/departements/employes`);
+      const response = await axios.get(`/api/employes`);
       if (response.data && Array.isArray(response.data)) {
-        setEmployeesWithContracts(response.data);
-        localStorage.setItem("employeesWithContracts", JSON.stringify(response.data));
-        console.log("Employés récupérés:", response.data);
+        const normalizedEmployees = normalizeEmployees(response.data);
+        setEmployeesWithContracts(normalizedEmployees);
+        localStorage.setItem("employeesWithContracts", JSON.stringify(normalizedEmployees));
+        console.log("Employés récupérés:", normalizedEmployees);
 
       }
     } catch (error) {
       console.error("Erreur lors de la récupération des employés:", error);
+      setEmployeesWithContracts([]);
+      localStorage.removeItem("employeesWithContracts");
     }
   }, []);
 
@@ -389,16 +408,16 @@ const EmployeTable = forwardRef((props, ref) => {
   useEffect(() => {
     const storedData = localStorage.getItem("employeesWithContracts");
     if (storedData) {
-      setEmployeesWithContracts(JSON.parse(storedData));
+      setEmployeesWithContracts(normalizeEmployees(JSON.parse(storedData)));
     }
     fetchEmployersWithContracts();
-  }, [fetchEmployersWithContracts]);
+  }, [fetchEmployersWithContracts, normalizeEmployees]);
 
 
 
 
   useEffect(() => {
-    fetch('http://localhost:8000/api/full-data')
+    fetch('/api/full-data')
       .then(response => response.json())
       .then(data => {
         setData(data);
@@ -474,6 +493,9 @@ const EmployeTable = forwardRef((props, ref) => {
 
 
   const filteredEmployers = useMemo(() => {
+    if (!departementId) {
+      return [];
+    }
 
     let result = includeSubDepartments
       ? employeesWithContracts.filter((emp) => {
@@ -547,13 +569,17 @@ const EmployeTable = forwardRef((props, ref) => {
   useEffect(() => {
     const savedColumnVisibility = localStorage.getItem('employeeColumnVisibility');
 
+    const defaultVisibility = {};
+    allColumns.forEach(col => {
+      defaultVisibility[col.key] = true;
+    });
+
     if (savedColumnVisibility) {
-      setColumnVisibility(JSON.parse(savedColumnVisibility));
+      const parsedVisibility = JSON.parse(savedColumnVisibility);
+      const mergedVisibility = { ...defaultVisibility, ...parsedVisibility };
+      setColumnVisibility(mergedVisibility);
+      localStorage.setItem('employeeColumnVisibility', JSON.stringify(mergedVisibility));
     } else {
-      const defaultVisibility = {};
-      allColumns.forEach(col => {
-        defaultVisibility[col.key] = true;
-      });
       setColumnVisibility(defaultVisibility);
       localStorage.setItem('employeeColumnVisibility', JSON.stringify(defaultVisibility));
     }
@@ -582,6 +608,22 @@ const EmployeTable = forwardRef((props, ref) => {
     });
   }, []);
 
+  const deleteEmployeeRequest = useCallback(async (id) => {
+    try {
+      await axios.delete(`/api/employes/${id}`);
+      return;
+    } catch (error) {
+      const status = error?.response?.status;
+
+      if (status === 403 || status === 405) {
+        await axios.post(`/api/employes/${id}`, { _method: "DELETE" });
+        return;
+      }
+
+      throw error;
+    }
+  }, []);
+
   const handleDeleteEmployer = useCallback(async (id) => {
     const result = await Swal.fire({
       title: "Êtes-vous sûr?",
@@ -596,7 +638,7 @@ const EmployeTable = forwardRef((props, ref) => {
 
     if (result.isConfirmed) {
       try {
-        await axios.delete(`http://127.0.0.1:8000/api/employes/${id}`);
+        await deleteEmployeeRequest(id);
         setEmployeesWithContracts(prev => {
           const updated = prev.filter(emp => emp.id !== id);
           localStorage.setItem("employeesWithContracts", JSON.stringify(updated));
@@ -605,10 +647,14 @@ const EmployeTable = forwardRef((props, ref) => {
         Swal.fire("Supprimé!", "L'employé a été supprimé.", "success");
       } catch (error) {
         console.error("Error deleting employer:", error);
-        Swal.fire("Erreur!", "Une erreur est survenue lors de la suppression.", "error");
+        const errorMessage =
+          error?.response?.data?.message ||
+          error?.response?.data?.error ||
+          "Une erreur est survenue lors de la suppression.";
+        Swal.fire("Erreur!", errorMessage, "error");
       }
     }
-  }, []);
+  }, [deleteEmployeeRequest]);
 
   const handleSelectEmployer = useCallback((employer) => {
     setSelectedEmployer(employer);
@@ -784,7 +830,7 @@ body {
     if (result.isConfirmed) {
       try {
         await Promise.all(
-          selectedEmployers.map(id => axios.delete(`http://127.0.0.1:8000/api/employes/${id}`))
+          selectedEmployers.map(id => deleteEmployeeRequest(id))
         );
 
         setEmployeesWithContracts(prev => {
@@ -797,10 +843,14 @@ body {
         Swal.fire("Supprimés!", "Les employés ont été supprimés.", "success");
       } catch (error) {
         console.error("Error deleting selected employers:", error);
-        Swal.fire("Erreur!", "Une erreur est survenue lors de la suppression.", "error");
+        const errorMessage =
+          error?.response?.data?.message ||
+          error?.response?.data?.error ||
+          "Une erreur est survenue lors de la suppression.";
+        Swal.fire("Erreur!", errorMessage, "error");
       }
     }
-  }, [selectedEmployers]);
+  }, [selectedEmployers, deleteEmployeeRequest]);
 
 
 
@@ -993,7 +1043,7 @@ body {
 
           console.log(" Envoi du planning :", payload);
 
-          await axios.post("http://127.0.0.1:8000/api/calendriers-employes", payload);
+          await axios.post("/api/calendriers-employes", payload);
 
           console.log(`Planning affecté à l'employé ${employerId}`);
         }
@@ -1020,7 +1070,7 @@ body {
   const fetchRegles = async () => {
     try {
       const res = await axios.get(
-        'http://127.0.0.1:8000/api/regle-compensations'
+        '/api/regle-compensations'
       );
       setReglesComp(Array.isArray(res.data) ? res.data : res.data.data);
       console.log("res.data regle", res.data)
@@ -1061,7 +1111,7 @@ body {
           if (!it.regle_id || !it.date_debut || !it.date_fin) continue;
 
           await axios.post(
-            'http://127.0.0.1:8000/api/regles-comp-employes',
+            '/api/regles-comp-employes',
 
             {
               employe_id: empId,
@@ -1099,7 +1149,7 @@ body {
       const sheet = workbook.Sheets[workbook.SheetNames[0]];
       const json = XLSX.utils.sheet_to_json(sheet);
 
-      axios.post('http://localhost:8000/api/employes', { data: json })
+      axios.post('/api/employes', { data: json })
         .then(() => {
           Swal.fire('Succès', 'Employés importés avec succès', 'success');
         })
@@ -1134,7 +1184,7 @@ body {
     formData.append("fieldMappings", JSON.stringify(fieldMappings));
     formData.append("departement_id", departementId);
 
-    axios.post("http://127.0.0.1:8000/api/import-employes", formData)
+    axios.post("/api/import-employes", formData)
       .then(response => {
         Swal.fire("Succès", "Importation terminée !", "success");
 
@@ -1975,7 +2025,7 @@ body {
         </Modal.Footer>
       </Modal>
 
-      <style jsx>{`
+      <style>{`
         // .custom-checkbox1 .form-check-input:checked {
         //   background-color: #00afaa;
         //   border-color: #00afaa;
@@ -2306,7 +2356,7 @@ body {
         </Modal.Footer>
 
 
-        <style jsx>{`
+        <style>{`
     .custom-checkbox1 .form-check-input:checked {
       background-color: #00afaa;
       border-color: #00afaa;

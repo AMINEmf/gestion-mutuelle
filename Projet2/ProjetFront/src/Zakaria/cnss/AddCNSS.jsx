@@ -1,12 +1,11 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import axios from 'axios';
-import { Button, Form, Tabs, Tab } from 'react-bootstrap';
+import { Button, Form } from 'react-bootstrap';
 import { ToastContainer } from 'react-toastify';
 import Swal from 'sweetalert2';
 import Select from "react-dropdown-select";
-import { Activity, User, Calendar, Save, X } from "lucide-react";
-import '../Employe/AddEmp.css';
-
+import { Activity, User, Calendar, Save, X, Hash, ShieldCheck } from "lucide-react";
+import './CnssForm.css';
 
 function AddCNSS({
   selectedDepartementId,
@@ -15,8 +14,8 @@ function AddCNSS({
   selectedCnss,
   onCnssUpdated,
   fetchCnss,
-  employeesList = [], // Reçu depuis CNSSTable
-  cnssAffiliationsList = [], // Reçu depuis CNSSTable
+  employeesList = [],
+  cnssAffiliationsList = [],
 }) {
   const [selectedEmployee, setSelectedEmployee] = useState(null);
   const [startDate, setStartDate] = useState('');
@@ -24,6 +23,7 @@ function AddCNSS({
   const [status, setStatus] = useState('Actif');
   const [loading, setLoading] = useState(false);
   const [cnssNumber, setCnssNumber] = useState('');
+  const [employeeDetails, setEmployeeDetails] = useState(null);
 
   const normalizeId = useCallback((value) => (value == null ? '' : String(value)), []);
 
@@ -39,7 +39,15 @@ function AddCNSS({
 
   useEffect(() => {
     if (selectedCnss) {
-      setSelectedEmployee(selectedCnss.employe_id ?? null);
+      const resolvedEmployeeId =
+        selectedCnss.employe_id ??
+        selectedCnss.employe?.id ??
+        selectedCnss.employe ??
+        null;
+      const parsedId = resolvedEmployeeId != null && String(resolvedEmployeeId).trim() !== ""
+        ? Number(resolvedEmployeeId)
+        : null;
+      setSelectedEmployee(Number.isNaN(parsedId) ? resolvedEmployeeId : parsedId);
       setStartDate(selectedCnss.date_debut || '');
       setEndDate(selectedCnss.date_fin || '');
       setStatus(selectedCnss.statut || 'Actif');
@@ -60,17 +68,12 @@ function AddCNSS({
   );
 
   const employeesInDepartment = useMemo(() => {
-    if (!selectedDepartementId) {
-      return [];
-    }
-
+    if (!selectedDepartementId) return [];
     const departmentId = normalizeId(selectedDepartementId);
-
     return employees.filter((emp) => {
       const inLinkedDepartments =
         Array.isArray(emp.departements) &&
         emp.departements.some((dept) => normalizeId(dept.id) === departmentId);
-
       return inLinkedDepartments || normalizeId(emp.departement_id) === departmentId;
     });
   }, [employees, selectedDepartementId, normalizeId]);
@@ -81,11 +84,7 @@ function AddCNSS({
     () =>
       employeesInDepartment.filter((emp) => {
         const employeeId = normalizeId(emp.id);
-
-        if (selectedCnss && employeeId === currentEditedEmployeeId) {
-          return true;
-        }
-
+        if (selectedCnss && employeeId === currentEditedEmployeeId) return true;
         return !affiliatedEmployeeIds.has(employeeId);
       }),
     [employeesInDepartment, affiliatedEmployeeIds, selectedCnss, currentEditedEmployeeId, normalizeId]
@@ -101,61 +100,99 @@ function AddCNSS({
   );
 
   const selectedEmployeeOption = useMemo(() => {
-    if (!selectedEmployee) {
-      return [];
-    }
-
+    if (!selectedEmployee) return [];
     const selectedId = normalizeId(selectedEmployee);
-    const fromOptions = employeeOptions.find(
-      (option) => normalizeId(option.value) === selectedId
-    );
-
-    if (fromOptions) {
-      return [fromOptions];
-    }
-
+    const fromOptions = employeeOptions.find((option) => normalizeId(option.value) === selectedId);
+    if (fromOptions) return [fromOptions];
     const matchedEmployee = employees.find((emp) => normalizeId(emp.id) === selectedId);
-    if (!matchedEmployee) {
-      return [];
-    }
-
-    return [
-      {
-        value: matchedEmployee.id,
-        label: `${matchedEmployee.matricule} - ${matchedEmployee.nom} ${matchedEmployee.prenom}`,
-      },
-    ];
+    if (!matchedEmployee) return [];
+    return [{
+      value: matchedEmployee.id,
+      label: `${matchedEmployee.matricule} - ${matchedEmployee.nom} ${matchedEmployee.prenom}`,
+    }];
   }, [selectedEmployee, employeeOptions, employees, normalizeId]);
 
   const selectedEmployeeSalary = useMemo(() => {
-    if (!selectedEmployee) {
-      return null;
-    }
-
+    if (!selectedEmployee) return null;
     const selectedId = normalizeId(selectedEmployee);
     const matchedEmployee = employees.find((emp) => normalizeId(emp.id) === selectedId);
-    if (!matchedEmployee) {
-      return null;
-    }
-
-    return (
-      matchedEmployee.salaire_base ??
-      matchedEmployee.salary ??
-      matchedEmployee.salaire ??
-      null
-    );
+    if (!matchedEmployee) return null;
+    return matchedEmployee.salaire_base ?? matchedEmployee.salary ?? matchedEmployee.salaire ?? null;
   }, [selectedEmployee, employees, normalizeId]);
+
+  const formatAddress = useCallback((address) => {
+    if (!address) return "";
+    if (typeof address === "string") return address;
+    if (typeof address === "object") {
+      const parts = [address.adress, address.adresse, address.rue, address.commune, address.ville, address.pays, address.code_postal, address.codePostal];
+      return parts.filter(Boolean).join(", ");
+    }
+    return "";
+  }, []);
+
+  const employeeInfo = useMemo(() => {
+    if (!employeeDetails) return { cin: "", dateNaissance: "", situationFamiliale: "", adresse: "", dateEmbauche: "" };
+    return {
+      cin: employeeDetails.cin || "",
+      dateNaissance: employeeDetails.date_naissance || "",
+      situationFamiliale: employeeDetails.situation_familiale || "",
+      adresse: formatAddress(employeeDetails.adresse),
+      dateEmbauche: employeeDetails.date_embauche || "",
+    };
+  }, [employeeDetails, formatAddress]);
+
+  const normalizeEmployeeResponse = useCallback((payload) => {
+    if (!payload) return null;
+    if (Array.isArray(payload)) return payload[0] || null;
+    if (payload.data && typeof payload.data === "object") return payload.data;
+    if (payload.employe && typeof payload.employe === "object") return payload.employe;
+    if (payload.employee && typeof payload.employee === "object") return payload.employee;
+    return payload;
+  }, []);
+
+  const mapEmployeeDetails = useCallback((raw) => {
+    if (!raw || typeof raw !== "object") return null;
+    const rawAddress = raw.adresse ?? raw.address ?? raw.adress ?? null;
+    return {
+      cin: raw.cin || "",
+      date_naissance: raw.date_naissance || raw.date_naiss || "",
+      situation_familiale: raw.situation_familiale || raw.situation_fm || "",
+      adresse: rawAddress,
+      date_embauche: raw.date_embauche || raw.date_entree || "",
+      numero_cnss: raw.numero_cnss || raw.cnss || raw.cnss_numero || "",
+    };
+  }, []);
+
+  useEffect(() => {
+    let isActive = true;
+    if (!selectedEmployee) { setEmployeeDetails(null); return undefined; }
+    const fetchEmployeeDetails = async () => {
+      try {
+        const response = await axios.get(`/api/employees/${selectedEmployee}`);
+        const normalized = normalizeEmployeeResponse(response.data);
+        const mapped = mapEmployeeDetails(normalized);
+        if (isActive) setEmployeeDetails(mapped || null);
+      } catch (error) {
+        if (isActive) setEmployeeDetails(null);
+      }
+    };
+    fetchEmployeeDetails();
+    return () => { isActive = false; };
+  }, [selectedEmployee, normalizeEmployeeResponse, mapEmployeeDetails]);
+
+  useEffect(() => {
+    if (!employeeDetails || selectedCnss) return;
+    const existingCnss = employeeDetails.numero_cnss || employeeDetails.cnss || employeeDetails.cnss_numero || "";
+    if (!cnssNumber && existingCnss) setCnssNumber(existingCnss);
+  }, [employeeDetails, selectedCnss, cnssNumber]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     if (!selectedDepartementId || !selectedEmployee) {
       Swal.fire('Erreur', 'Veuillez sélectionner un employé.', 'warning');
       return;
     }
-
     setLoading(true);
-
     const payload = {
       employe_id: selectedEmployee,
       numero_cnss: cnssNumber,
@@ -165,28 +202,19 @@ function AddCNSS({
       statut: status,
       departement_id: selectedDepartementId,
     };
-
     try {
       if (selectedCnss) {
-        const response = await axios.put(
-          `http://127.0.0.1:8000/api/cnss/affiliations/${selectedCnss.id}`,
-          payload
-        );
-        if (onCnssUpdated) {
-          onCnssUpdated(response.data || { ...payload, id: selectedCnss.id });
-        }
+        const response = await axios.put(`/api/cnss/affiliations/${selectedCnss.id}`, payload);
+        if (onCnssUpdated) onCnssUpdated(response.data || { ...payload, id: selectedCnss.id });
         Swal.fire('Succès', 'Affiliation CNSS mise à jour', 'success');
       } else {
-        const response = await axios.post('http://127.0.0.1:8000/api/cnss/affiliations', payload);
+        const response = await axios.post('/api/cnss/affiliations', payload);
         onCnssAdded(response.data);
         Swal.fire('Succès', 'Affiliation CNSS ajoutée', 'success');
       }
       handleClose();
-      if (fetchCnss) {
-        await fetchCnss();
-      }
+      if (fetchCnss) await fetchCnss();
     } catch (error) {
-      console.error('Error saving affiliation:', error);
       Swal.fire('Erreur', error.response?.data?.message || 'Une erreur est survenue', 'error');
     } finally {
       setLoading(false);
@@ -199,278 +227,198 @@ function AddCNSS({
     setEndDate('');
     setStatus('Actif');
     setCnssNumber('');
+    setEmployeeDetails(null);
     toggleCnssForm();
   }, [toggleCnssForm]);
 
+  const handleGenerateImmatriculation = useCallback(() => {
+    const stamp = Date.now().toString().slice(-6);
+    const random = Math.floor(1000 + Math.random() * 9000);
+    setCnssNumber(`CNSS-${stamp}${random}`);
+  }, []);
+
   return (
     <>
-      <style>
-        {`
-          .side-panel-container {
-            position: fixed !important;
-            top: 9.4%; 
-            left: 60%; 
-            width: 40%;
-            height: calc(100vh - 160px) !important;
-            animation: slideInAccident 0.3s ease-out;
-            background: white;
-            z-index: 1000;
-            display: flex;
-            flex-direction: column;
-            box-shadow: -5px 0 15px rgba(0,0,0,0.1);
-            border-radius: 8px 0 0 8px;
-          }
-          @media (max-width: 1024px) {
-            .side-panel-container {
-              left: 0 !important;
-              width: 100% !important;
-              border-radius: 0 !important;
-            }
-          }
-          @keyframes slideInAccident {
-            from { transform: translateX(100%); }
-            to { transform: translateX(0); }
-          }
-          .form-header {
-            padding: 16px 24px;
-            background-color: #f8fafc;
-            border-bottom: 1px solid #e2e8f0;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-          }
-          .form-header h3 {
-            margin: 0;
-            font-size: 18px;
-            color: #2c767c;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-          }
-          .form-body {
-            flex-grow: 1;
-            overflow-y: auto;
-            padding: 24px;
-          }
-          .form-body::-webkit-scrollbar { width: 6px; }
-          .form-body::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
-          .form-footer {
-            padding: 16px 24px;
-            background-color: #f8fafc;
-            border-top: 1px solid #e2e8f0;
-            display: flex;
-            justify-content: flex-end;
-            gap: 12px;
-          }
-          .form-control, .form-select, .form-control-select {
-             font-size: 14px;
-             color: #334155;
-             border-color: #cbd5e1;
-          }
-          .form-control:focus, .form-select:focus {
-            border-color: #2c767c;
-            box-shadow: 0 0 0 0.2rem rgba(44, 118, 124, 0.25);
-          }
-          .form-label {
-            font-size: 13px;
-            font-weight: 700;
-            color: #475569;
-            margin-bottom: 6px;
-          }
-          .section-title {
-            color: #64748b;
-            font-size: 12px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            margin-bottom: 20px;
-            margin-top: 10px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            border-bottom: 2px solid #f1f5f9;
-            padding-bottom: 8px;
-          }
-        `}
-      </style>
-
       <ToastContainer position="bottom-right" autoClose={3000} />
 
-      <div className="side-panel-container" onClick={(e) => e.stopPropagation()}>
+      <div className="cnss-side-panel" onClick={(e) => e.stopPropagation()}>
+
         {/* HEADER */}
-        <div className="form-header">
-          <h3>
-            <Activity size={20} />
+        <div className="cnss-form-header">
+          <div style={{ width: "24px" }}></div> {/* Pour équilibrer le bouton Fermer et centrer le titre */}
+          <h5>
             {selectedCnss ? 'Modifier Affiliation' : 'Nouvelle Affiliation'}
-          </h3>
-          <button
-            onClick={handleClose}
-            style={{
-              background: "transparent",
-              border: "none",
-              color: "#94a3b8",
-              cursor: "pointer",
-              padding: "4px",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center"
-            }}
-          >
-            <X size={24} />
+          </h5>
+          <button className="cnss-close-btn" onClick={handleClose} type="button" aria-label="Fermer">
+            <X size={20} />
           </button>
         </div>
 
         {/* BODY */}
-        <div className="form-body">
+        <div className="cnss-form-body">
           <Form onSubmit={handleSubmit} id="affiliationForm">
 
-            {/* SECTION 1: EMPLOYE */}
-            <div className="section-title">
-              <User size={16} />
+            {/* SECTION : EMPLOYÉ */}
+            <div className="cnss-section-title">
+              <User size={14} />
               <span>Employé concerné</span>
             </div>
 
-            <div className="row g-3 mb-4">
+            <div className="cnss-field-group">
+              <label className="cnss-form-label">
+                Employé <span className="text-danger">*</span>
+              </label>
+              <Select
+                options={employeeOptions}
+                values={selectedEmployeeOption}
+                onChange={(values) => {
+                  const next = values && values.length > 0 ? values[0] : null;
+                  const nextId = next ? (next.value ?? next.id ?? null) : null;
+                  const parsedId = nextId != null && String(nextId).trim() !== "" ? Number(nextId) : null;
+                  setSelectedEmployee(Number.isNaN(parsedId) ? nextId : parsedId);
+                }}
+                placeholder="Rechercher par Matricule, Nom ou Prénom..."
+                disabled={!!selectedCnss}
+                searchable={true}
+                searchBy="label"
+                labelField="label"
+                valueField="value"
+                dropdownPosition="bottom"
+                className="react-dropdown-select"
+              />
+              {availableEmployees.length === 0 && !selectedCnss && (
+                <span className="cnss-error-message" style={{ color: '#6b7280' }}>
+                  Tous les employés de ce département sont déjà affiliés.
+                </span>
+              )}
+            </div>
+
+            <div className="row g-3 mb-1">
+              <div className="col-md-6">
+                <div className="cnss-field-group">
+                  <label className="cnss-form-label">CIN</label>
+                  <Form.Control className="form-control-enhanced cnss-form-control" type="text" value={employeeInfo.cin} readOnly />
+                </div>
+              </div>
+              <div className="col-md-6">
+                <div className="cnss-field-group">
+                  <label className="cnss-form-label">Date de naissance</label>
+                  <Form.Control className="cnss-form-control" type="text" value={employeeInfo.dateNaissance} readOnly />
+                </div>
+              </div>
+              <div className="col-md-6">
+                <div className="cnss-field-group">
+                  <label className="cnss-form-label">Situation familiale</label>
+                  <Form.Control className="cnss-form-control" type="text" value={employeeInfo.situationFamiliale} readOnly />
+                </div>
+              </div>
+              <div className="col-md-6">
+                <div className="cnss-field-group">
+                  <label className="cnss-form-label">Date d'embauche</label>
+                  <Form.Control className="cnss-form-control" type="text" value={employeeInfo.dateEmbauche} readOnly />
+                </div>
+              </div>
               <div className="col-md-12">
-                <Form.Group>
-                  <Form.Label>Employé <span className="text-danger">*</span></Form.Label>
-                  <Select
-                    options={employeeOptions}
-                    values={selectedEmployeeOption}
-                    onChange={(values) => setSelectedEmployee(values.length > 0 ? values[0].value : null)}
-                    placeholder="Rechercher par Matricule, Nom ou Prénom..."
-                    disabled={!!selectedCnss}
-                    searchable={true}
-                    searchBy="label"
-                    labelField="label"
-                    valueField="value"
-                    dropdownPosition="bottom"
-                    className="form-control-select"
-                    style={{
-                      padding: '6px 10px',
-                      borderRadius: '0.375rem',
-                      border: '1px solid #dee2e6',
-                      minHeight: '38px',
-                      fontSize: '14px',
-                    }}
-                  />
-                  {availableEmployees.length === 0 && !selectedCnss && (
-                    <Form.Text className="text-muted d-block mt-1">
-                      Tous les employés de ce département sont déjà affiliés.
-                    </Form.Text>
-                  )}
-                </Form.Group>
+                <div className="cnss-field-group">
+                  <label className="cnss-form-label">Adresse</label>
+                  <Form.Control className="cnss-form-control" type="text" value={employeeInfo.adresse} readOnly />
+                </div>
               </div>
             </div>
 
-            {/* SECTION 2: INFORMATIONS AFFILIATION */}
-            <div className="section-title">
-              <Calendar size={16} />
+            {/* SECTION : DÉTAILS AFFILIATION */}
+            <div className="cnss-section-title">
+              <ShieldCheck size={14} />
               <span>Détails Affiliation</span>
             </div>
 
             <div className="row g-3">
               <div className="col-md-6">
-                <Form.Group>
-                  <Form.Label>Numéro CNSS <span className="text-danger">*</span></Form.Label>
+                <div className="cnss-field-group">
+                  <label className="cnss-form-label">
+                    Numéro CNSS <span className="text-danger">*</span>
+                  </label>
                   <Form.Control
+                    className="cnss-form-control"
                     type="text"
                     value={cnssNumber}
                     onChange={(e) => setCnssNumber(e.target.value)}
                     required
                     placeholder="Ex: 123456789"
                   />
-                </Form.Group>
+                </div>
               </div>
 
               <div className="col-md-6">
-                <Form.Group>
-                  <Form.Label>Date d'affiliation <span className="text-danger">*</span></Form.Label>
+                <div className="cnss-field-group">
+                  <label className="cnss-form-label">
+                    Date d'affiliation <span className="text-danger">*</span>
+                  </label>
                   <Form.Control
+                    className="cnss-form-control"
                     type="date"
                     value={startDate}
                     onChange={(e) => setStartDate(e.target.value)}
                     required
                   />
-                </Form.Group>
+                </div>
               </div>
 
               <div className="col-md-6">
-                <Form.Group>
-                  <Form.Label>Date de fin</Form.Label>
+                <div className="cnss-field-group">
+                  <label className="cnss-form-label">Date de fin</label>
                   <Form.Control
+                    className="cnss-form-control"
                     type="date"
                     value={endDate}
                     onChange={(e) => setEndDate(e.target.value)}
                     placeholder="Optionnel"
                   />
-                </Form.Group>
+                </div>
               </div>
 
-              <div className="col-md-12 mt-3">
-                <Form.Group>
-                  <Form.Label>Statut</Form.Label>
+              <div className="col-md-12 mt-2">
+                <div className="cnss-field-group">
+                  <label className="cnss-form-label">Statut</label>
                   <div className="d-flex gap-4 mt-1">
-                    <Form.Check
-                      type="radio"
-                      label="Actif"
-                      name="statut"
-                      id="statutA"
-                      value="Actif"
-                      checked={status === 'Actif'}
-                      onChange={(e) => setStatus(e.target.value)}
-                      className="custom-radio"
-                    />
-                    <Form.Check
-                      type="radio"
-                      label="Inactif"
-                      name="statut"
-                      id="statutI"
-                      value="Inactif"
-                      checked={status === 'Inactif'}
-                      onChange={(e) => setStatus(e.target.value)}
-                      className="custom-radio"
-                    />
-                    <Form.Check
-                      type="radio"
-                      label="Suspendu"
-                      name="statut"
-                      id="statutS"
-                      value="Suspendu"
-                      checked={status === 'Suspendu'}
-                      onChange={(e) => setStatus(e.target.value)}
-                      className="custom-radio"
-                    />
+                    <Form.Check type="radio" label="Actif" name="statut" id="statutA" value="Actif"
+                      checked={status === 'Actif'} onChange={(e) => setStatus(e.target.value)} />
+                    <Form.Check type="radio" label="Inactif" name="statut" id="statutI" value="Inactif"
+                      checked={status === 'Inactif'} onChange={(e) => setStatus(e.target.value)} />
+                    <Form.Check type="radio" label="Suspendu" name="statut" id="statutS" value="Suspendu"
+                      checked={status === 'Suspendu'} onChange={(e) => setStatus(e.target.value)} />
                   </div>
-                </Form.Group>
+                </div>
               </div>
             </div>
-
           </Form>
         </div>
 
         {/* FOOTER */}
-        <div className="form-footer">
-          <Button
-            variant="outline-secondary"
+        <div className="cnss-form-footer">
+          <button
+            type="button"
+            className="cnss-btn-secondary"
             onClick={handleClose}
-            className="px-4"
-            style={{ borderColor: "#cbd5e1" }}
           >
             Annuler
-          </Button>
-          <Button
-            variant="primary"
+          </button>
+          <button
+            type="button"
+            className="cnss-btn-secondary"
+            onClick={handleGenerateImmatriculation}
+            disabled={!selectedEmployee}
+          >
+            Générer immatriculation
+          </button>
+          <button
             type="submit"
             form="affiliationForm"
-            disabled={loading || (!selectedCnss && availableEmployees.length === 0)}
-            className="px-4 d-flex align-items-center"
-            style={{ backgroundColor: "#2c767c", borderColor: "#2c767c" }}
+            className="cnss-btn-primary"
+            disabled={loading || !selectedEmployee || (!selectedCnss && availableEmployees.length === 0)}
           >
-            <Save size={16} className="me-2" />
-            {loading ? 'Enregistrement...' : (selectedCnss ? 'Mettre à jour' : 'Enregistrer')}
-          </Button>
+            {loading ? 'Enregistrement...' : 'Affilier'}
+          </button>
         </div>
       </div>
     </>
@@ -478,3 +426,4 @@ function AddCNSS({
 }
 
 export default AddCNSS;
+

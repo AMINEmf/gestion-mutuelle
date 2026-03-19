@@ -86,7 +86,7 @@ const Dashboard = () => {
   const fetchDashboardStats = async () => {
     try {
       setLoading(true);
-      const response = await fetch('http://localhost:8000/api/employes/dashboard-stats');
+      const response = await fetch('/api/employes/dashboard-stats');
       if (response.ok) {
         const data = await response.json();
         setTotalEmployees(data.totalEmployees);
@@ -104,7 +104,7 @@ const Dashboard = () => {
 
   const fetchTotalDepartements = async () => {
     try {
-      const response = await fetch('http://localhost:8000/api/total-departemet');
+      const response = await fetch('/api/total-departemet');
       const data = await response.json();
       setDepartements(data.totalDepartements);
     } catch (error) {

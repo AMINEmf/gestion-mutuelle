@@ -20,19 +20,28 @@ class DatabaseSeeder extends Seeder
         //     'name' => 'Test User',
         //     'email' => 'test@example.com',
         // ]);
-        $this->call(DepartementSeeder::class);
         // $this->call([FullDataSeeder::class, ]);
-        $this->call([RolesAndPermissionsSeeder::class,
-        
-        ClientSeeder::class]);
+        $this->call([RolesAndPermissionsSeeder::class]);
 
         $this->call([
             DeclarationsCnssSeeder::class,
             DetailsDeclarationCnssSeeder::class,
         ]);
 
+        $this->call([
+            GpGradesSeeder::class,
+            GpCompetencesSeeder::class,
+            GpServicesUnitesSeeder::class,  // Créer services/unités avant les postes
+            GpPostesSeeder::class,
+            GpPosteCompetenceSeeder::class,
+            CarriereSeeder::class,
+            CarriereEvolutionScenariosSeeder::class,
+            DemandesMobiliteDemoSeeder::class,
+            DemandesFormationDemoSeeder::class,
+        ]);
        
     
 
     }
 }
+

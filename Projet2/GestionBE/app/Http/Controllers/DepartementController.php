@@ -14,10 +14,8 @@ class DepartementController extends Controller
 {
     public function index()
     {
-        if (Gate::allows('view_all_departements')) {
-            return Departement::with(['employes', 'children', 'parent'])->get();
-        }
-        return response()->json(['message' => 'Accès refusé'], 403);
+        // Route publique - pas de vérification de permissions pour la lecture
+        return Departement::with(['employes', 'children', 'parent'])->get();
     }
 
 
@@ -38,9 +36,6 @@ class DepartementController extends Controller
     
     public function getHierarchy()
     {
-        if (!Gate::allows('view_all_departements')) {
-            return response()->json(['message' => 'Accès refusé'], 403);
-        }
         \Log::info('getHierarchy called');
         $rootDepartments = Departement::whereNull('parent_id')->with('children')->get();
         return response()->json($this->buildHierarchy($rootDepartments));
@@ -244,3 +239,4 @@ class DepartementController extends Controller
 
 
 }
+

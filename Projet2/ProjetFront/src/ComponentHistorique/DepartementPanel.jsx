@@ -3,7 +3,10 @@ import PropTypes from "prop-types";
 import axios from "axios";
 import { IoFolderOpenOutline } from "react-icons/io5";
 import { FaMinus, FaPlus } from "react-icons/fa6";
+import { API_ORIGIN } from "../services/apiConfig";
 import "./DepartementPanel.css";
+
+const API_BASE = API_ORIGIN;
 
 
 export const DepartmentPanel = memo(({
@@ -21,7 +24,7 @@ export const DepartmentPanel = memo(({
   filtersVisible = false
 }) => {
   const [departments, setDepartments] = useState([]);
-  const [isLoading, setIsLoading] = useState(false); 
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [expandedDepartments, setExpandedDepartments] = useState({});
   const [checkedEmployeesData, setCheckedEmployeesData] = useState([]);
@@ -31,7 +34,7 @@ export const DepartmentPanel = memo(({
   const fetchDepartments = useCallback(async () => {
     setError(null);
     try {
-      const response = await axios.get("http://127.0.0.1:8000/api/departements/hierarchy");
+      const response = await axios.get(`${API_BASE}/api/departements/hierarchy`, { timeout: 12000 });
       console.log('Departments data:', response.data);
 
       const initialExpandedState = {};
@@ -45,24 +48,28 @@ export const DepartmentPanel = memo(({
       localStorage.setItem('departmentPanelData', JSON.stringify(response.data));
     } catch (error) {
       console.error("Error fetching departments:", error);
-      setError("An error occurred while fetching departments. Please try again.");
-      setDepartments([]);
-    } finally {
+      // Only show error if there's no cached data already displayed
+      const hasCachedData = localStorage.getItem('departmentPanelData');
+      if (!hasCachedData) {
+        setError("An error occurred while fetching departments. Please try again.");
+        setDepartments([]);
+      }
+      // If cache exists, silently fail and keep the cached departments
       setIsLoading(false);
     }
   }, []);
 
 
-  
+
   useEffect(() => {
     // Charger d'abord depuis le cache localStorage (instantané)
     const departmentsFromStorage = localStorage.getItem('departmentPanelData');
-    
+
     if (departmentsFromStorage) {
       const cachedDepartments = JSON.parse(departmentsFromStorage);
       setDepartments(cachedDepartments);
       setIsLoading(false); // Immédiatement masquer le loading
-      
+
       // Initialiser l'état d'expansion pour les départements en cache
       const initialExpandedState = {};
       cachedDepartments.forEach(dept => {
@@ -140,7 +147,7 @@ export const DepartmentPanel = memo(({
     const hasChildren = department.children && department.children.length > 0;
 
     return (
-      
+
       <li key={department.id} style={{ listStyleType: "none" }}>
         <div className={`department-item ${selectedDepartmentId === department.id ? 'selected' : ''}`}>
           <div className="department-item-content">
@@ -163,7 +170,7 @@ export const DepartmentPanel = memo(({
               onClick={() => onSelectDepartment(department.id)}
             >
               <IoFolderOpenOutline />
-              {department.nom}
+              <span className="department-name-text">{department.nom}</span>
             </span>
           </div>
         </div>
@@ -179,7 +186,7 @@ export const DepartmentPanel = memo(({
 
   return (
     <div className={`departement_historique ${filtersVisible ? '' : ''}`}>
-      <div className="departement_list" style={{width: "47%"}}>
+      <div className="departement_list" style={{ width: "47%" }}>
         <div className="checkbox-container">
           <input
             type="checkbox"
@@ -283,7 +290,7 @@ export const DepartmentPanel = memo(({
                     <div className="employee-avatar">
                       {employee.url_img ? (
                         <img
-                          src={`http://127.0.0.1:8000/storage/${employee.url_img}`}
+                          src={`${API_BASE}/storage/${employee.url_img}`}
                           alt="Employee"
                           style={{
                             width: "50px",
@@ -318,7 +325,7 @@ export const DepartmentPanel = memo(({
         )}
       </div>
     </div>
-    
+
   );
 });
 

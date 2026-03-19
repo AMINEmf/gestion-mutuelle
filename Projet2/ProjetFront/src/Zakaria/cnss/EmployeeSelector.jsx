@@ -69,7 +69,6 @@ const EmployeeSelector = ({
             {/* Search Bar */}
             <InputGroup className="mb-2">
                 <InputGroup.Text className="bg-light">
-                    <FaSearch className="text-muted" />
                 </InputGroup.Text>
                 <Form.Control
                     placeholder="Rechercher par nom, prenom ou matricule..."

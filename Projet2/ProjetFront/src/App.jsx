@@ -17,6 +17,9 @@ import PositionsGrades from './Zakaria/CarriereFormation/PositionsGrades';
 import TrainingDashboard from './Zakaria/CarriereFormation/TrainingDashboard';
 import CarrieresPage from './Zakaria/CarriereFormation/CarrieresPage';
 import FormationsPage from './Zakaria/CarriereFormation/FormationsPage';
+import FormationParticipantsPage from './Zakaria/CarriereFormation/FormationParticipantsPage';
+import DemandeMobilitePage from './Zakaria/CarriereFormation/DemandeMobilitePage';
+import DemandeFormationPage from './Zakaria/CarriereFormation/DemandeFormationPage';
 
 
 import { OpenProvider } from './Acceuil/OpenProvider.jsx';
@@ -56,6 +59,9 @@ const App = () => {
             <Route path="/carrieres-formations/postes-grades" element={<PositionsGrades />} />
             <Route path="/carrieres-formations/dashboard-formations" element={<TrainingDashboard />} />
             <Route path="/carrieres-formations/formations" element={<FormationsPage />} />
+            <Route path="/carrieres-formations/formations/:id/participants" element={<FormationParticipantsPage />} />
+            <Route path="/carrieres-formations/demandes-mobilite" element={<DemandeMobilitePage />} />
+            <Route path="/carrieres-formations/demandes-formation" element={<DemandeFormationPage />} />
 
 
 

@@ -515,6 +515,12 @@ use App\Http\Controllers\CommuneController;
 use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\UniteController;
 use App\Http\Controllers\PosteController;
+use App\Http\Controllers\GradeController;
+use App\Http\Controllers\CompetenceController;
+use App\Http\Controllers\Api\CarriereController;
+use App\Http\Controllers\Api\DemandeMobiliteController;
+use App\Http\Controllers\Api\DemandeFormationController;
+use App\Http\Controllers\TypeEvolutionController;
 use App\Http\Controllers\GpCalendrierEmployeController;
 use App\Http\Controllers\RegleCompEmployeController;
 use App\Http\Controllers\GpBanqueController;
@@ -522,6 +528,7 @@ use App\Http\Controllers\GpAgenceController;
 use App\Http\Controllers\GpCompteBancaireController;
 use App\Http\Controllers\SocieteController;
 use App\Http\Controllers\GpBonSortieController;
+use App\Http\Controllers\ConstantesRubriquesController;
 
 use App\Http\Controllers\GroupConstanteController;
 use App\Http\Controllers\GroupRubriqueController;
@@ -600,11 +607,116 @@ Route::post("/login", [AuthController::class , 'login']);
 //logout
 Route::post("/logout", [AuthController::class , 'logout']);
 
+// -----------------------------------------------------------------------
+// Routes publiques RH — lecture sans authentification requise
+// Dupliquées ici car le groupe auth:sanctum ci-dessous les bloquerait
+// -----------------------------------------------------------------------
+Route::get('/grades', [GradeController::class, 'index']);
+Route::get('/grades/{grade}', [GradeController::class, 'show']);
+Route::get('/competences', [CompetenceController::class, 'index']);
+Route::get('/postes', [PosteController::class, 'index']);
+Route::get('/carrieres', [CarriereController::class, 'index']);
+Route::get('/dashboard/carrieres', [\App\Http\Controllers\Api\DashboardController::class, 'carrieres']);
+Route::get('/departements', [DepartementController::class, 'index']);
+Route::get('/departements/hierarchy', [DepartementController::class, 'getHierarchy']);
+Route::get('/services', [ServiceController::class, 'index']);
+Route::get('/services/{id}', [ServiceController::class, 'show']);
+Route::get('/unites', [UniteController::class, 'index']);
+Route::get('/unites/{id}', [UniteController::class, 'show']);
+Route::get('/employes/list', [EmployeController::class, 'listForSelect']);
+Route::get('/employes/{id}/parcours', [CarriereController::class, 'parcours']);
+Route::get('/employes/{id}/postes-en-attente', [CarriereController::class, 'getPostesEnAttente']);
+Route::get('/employes', [EmployeController::class, 'index']);
+Route::get('/formations', [\App\Http\Controllers\Api\FormationController::class, 'index']);
+Route::get('/dashboard/formations', [\App\Http\Controllers\Api\DashboardController::class, 'formations']);
+Route::get('/formations/{formation}', [\App\Http\Controllers\Api\FormationController::class, 'show']);
+Route::get('/formateurs', [\App\Http\Controllers\Api\FormateurController::class, 'index']);
+// Routes publiques pour formations - participants et sessions
+Route::get('/formations/{formation}/participants', [\App\Http\Controllers\Api\FormationController::class, 'participants']);
+Route::get('/formations/{formation}/participants-with-attendance', [\App\Http\Controllers\Api\FormationController::class, 'participantsWithAttendance']);
+Route::get('/formations/{formation}/sessions', [\App\Http\Controllers\Api\FormationSessionController::class, 'index']);
+Route::get('/sessions/{session}/attendance', [\App\Http\Controllers\Api\FormationAttendanceController::class, 'index']);
+// Routes publiques pour suggestions
+Route::get('/postes/{id}/suggestions', [PosteController::class, 'aiSuggestions']);
+Route::get('/formations/{formation}/suggested-participants', [\App\Http\Controllers\Api\FormationController::class, 'suggestedParticipants']);
+Route::get('/formations/{formation}/smart-suggestions', [\App\Http\Controllers\Api\FormationController::class, 'smartSuggestions']);
+// Routes publiques pour types d'évolution et carrières
+Route::get('/types-evolution', [TypeEvolutionController::class, 'index']);
+Route::post('/carrieres', [CarriereController::class, 'store']);
+Route::delete('/carrieres/{id}', [CarriereController::class, 'destroy']);
+Route::post('/carrieres/{id}/accept', [CarriereController::class, 'acceptPoste']);
+Route::post('/carrieres/{id}/refuse', [CarriereController::class, 'refusePoste']);
+Route::get('/demandes-mobilite', [DemandeMobiliteController::class, 'index']);
+Route::get('/demandes-mobilite/{id}', [DemandeMobiliteController::class, 'show']);
+Route::post('/demandes-mobilite', [DemandeMobiliteController::class, 'store']);
+Route::post('/demandes-mobilite/{id}/statut', [DemandeMobiliteController::class, 'updateStatus']);
+Route::put('/demandes-mobilite/{id}', [DemandeMobiliteController::class, 'update']);
+Route::delete('/demandes-mobilite/{id}', [DemandeMobiliteController::class, 'destroy']);
+Route::get('/demandes-formation', [DemandeFormationController::class, 'index']);
+Route::get('/demandes-formation/{id}', [DemandeFormationController::class, 'show']);
+Route::post('/demandes-formation', [DemandeFormationController::class, 'store']);
+Route::put('/demandes-formation/{id}', [DemandeFormationController::class, 'update']);
+Route::delete('/demandes-formation/{id}', [DemandeFormationController::class, 'destroy']);
+Route::patch('/demandes-formation/{id}/status', [DemandeFormationController::class, 'updateStatus']);
+// Route publique pour utilisateur (dev mode - retourne admin par défaut)
+Route::get('/user', [AuthController::class, 'user']);
+// Routes publiques pour compétences (lecture)
+Route::get('/employes/{id}/competences', [EmployeController::class, 'getCompetences']);
+Route::get('/postes/{poste}/competences', [PosteController::class, 'getCompetences']);
+Route::get('/formations/{formation}/competences', [\App\Http\Controllers\Api\FormationController::class, 'getCompetences']);
+// Routes publiques pour CRUD compétences employé
+Route::post('/employes/{id}/competences', [EmployeController::class, 'addCompetence']);
+Route::put('/employes/{id}/competences/{competenceId}', [EmployeController::class, 'updateCompetence']);
+Route::delete('/employes/{id}/competences/{competenceId}', [EmployeController::class, 'deleteCompetence']);
+Route::put('/employes/{id}/competences', [EmployeController::class, 'updateCompetences']);
+// Routes publiques pour CRUD compétences
+Route::get('/competences/{competence}', [CompetenceController::class, 'show']);
+Route::post('/competences', [CompetenceController::class, 'store']);
+Route::put('/competences/{competence}', [CompetenceController::class, 'update']);
+Route::delete('/competences/{competence}', [CompetenceController::class, 'destroy']);
+// Routes publiques pour postes CRUD
+Route::post('/postes', [PosteController::class, 'store']);
+Route::get('/postes/{poste}', [PosteController::class, 'show']);
+Route::put('/postes/{poste}', [PosteController::class, 'update']);
+Route::delete('/postes/{poste}', [PosteController::class, 'destroy']);
+Route::put('/postes/{poste}/competences', [PosteController::class, 'updateCompetences']);
+// Routes publiques pour formateurs CRUD
+Route::post('/formateurs', [\App\Http\Controllers\Api\FormateurController::class, 'store']);
+Route::put('/formateurs/{id}', [\App\Http\Controllers\Api\FormateurController::class, 'update']);
+Route::delete('/formateurs/{id}', [\App\Http\Controllers\Api\FormateurController::class, 'destroy']);
+// Routes publiques pour formations CRUD
+Route::post('/formations', [\App\Http\Controllers\Api\FormationController::class, 'store']);
+Route::put('/formations/{formation}', [\App\Http\Controllers\Api\FormationController::class, 'update']);
+Route::delete('/formations/{formation}', [\App\Http\Controllers\Api\FormationController::class, 'destroy']);
+Route::post('/formations/{formation}/participants', [\App\Http\Controllers\Api\FormationController::class, 'addParticipant']);
+Route::put('/formations/{formation}/participants/{participant}', [\App\Http\Controllers\Api\FormationController::class, 'updateParticipant']);
+Route::delete('/formations/{formation}/participants/{participant}', [\App\Http\Controllers\Api\FormationController::class, 'removeParticipant']);
+Route::post('/formations/{formation}/competences/sync', [\App\Http\Controllers\Api\FormationController::class, 'syncCompetences']);
+Route::post('/formations/{formation}/sessions', [\App\Http\Controllers\Api\FormationSessionController::class, 'store']);
+Route::put('/sessions/{session}', [\App\Http\Controllers\Api\FormationSessionController::class, 'update']);
+Route::delete('/sessions/{session}', [\App\Http\Controllers\Api\FormationSessionController::class, 'destroy']);
+Route::post('/sessions/{session}/attendance/bulk-update', [\App\Http\Controllers\Api\FormationAttendanceController::class, 'bulkUpdate']);
+// Routes publiques pour employés CRUD
+Route::get('/employes/{employe}', [EmployeController::class, 'show']);
+Route::post('/employes', [EmployeController::class, 'store']);
+Route::put('/employes/{employe}', [EmployeController::class, 'update']);
+Route::delete('/employes/{employe}', [EmployeController::class, 'destroy']);
+Route::get('/employes/{id}/contrats', [ContratController::class, 'getContratsByEmploye']);
+// Routes publiques pour contrats CRUD
+Route::get('/contrats', [ContratController::class, 'index']);
+Route::post('/contrats', [ContratController::class, 'store']);
+Route::get('/contrats/{id}', [ContratController::class, 'show']);
+Route::put('/contrats/{id}', [ContratController::class, 'update']);
+Route::delete('/contrats/{id}', [ContratController::class, 'destroy']);
+// Routes publiques pour assignation employé à poste
+Route::post('postes/{id}/assign-employe', [PosteController::class, 'assignEmploye']);
+Route::post('postes/{id}/assign-employee', [PosteController::class, 'assignEmploye']);
+// -----------------------------------------------------------------------
 
 Route::middleware('auth:sanctum')->group(function () {
 
     Route::post("/register", [AuthController::class , 'register']);
-    Route::get("/user", [AuthController::class , 'user']);
+    // Route::get("/user", [AuthController::class , 'user']); // Publique (voir au-dessus)
     Route::apiResource('calendrie', CalendrieController::class);
 
 
@@ -617,22 +729,68 @@ Route::middleware('auth:sanctum')->group(function () {
 
 
 
-    Route::apiResource('pays', PaysController::class);
+    // Route::apiResource('pays', PaysController::class); // Temporairement commenté - controller manquant
     Route::apiResource('villes', VilleController::class);
     Route::apiResource('communes', CommuneController::class);
     Route::get('/villes', [VilleController::class , 'getVilles']);
     Route::get('/communes', [CommuneController::class , 'getCommunes']);
-    Route::apiResource('postes ', PosteController::class);
+    // Route::get('postes/{id}/suggestions', [PosteController::class , 'aiSuggestions']); // Publique
+    // Route::apiResource('postes', ...); // Publique
+    // Route::get('postes/{poste}/competences', ...); // Publique
+    // Route::put('postes/{poste}/competences', ...); // Publique
+    // Route::post('postes/{id}/assign-employe', ...); // Publique - voir au-dessus
+    // Route::post('postes/{id}/assign-employee', ...); // Publique - voir au-dessus
+    // Routes carrieres déclarées publiquement au-dessus
+    // Route::post('carrieres', ...); // Publique
+    // Route::delete('carrieres/{id}', ...); // Publique
+    // Route::post('carrieres/{id}/accept', ...); // Publique
+    // Route::post('carrieres/{id}/refuse', ...); // Publique
+    // Public GET /employes/{id}/parcours is declared above (outside auth middleware)
+
+    // Types d'évolution (GET est publique - voir au-dessus)
+    // Route::get('types-evolution', ...); // Publique
+    Route::post('types-evolution', [TypeEvolutionController::class, 'store']);
+    Route::put('types-evolution/{id}', [TypeEvolutionController::class, 'update']);
+    Route::delete('types-evolution/{id}', [TypeEvolutionController::class, 'destroy']);
+
+    // Formations - toutes les routes sont publiques maintenant
+    // Route::post('formations', ...); // Publique
+    // Route::put('formations/{formation}', ...); // Publique
+    // Route::delete('formations/{formation}', ...); // Publique
+    // Route::post('formations/{formation}/participants', ...); // Publique
+    // Route::put('formations/{formation}/participants/{participant}', ...); // Publique
+    // Route::delete('formations/{formation}/participants/{participant}', ...); // Publique
+
+    // Formation Competences
+    // Route::post('formations/{formation}/competences/sync', ...); // Publique
+
+    // Formation Sessions - routes publiques
+    // Route::post/put/delete sessions - Publiques
+
+    // Formation Attendance - routes publiques
+    // Route::post('sessions/{session}/attendance/bulk-update', ...); // Publique
+
+    // Formateurs - toutes les routes sont publiques maintenant
+    // Route::post/put/delete formateurs - Publiques
+    Route::apiResource('grades', GradeController::class)->except(['index', 'show']);
+    // Route::apiResource('competences', ...); // Publique
     Route::get('postes/{id}/hierarchy', [PosteController::class , 'getHierarchy']);
-    Route::apiResource('services', ServiceController::class);
-    Route::apiResource('unites', UniteController::class);
+    Route::apiResource('services', ServiceController::class)->except(['index', 'show']);
+    Route::apiResource('unites', UniteController::class)->except(['index', 'show']);
     Route::get('/departements/{id}/services', [DepartementController::class , 'getServices']);
     Route::get('/services/{id}/unites', [ServiceController::class , 'getUnitesByService']);
     Route::get('/unites/{id}/postes', [PosteController::class , 'getPostesByUnite']);
 
+    // Employe Competences
+    // Route::get('employes/{id}/competences', ...); // Publique
+    // Route::post('employes/{id}/competences', [EmployeController::class, 'addCompetence']); // Publique
+    // Route::put('employes/{id}/competences/{competenceId}', [EmployeController::class, 'updateCompetence']); // Publique
+    // Route::delete('employes/{id}/competences/{competenceId}', [EmployeController::class, 'deleteCompetence']); // Publique
+    // Route::put('employes/{id}/competences', [EmployeController::class, 'updateCompetences']); // Publique
 
 
-    Route::get('/departements', [DepartementController::class , 'index']);
+
+    // Public route declared above to allow read access from carriere/formation pages
     Route::post('/departements', [DepartementController::class , 'store']);
     Route::put('/departements/{departement}', [DepartementController::class , 'update']);
     Route::delete('/departements/{departement}', [DepartementController::class , 'destroy']);
@@ -682,7 +840,7 @@ Route::middleware('auth:sanctum')->group(function () {
 // Route::get('/employes/{id}/rubriques-constantes', [EmployeController::class, 'getRubriquesEtConstantes']);
 //route afficher department
 // routes/api.php
-    Route::get('departements/hierarchy', [DepartementController::class , 'getHierarchy']);
+    // Public route declared above to allow read access from carriere/formation pages
     Route::get('/departements/{id}', [DepartementController::class , 'show']);
     Route::get('/constantes-rubriques', [ConstantesRubriquesController::class , 'index']);
     Route::post('/employes/{employe}/bulletins', [GpEmployeBulletinController::class , 'store']);
@@ -885,6 +1043,8 @@ Route::middleware('auth:sanctum')->group(function () {
 
 
 
+
+
     
 Route::get('/groupes', [GroupeClientController::class , 'index']);
     Route::post('/groupes', [GroupeClientController::class , 'store']);
@@ -980,11 +1140,12 @@ Route::get('/groupes', [GroupeClientController::class , 'index']);
 
     // Add this route to handle employees within a specific department
     // Route::post('/departements/employes', [EmployeController::class, 'storeEmployeForDepartement']);
-    Route::put('/employes/{employe}', [EmployeController::class , 'update']);
-    Route::delete('/employes/{employe}', [EmployeController::class , 'destroy']);
-    Route::post('/employe', [EmployeController::class , 'store']);
-    Route::get('/employes', [EmployeController::class , 'index']);
+    // Public GET /employes is declared above (outside auth middleware)
     Route::post('/employes/update-departement', [EmployeController::class , 'updateDepartement']);
+    // Route::get('/employes', [EmployeController::class , 'index']); // Publique - voir au-dessus
+    Route::post('/employe', [EmployeController::class , 'store']);
+    // Route::put('/employes/{employe}', [EmployeController::class , 'update']); // Publique - voir au-dessus
+    // Route::delete('/employes/{employe}', [EmployeController::class , 'destroy']); // Publique - voir au-dessus
 
     Route::get('/employe-departements', [EmployeDepartementController::class , 'index']);
     Route::post('/employe-departements', [EmployeDepartementController::class , 'store']);
@@ -993,40 +1154,44 @@ Route::get('/groupes', [GroupeClientController::class , 'index']);
     Route::put('/employe-departements/update', [EmployeDepartementController::class , 'updateOrCreate']);
     // Route::get('/employee-history', [EmployeDepartementController::class, 'getEmployeeHistory']);
 // Route::get('departements/hierarchy', [DepartementController::class, 'getHierarchy']);
-    Route::get('/contrats', [ContratController::class , 'index']);
-    Route::post('/contrats', [ContratController::class , 'store']);
-    Route::get('/contrats/{id}', [ContratController::class , 'show']);
-    Route::put('/contrats/{id}', [ContratController::class , 'update']);
-    Route::delete('/contrats/{id}', [ContratController::class , 'destroy']); // Route::get('/employes/{employeId}/contrats', [ContratController::class, 'getContratsByEmploye']);    Route::get('/employes/{id}/contrats', [ContratController::class , 'getContratsByEmploye']);
+    // Routes contrats - Publiques (voir au-dessus)
+    // Route::get('/contrats', ...); // Publique
+    // Route::post('/contrats', ...); // Publique
+    // Route::get('/contrats/{id}', ...); // Publique
+    // Route::put('/contrats/{id}', ...); // Publique
+    // Route::delete('/contrats/{id}', ...); // Publique
+    // Route::get('/employes/{id}/contrats', ...); // Publique
+    Route::get('/employees/{employe}', [EmployeController::class , 'show']);
+    // Route::get('/employes/{employe}', ...); // Publique
     // Routes CNSS Affiliations
-    Route::get('/cnss/affiliations', [CnssAffiliationController::class, 'index']);
-    Route::post('/cnss/affiliations', [CnssAffiliationController::class, 'store']);
-    Route::get('/cnss/affiliations/{id}', [CnssAffiliationController::class, 'show']);
-    Route::put('/cnss/affiliations/{id}', [CnssAffiliationController::class, 'update']);
-    Route::delete('/cnss/affiliations/{id}', [CnssAffiliationController::class, 'destroy']);
-    Route::get('/employes/{employeId}/cnss/affiliations', [CnssAffiliationController::class, 'getByEmploye']);
+    Route::get('/cnss/affiliations', [CnssAffiliationController::class , 'index']);
+    Route::post('/cnss/affiliations', [CnssAffiliationController::class , 'store']);
+    Route::get('/cnss/affiliations/{id}', [CnssAffiliationController::class , 'show']);
+    Route::put('/cnss/affiliations/{id}', [CnssAffiliationController::class , 'update']);
+    Route::delete('/cnss/affiliations/{id}', [CnssAffiliationController::class , 'destroy']);
+    Route::get('/employes/{employeId}/cnss/affiliations', [CnssAffiliationController::class , 'getByEmploye']);
 
     // Routes CNSS Declarations
-    Route::get('/cnss/declarations/eligible-employees', [CnssDeclarationController::class, 'eligibleEmployees']);
-    Route::get('/cnss/declarations', [CnssDeclarationController::class, 'index']);
-    Route::post('/cnss/declarations', [CnssDeclarationController::class, 'store']);
-    Route::get('/cnss/declarations/{id}', [CnssDeclarationController::class, 'show']);
-    Route::put('/cnss/declarations/{id}', [CnssDeclarationController::class, 'update']);
-    Route::delete('/cnss/declarations/{id}', [CnssDeclarationController::class, 'destroy']);
+    Route::get('/cnss/declarations/eligible-employees', [CnssDeclarationController::class , 'eligibleEmployees']);
+    Route::get('/cnss/declarations', [CnssDeclarationController::class , 'index']);
+    Route::post('/cnss/declarations', [CnssDeclarationController::class , 'store']);
+    Route::get('/cnss/declarations/{id}', [CnssDeclarationController::class , 'show']);
+    Route::put('/cnss/declarations/{id}', [CnssDeclarationController::class , 'update']);
+    Route::delete('/cnss/declarations/{id}', [CnssDeclarationController::class , 'destroy']);
 
     // Routes CNSS Dossiers
-    Route::get('/cnss/dashboard', [CnssDashboardController::class, 'index']);
-    Route::get('/cnss/dossiers', [CnssDossierController::class, 'index']);
-    Route::get('/cnss/dossiers/{employe}', [CnssDossierController::class, 'show']);
-    Route::post('/cnss/dossiers/{employe}/documents', [CnssDocumentController::class, 'store']);
-    Route::post('/cnss/operations/{operation}/documents', [CnssDocumentController::class, 'storeForOperation']);
-    Route::get('/cnss/documents/{document}/download', [CnssDocumentController::class, 'download']);
-    Route::delete('/cnss/documents/{document}', [CnssDocumentController::class, 'destroy']);
-    Route::get('/cnss/dossiers/{employe}/operations', [CnssOperationController::class, 'index']);
-    Route::post('/cnss/dossiers/{employe}/operations', [CnssOperationController::class, 'store']);
-    Route::get('/cnss/operations/{operation}', [CnssOperationController::class, 'show']);
-    Route::put('/cnss/operations/{operation}', [CnssOperationController::class, 'update']);
-    Route::delete('/cnss/operations/{operation}', [CnssOperationController::class, 'destroy']);
+    Route::get('/cnss/dashboard', [CnssDashboardController::class , 'index']);
+    Route::get('/cnss/dossiers', [CnssDossierController::class , 'index']);
+    Route::get('/cnss/dossiers/{employe}', [CnssDossierController::class , 'show']);
+    Route::post('/cnss/dossiers/{employe}/documents', [CnssDocumentController::class , 'store']);
+    Route::post('/cnss/operations/{operation}/documents', [CnssDocumentController::class , 'storeForOperation']);
+    Route::get('/cnss/documents/{document}/download', [CnssDocumentController::class , 'download']);
+    Route::delete('/cnss/documents/{document}', [CnssDocumentController::class , 'destroy']);
+    Route::get('/cnss/dossiers/{employe}/operations', [CnssOperationController::class , 'index']);
+    Route::post('/cnss/dossiers/{employe}/operations', [CnssOperationController::class , 'store']);
+    Route::get('/cnss/operations/{operation}', [CnssOperationController::class , 'show']);
+    Route::put('/cnss/operations/{operation}', [CnssOperationController::class , 'update']);
+    Route::delete('/cnss/operations/{operation}', [CnssOperationController::class , 'destroy']);
 
     Route::get('/contract-types', [ContractTypeController::class , 'index']);
     Route::post('/contract-types', [ContractTypeController::class , 'store']);
@@ -1052,6 +1217,8 @@ Route::get('/groupes', [GroupeClientController::class , 'index']);
     Route::delete('/horaires/{id}', [HoraireController::class , 'destroy']);
 
     Route::apiResource('/groupes-horaires', GroupeHoraireController::class);
+
+
 
 
 

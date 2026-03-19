@@ -15,7 +15,7 @@ function OffresForm({ form, handleChange, handleSubmit, handleOffre_detailChange
 
     const fetchProduits = async () => {
         try {
-            const response = await axios.get("http://localhost:8000/api/produits");
+            const response = await axios.get("/api/produits");
             setProduits(response.data.produit);
         } catch (error) {
             console.error("Error fetching products data:", error);

@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Connexion API - Postes & Grades</title>
+    <style>
+        body { font-family: Arial; padding: 20px; background: #f5f5f5; }
+        .test { background: white; padding: 15px; margin: 10px 0; border-radius: 5px; border-left: 4px solid #ccc; }
+        .success { border-color: #4caf50; }
+        .error { border-color: #f44336; }
+        .warning { border-color: #ff9800; }
+        h2 { color: #333; }
+        pre { background: #f9f9f9; padding: 10px; overflow-x: auto; }
+        .buttons { margin: 20px 0; }
+        button { padding: 10px 20px; margin-right: 10px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Test Connexion API - Module Postes & Grades</h1>
+    
+    <div class="buttons">
+        <button onclick="testBackend()">Test Backend Laravel</button>
+        <button onclick="testViteProxy()">Test Proxy Vite</button>
+        <button onclick="testAuthentication()">Test Authentification</button>
+        <button onclick="testAllEndpoints()">Test Complet</button>
+    </div>
+
+    <div id="results"></div>
+
+    <script>
+        const BACKEND_URL = 'http://127.0.0.1:8000';
+        const VITE_PROXY = ''; // URLs relatives via proxy
+        
+        function log(message, type = 'info') {
+            const results = document.getElementById('results');
+            const div = document.createElement('div');
+            div.className = `test ${type}`;
+            div.innerHTML = message;
+            results.appendChild(div);
+        }
+
+        function clear() {
+            document.getElementById('results').innerHTML = '';
+        }
+
+        async function testBackend() {
+            clear();
+            log('<h2>Test 1: Backend Laravel direct</h2>');
+            
+            try {
+                const response = await fetch(`${BACKEND_URL}/api/grades`, {
+                    method: 'GET',
+                    headers: { 'Accept': 'application/json' }
+                });
+                
+                if (response.status === 401) {
+                    log(`✓ Backend répond (401 Unauthorized - normal sans token)<br>URL: ${BACKEND_URL}`, 'warning');
+                } else if (response.ok) {
+                    const data = await response.json();
+                    log(`✓ Backend OK: ${data.length} grades chargés<br><pre>${JSON.stringify(data, null, 2)}</pre>`, 'success');
+                } else {
+                    log(`⚠ Backend répond avec status ${response.status}`, 'warning');
+                }
+            } catch (error) {
+                log(`✗ Erreur connexion backend: ${error.message}<br>Vérifiez que "php artisan serve" tourne!`, 'error');
+            }
+        }
+
+        async function testViteProxy() {
+            clear();
+            log('<h2>Test 2: Proxy Vite (URLs relatives)</h2>');
+            
+            try {
+                const response = await fetch('/api/grades', {
+                    method: 'GET',
+                    headers: { 'Accept': 'application/json' }
+                });
+                
+                if (response.status === 401) {
+                    log('✓ Proxy Vite fonctionne (401 - authentification requise)', 'warning');
+                } else if (response.ok) {
+                    const data = await response.json();
+                    log(`✓ Proxy OK: ${data.length} grades via proxy<br><pre>${JSON.stringify(data.slice(0, 2), null, 2)}</pre>`, 'success');
+                } else {
+                    log(`⚠ Proxy répond avec status ${response.status}`, 'warning');
+                }
+            } catch (error) {
+                log(`✗ Erreur proxy: ${error.message}<br>Redémarrez Vite avec "npm run dev"`, 'error');
+            }
+        }
+
+        async function testAuthentication() {
+            clear();
+            log('<h2>Test 3: Authentification</h2>');
+            
+            const token = localStorage.getItem('API_TOKEN');
+            if (!token) {
+                log('⚠ Aucun token trouvé dans localStorage<br>Connectez-vous via /login', 'warning');
+                return;
+            }
+            
+            log(`✓ Token présent: ${token.substring(0, 20)}...`, 'success');
+            
+            try {
+                const response = await fetch('/api/grades', {
+                    method: 'GET',
+                    headers: { 
+                        'Accept': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    log(`✓ Authentification OK: ${data.length} grades chargés`, 'success');
+                } else if (response.status === 401) {
+                    log('✗ Token invalide ou expiré<br>Reconnectez-vous', 'error');
+                } else {
+                    log(`⚠ Erreur ${response.status}`, 'warning');
+                }
+            } catch (error) {
+                log(`✗ Erreur: ${error.message}`, 'error');
+            }
+        }
+
+        async function testAllEndpoints() {
+            clear();
+            log('<h2>Test 4: Tous les endpoints du module</h2>');
+            
+            const token = localStorage.getItem('API_TOKEN');
+            if (!token) {
+                log('⚠ Connectez-vous d\'abord', 'warning');
+                return;
+            }
+            
+            const endpoints = [
+                { name: 'Grades', url: '/api/grades' },
+                { name: 'Compétences', url: '/api/competences' },
+                { name: 'Postes', url: '/api/postes' },
+                { name: 'Services', url: '/api/services' },
+                { name: 'Unités', url: '/api/unites' },
+                { name: 'Départements (hierarchy)', url: '/api/departements/hierarchy' },
+            ];
+            
+            for (const endpoint of endpoints) {
+                try {
+                    const response = await fetch(endpoint.url, {
+                        headers: {
+                            'Accept': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        }
+                    });
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        const count = Array.isArray(data) ? data.length : 'N/A';
+                        log(`✓ ${endpoint.name}: ${count} enregistrements`, 'success');
+                    } else {
+                        log(`✗ ${endpoint.name}: HTTP ${response.status}`, 'error');
+                    }
+                } catch (error) {
+                    log(`✗ ${endpoint.name}: ${error.message}`, 'error');
+                }
+            }
+        }
+
+        // Test automatique au chargement
+        window.addEventListener('load', () => {
+            testBackend();
+        });
+    </script>
+</body>
+</html>

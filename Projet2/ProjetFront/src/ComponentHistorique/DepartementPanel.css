@@ -174,13 +174,21 @@
     overflow: hidden;
     text-overflow: ellipsis;
     transition: all 0.3s ease;
+    gap: 10px;
 }
 
 .common-text svg {
-    margin-right: 10px;
+    margin-right: 0;
     color: #3a8a90;
     font-size: 18px;
     transition: transform 0.3s ease;
+    flex-shrink: 0;
+    min-width: 18px;
+}
+
+.department-name-text {
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .common-text:hover svg {

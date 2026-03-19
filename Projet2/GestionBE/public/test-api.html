@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test API Postes & Grades</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body>
+    <h1>Test des endpoints API</h1>
+    <div id="results"></div>
+
+    <script>
+        const API_BASE = 'http://127.0.0.1:8000/api';
+        const results = document.getElementById('results');
+
+        // Simuler le token du localStorage (remplacez par un vrai token si vous en avez un)
+        const token = localStorage.getItem('API_TOKEN');
+        
+        async function testEndpoints() {
+            const headers = token ? { Authorization: `Bearer ${token}` } : {};
+            
+            results.innerHTML += '<h2>Configuration</h2>';
+            results.innerHTML += '<p>Token présent: ' + (token ? 'OUI' : 'NON') + '</p>';
+            
+            // Test /api/grades
+            try {
+                results.innerHTML += '<h2>Test GET /api/grades</h2>';
+                const gradesResponse = await axios.get(`${API_BASE}/grades`, { 
+                    headers,
+                    withCredentials: true 
+                });
+                results.innerHTML += '<p style="color: green;">✓ Succès: ' + gradesResponse.data.length + ' grades chargés</p>';
+                results.innerHTML += '<pre>' + JSON.stringify(gradesResponse.data, null, 2) + '</pre>';
+            } catch (error) {
+                results.innerHTML += '<p style="color: red;">✗ Erreur: ' + error.response?.status + ' - ' + error.message + '</p>';
+                if (error.response?.data) {
+                    results.innerHTML += '<pre>' + JSON.stringify(error.response.data, null, 2) + '</pre>';
+                }
+            }
+
+            // Test /api/postes
+            try {
+                results.innerHTML += '<h2>Test GET /api/postes</h2>';
+                const postesResponse = await axios.get(`${API_BASE}/postes`, { 
+                    headers,
+                    withCredentials: true 
+                });
+                results.innerHTML += '<p style="color: green;">✓ Succès: ' + postesResponse.data.length + ' postes chargés</p>';
+                results.innerHTML += '<pre>' + JSON.stringify(postesResponse.data.slice(0, 2), null, 2) + '</pre>';
+            } catch (error) {
+                results.innerHTML += '<p style="color: red;">✗ Erreur: ' + error.response?.status + ' - ' + error.message + '</p>';
+                if (error.response?.data) {
+                    results.innerHTML += '<pre>' + JSON.stringify(error.response.data, null, 2) + '</pre>';
+                }
+            }
+
+            // Test /api/competences
+            try {
+                results.innerHTML += '<h2>Test GET /api/competences</h2>';
+                const competencesResponse = await axios.get(`${API_BASE}/competences`, { 
+                    headers,
+                    withCredentials: true 
+                });
+                results.innerHTML += '<p style="color: green;">✓ Succès: ' + competencesResponse.data.length + ' compétences chargées</p>';
+            } catch (error) {
+                results.innerHTML += '<p style="color: red;">✗ Erreur: ' + error.response?.status + ' - ' + error.message + '</p>';
+            }
+        }
+
+        testEndpoints();
+    </script>
+</body>
+</html>

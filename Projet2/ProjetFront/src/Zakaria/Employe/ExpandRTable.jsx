@@ -12,6 +12,7 @@ import Paper from '@mui/material/Paper';
 import Checkbox from '@mui/material/Checkbox';
 import { Pagination } from '@mui/material';
 import "../Style.css";
+import { API_ORIGIN } from "../../services/apiConfig";
 
 
 const ExpandRTable = ({
@@ -19,7 +20,6 @@ const ExpandRTable = ({
   data,
   filteredData,
   searchTerm,
-  highlightText,
   selectAll,
   selectedItems,
   handleSelectAllChange,
@@ -37,7 +37,16 @@ const ExpandRTable = ({
   expandedChambre,
   toggleRowExpansion,
   renderExpandedRow,
-  renderCustomActions,
+  renderActions, // Changed from renderCustomActions
+  onRowClick, // Added for row click functionality
+  pagination, // Added for pagination control
+  itemsPerPage, // Added for pagination control
+  currentPage, // Added for pagination control
+  onPageChange, // Added for pagination control
+  onRowsPerPageChange, // Added for pagination control
+  onSelectAll, // Added for selection
+  onSelectItem, // Added for selection
+  noDataMessage, // Added for custom no data message
   expansionType = 'default',
   supportPDF = false,
   getRowStyle,
@@ -48,7 +57,7 @@ const ExpandRTable = ({
   canBulkDelete = true,
 }) => {
 
-  const hasActions = handleEdit || handleDelete || handleDuplicate || handlePrint || renderCustomActions;
+  const hasActions = handleEdit || handleDelete || handleDuplicate || handlePrint || renderActions;
   const displayData = filteredData || data || [];
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [zoomedImages, setZoomedImages] = useState(new Set());
@@ -118,7 +127,7 @@ const ExpandRTable = ({
       const isZoomed = zoomedImages.has(imageId);
 
       if (imgSrc) {
-        const fullImgSrc = imgSrc.startsWith('http') ? imgSrc : `http://127.0.0.1:8000/storage/${imgSrc}`;
+        const fullImgSrc = imgSrc.startsWith('http') ? imgSrc : `${API_ORIGIN}/storage/${imgSrc}`;
 
         return (
           <div className="employee-avatar">
@@ -177,7 +186,7 @@ const ExpandRTable = ({
 
     return column.render
       ? column.render(item, searchTerm, toggleRowExpansion)
-      : (highlightText ? highlightText(item[column.key], searchTerm) : item[column.key]) || '';
+      : item[column.key] || '';
   };
 
   const filteredItems = displayData.filter(item => filterData(item, searchTerm));
@@ -207,7 +216,6 @@ const ExpandRTable = ({
     gridTemplateColumns: 'repeat(9, 1fr)',
     gap: '1rem',
     paddingBottom: '0.5rem',
-    borderBottom: 'none',
     fontSize: '0.875rem',
     fontWeight: 600,
     color: '#4b5563',
@@ -216,7 +224,6 @@ const ExpandRTable = ({
     padding: '0.75rem 1rem',
     textTransform: 'uppercase',
     position: 'relative',
-    fontSize: '0.875rem',
     borderBottom: "1px solid #e5e7eb",
   };
 
@@ -257,7 +264,7 @@ const ExpandRTable = ({
                   <Checkbox
                     indeterminate={selectedItems.length > 0 && selectedItems.length < displayData.length}
                     checked={selectAll}
-                    onChange={canDelete ? handleSelectAllChange : undefined}
+                    onChange={onSelectAll ? (e) => onSelectAll(e.target.checked) : undefined}
                     disabled={!canDelete}
                     inputProps={{ 'aria-label': 'select all' }}
                     sx={{ padding: '0', borderBottom: 'none' }}
@@ -318,7 +325,7 @@ const ExpandRTable = ({
                     return (
                       <React.Fragment key={item.id || `row-${Math.random()}`}>
                         <TableRow
-                          onClick={() => toggleRowExpansion && toggleRowExpansion(item.id)}
+                          onClick={() => onRowClick && onRowClick(item)}
                           sx={{
                             ...(getRowStyle ? getRowStyle(item) : tableRowStyles(item)),
                             ...(index !== filteredItems.length - 1 && {
@@ -339,7 +346,7 @@ const ExpandRTable = ({
                           <TableCell padding="checkbox" sx={tableCellStyles}>
                             <Checkbox
                               checked={selectedItems.includes(item.id)}
-                              onChange={() => handleCheckboxChange(item.id)}
+                              onChange={() => onSelectItem && onSelectItem(item.id)}
                               inputProps={{ 'aria-label': `select row ${item.id}` }}
                               onClick={(e) => e.stopPropagation()}
                               sx={{ padding: '0', borderBottom: 'none' }}
@@ -367,7 +374,7 @@ const ExpandRTable = ({
                                 position: 'sticky',
                                 right: 0,
                                 zIndex: 2,
-                                backgroundColor: "#fff",
+                                backgroundColor: "inherit",
                                 borderBottom: "1px solid #e5e7eb",
                               }}
                             >
@@ -481,7 +488,7 @@ const ExpandRTable = ({
                                   </button>
                                 )}
 
-                                {renderCustomActions && renderCustomActions(item)}
+                                {renderActions && renderActions(item)}
                               </div>
                             </TableCell>
                           )}
@@ -528,7 +535,7 @@ const ExpandRTable = ({
                     align="center"
                     sx={{ padding: '24px', color: '#6b7280' }}
                   >
-                    Aucune donnée disponible
+                    {noDataMessage || "Aucune donnée disponible"}
                   </TableCell>
                 </TableRow>
               )}
@@ -536,6 +543,7 @@ const ExpandRTable = ({
           </Table >
         </TableContainer >
 
+        {pagination && (
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: '10px' }}>
           <div className="pagination-container" style={{
             display: 'flex',
@@ -572,8 +580,8 @@ const ExpandRTable = ({
           }}>
             <div className="entries-per-page-container" style={{ display: 'flex', alignItems: 'center' }}>
               <select
-                value={rowsPerPage}
-                onChange={handleMuiChangeRowsPerPage}
+                value={itemsPerPage}
+                onChange={onRowsPerPageChange}
                 style={{
                   width: "60px",
                   padding: "5px 8px",
@@ -597,13 +605,14 @@ const ExpandRTable = ({
             </div>
 
             <Pagination
-              count={Math.ceil(filteredItems.length / rowsPerPage)}
-              page={page + 1}
-              onChange={(event, newPage) => handleChangePage(newPage - 1)}
+              count={Math.ceil(filteredItems.length / itemsPerPage)}
+              page={currentPage + 1}
+              onChange={(event, newPage) => onPageChange(event, newPage - 1)}
               color="primary"
             />
           </div>
         </div>
+        )}
       </div >
     </>
   );

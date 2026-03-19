@@ -21,43 +21,41 @@ import ExpandRTable from "../Employe/ExpandRTable";
 import DossierCNSSDetails from "./DossierCNSSDetails";
 import AddCnssOperation from "./AddCnssOperation";
 import "../Style.css";
+import SectionTitle from "./SectionTitle";
+import { API_ORIGIN } from "../../services/apiConfig";
 
-const API_BASE = window.location.hostname === "localhost"
-  ? "http://localhost:8000"
-  : "http://127.0.0.1:8000";
+const API_BASE = API_ORIGIN;
 
 const normalizeValue = (value) => (value == null ? "" : String(value).toLowerCase().trim());
 
 const StatusChip = ({ status }) => {
   const normalized = String(status || "").toUpperCase();
   let color = "#64748b";
-  let bg = "#f1f5f9";
 
-  if (["ACTIF", "ACTIVE", "PAYE"].includes(normalized)) {
+  if (["ACTIF", "ACTIVE", "PAYE", "TERMINEE"].includes(normalized)) {
     color = "#4caf50";
-    bg = "#e8f5e9";
   } else if (["EN_COURS", "EN_ATTENTE", "DECLARE"].includes(normalized)) {
     color = "#ff9800";
-    bg = "#fff3e0";
-  } else if (["RESILIE", "REFUSÉE", "ANNULÉE", "ERREUR"].includes(normalized)) {
+  } else if (["RESILIE", "REFUSÉE", "ANNULÉE", "ERREUR", "SUSPENDU", "INACTIF"].includes(normalized)) {
     color = "#f44336";
-    bg = "#ffebee";
   }
 
   return (
     <span
       style={{
-        backgroundColor: bg,
+        backgroundColor: `${color}15`,
         color: color,
-        padding: "0.25rem 0.625rem",
-        borderRadius: "0.75rem",
-        fontSize: "0.75rem",
-        fontWeight: 600,
+        padding: "4px 8px",
+        borderRadius: "6px",
+        fontSize: "0.65rem",
+        fontWeight: 700,
         display: "inline-block",
-        whiteSpace: "nowrap"
+        whiteSpace: "nowrap",
+        textTransform: "uppercase",
+        letterSpacing: "0.3px"
       }}
     >
-      {status || "N/A"}
+      {status || "-"}
     </span>
   );
 };
@@ -87,7 +85,7 @@ const DossierCNSSTable = forwardRef((props, ref) => {
     filters: [
       {
         key: "cnss_status",
-        label: "Statut CNSS",
+        label: "Statut Mutuelle",
         type: "select",
         value: "",
         options: [
@@ -224,7 +222,7 @@ const DossierCNSSTable = forwardRef((props, ref) => {
 
   const allColumns = useMemo(
     () => [
-      { key: "matricule", label: "N Dossier" },
+      { key: "matricule", label: "Matricule" },
       {
         key: "numero_adherent",
         label: "N Adherent",
@@ -345,7 +343,7 @@ const DossierCNSSTable = forwardRef((props, ref) => {
 
     const result = await Swal.fire({
       title: "Êtes-vous sûr?",
-      text: `Vous allez supprimer ${selectedItems.length} dossier(s)!`,
+      text: `Vous allez supprimer ${selectedItems.length} opération(s)!`,
       icon: "warning",
       showCancelButton: true,
       confirmButtonColor: "#3085d6",
@@ -363,7 +361,7 @@ const DossierCNSSTable = forwardRef((props, ref) => {
         setSelectedItems([]);
         await fetchDossiers();
 
-        Swal.fire("Supprimés!", "Les dossiers ont été supprimés.", "success");
+        Swal.fire("Supprimés!", "Les opérations ont été supprimées.", "success");
       } catch (error) {
         console.error("Error deleting selected dossiers:", error);
         Swal.fire("Erreur!", "Une erreur est survenue lors de la suppression.", "error");
@@ -401,7 +399,7 @@ const DossierCNSSTable = forwardRef((props, ref) => {
     );
 
     doc.setFontSize(18);
-    doc.text("Dossier CNSS", 14, 22);
+    doc.text("Gestion des opérations Mutuelle", 14, 22);
     doc.setFontSize(11);
     doc.text(`Date: ${new Date().toLocaleDateString()}`, 14, 30);
     doc.autoTable({
@@ -409,7 +407,7 @@ const DossierCNSSTable = forwardRef((props, ref) => {
       body: tableRows,
       startY: 35,
     });
-    doc.save("cnss_dossiers.pdf");
+    doc.save("mutuelle_operations.pdf");
   }, [allColumns, columnVisibility, filteredDossiers]);
 
   const exportToExcel = useCallback(() => {
@@ -424,8 +422,8 @@ const DossierCNSSTable = forwardRef((props, ref) => {
 
     const ws = XLSX.utils.json_to_sheet(worksheetData);
     const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Dossier CNSS");
-    XLSX.writeFile(wb, "cnss_dossiers.xlsx");
+    XLSX.utils.book_append_sheet(wb, ws, "Opérations Mutuelle");
+    XLSX.writeFile(wb, "mutuelle_operations.xlsx");
   }, [allColumns, columnVisibility, filteredDossiers]);
 
   const handlePrint = useCallback(() => {
@@ -442,7 +440,7 @@ const DossierCNSSTable = forwardRef((props, ref) => {
     const tableHtml = `
       <html>
         <head>
-          <title>Dossier CNSS</title>
+          <title>Gestion des opérations Mutuelle</title>
           <style>
             table { border-collapse: collapse; width: 100%; }
             th, td { border: 1px solid #000; padding: 8px; text-align: left; }
@@ -450,7 +448,7 @@ const DossierCNSSTable = forwardRef((props, ref) => {
           </style>
         </head>
         <body>
-          <h1>Dossier CNSS</h1>
+          <h1>Gestion des opérations Mutuelle</h1>
           <table>
             <thead>
               <tr>${tableColumns.map((column) => `<th>${column}</th>`).join("")}</tr>
@@ -537,9 +535,9 @@ const DossierCNSSTable = forwardRef((props, ref) => {
         className={`with-split-view ${isAnyFormOpen ? "split-active" : ""}`}
         style={{
           width: "100%",
-          height: "calc(100vh - 160px)",
+          height: "calc(100vh - 130px)",
           display: "flex",
-          gap: isAnyFormOpen ? "0" : "auto",
+          gap: "0",
           overflowX: isAnyFormOpen ? "auto" : "visible",
           overflowY: "hidden",
           boxSizing: "border-box"
@@ -548,20 +546,6 @@ const DossierCNSSTable = forwardRef((props, ref) => {
         {/* CSS Override for Split View */}
         <style>
           {`
-        .with-split-view .add-cnss-container, 
-        .with-split-view .add-accident-container {
-            position: absolute !important;
-            top: 0 !important;
-            left: 0 !important;
-            width: 100% !important;
-            height: 100% !important;
-            z-index: 100 !important;
-            background: white !important;
-            box-shadow: none !important;
-            animation: none !important;
-            border-radius: 0 !important;
-        }
-        
         /* Responsive Split View for Zoom */
         @media (max-width: 1100px) {
           .with-split-view.split-active {
@@ -596,11 +580,13 @@ const DossierCNSSTable = forwardRef((props, ref) => {
         {/* Left Pane: Table & Filters */}
         <div
           style={{
-            flex: isAnyFormOpen ? `1 1 ${100 - drawerWidth}%` : "1 1 100%",
+            flexGrow: isAnyFormOpen ? 0 : 1,
+            flexShrink: isAnyFormOpen ? 0 : 1,
+            flexBasis: isAnyFormOpen ? `${100 - drawerWidth}%` : "100%",
             borderRight: isAnyFormOpen && !isResizing ? "0.125rem solid #eef2f5" : "none",
-            transition: isResizing ? "none" : "all 0.3s ease",
+            transition: isResizing ? "none" : "flex-basis 0.35s cubic-bezier(0.4, 0, 0.2, 1), flex-grow 0.35s cubic-bezier(0.4, 0, 0.2, 1)",
             paddingRight: isAnyFormOpen ? "0.625rem" : "0",
-            minWidth: isAnyFormOpen ? "0" : "100%",
+            minWidth: "0",
             boxSizing: "border-box",
             height: "100%",
             overflowX: "hidden",
@@ -611,13 +597,10 @@ const DossierCNSSTable = forwardRef((props, ref) => {
             <div className="section-header mb-3">
               <div className="d-flex align-items-center justify-content-between flex-wrap" style={{ gap: "1.5rem" }}>
                 <div>
-                  <span className="section-title mb-1">
-                    <i className="fas fa-id-card me-2"></i>
-                    Dossier CNSS
-                  </span>
+                  <SectionTitle icon="fas fa-id-card" text="Gestion des opérations Mutuelle" />
                   {!isDetailsOpen && (
                     <p className="section-description text-muted mb-0">
-                      {filteredDossiers.length} dossier{filteredDossiers.length > 1 ? "s" : ""} affiche
+                      {filteredDossiers.length} opération{filteredDossiers.length > 1 ? "s" : ""} affichée
                       {filteredDossiers.length > 1 ? "s" : ""}
                     </p>
                   )}
@@ -758,7 +741,7 @@ const DossierCNSSTable = forwardRef((props, ref) => {
             columns={visibleColumns}
             data={filteredDossiers}
             loading={isTableLoading}
-            loadingText="Chargement des dossiers CNSS..."
+            loadingText="Chargement des opérations Mutuelle..."
             searchTerm={normalizeValue(globalSearch)}
             highlightText={highlightText}
             selectAll={selectedItems.length === filteredDossiers.length && filteredDossiers.length > 0}
@@ -778,8 +761,8 @@ const DossierCNSSTable = forwardRef((props, ref) => {
                   event.stopPropagation();
                   setSelectedDossier(item);
                 }}
-                aria-label="Gérer dossier"
-                title="Gérer dossier"
+                aria-label="Gérer opérations"
+                title="Gérer opérations"
                 className="d-flex align-items-center"
                 style={{
                   border: "none",
@@ -825,16 +808,20 @@ const DossierCNSSTable = forwardRef((props, ref) => {
           <div
             className="split-view-drawer"
             style={{
-              flex: `1 1 ${drawerWidth}%`,
+              flexGrow: 0,
+              flexShrink: 0,
+              flexBasis: `${drawerWidth}%`,
               height: "100%",
               overflow: "auto",
               position: "relative",
-              backgroundColor: "#fdfdfd",
+              backgroundColor: "#ffffff",
               boxShadow: "-0.25rem 0 0.9375rem rgba(0,0,0,0.05)",
-              transition: isResizing ? "none" : "flex 0.3s ease",
+              transition: isResizing ? "none" : "flex-basis 0.35s cubic-bezier(0.4, 0, 0.2, 1)",
               minWidth: "0",
               maxWidth: "90vw",
-              boxSizing: "border-box"
+              boxSizing: "border-box",
+              willChange: "flex-basis",
+              contain: "layout style"
             }}
           >
             {isDetailsOpen && (

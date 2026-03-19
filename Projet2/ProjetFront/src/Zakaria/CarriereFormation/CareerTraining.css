@@ -3,6 +3,41 @@
   min-height: calc(100vh - 160px);
 }
 
+.mobilite-layout-fix {
+  margin-left: 0 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box;
+}
+
+.mobilite-layout-fix .filters-container {
+  margin-left: 0 !important;
+  padding-left: 20px !important;
+  padding-right: 20px !important;
+}
+
+.mobilite-layout-fix .filters-icon-section,
+.mobilite-layout-fix .filter-group {
+  min-width: max-content;
+}
+
+/* Allow full-page vertical scroll in Carrières layout (avoid fixed height/hidden overflow) */
+.career-scroll-layout {
+  height: auto !important;
+  min-height: calc(100vh - 130px) !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+}
+
+.career-scroll-layout > div {
+  min-height: 0;
+}
+
+.career-scroll-layout .departement_list {
+  height: auto;
+  max-height: calc(100vh - 130px);
+}
+
 .career-section {
   margin-bottom: 24px;
 }
@@ -154,6 +189,7 @@
   border-radius: 999px;
   font-size: 0.75rem;
   font-weight: 600;
+  white-space: nowrap;
 }
 
 .career-badge.success {
@@ -236,18 +272,23 @@
 
 /* Drawer internal layout: allow cards to expand and grid to adapt */
 .side-panel-container .career-section,
+.career-drawer-content .career-section,
 .side-panel-container .career-card,
-.side-panel-container .career-card-body {
+.career-drawer-content .career-card,
+.side-panel-container .career-card-body,
+.career-drawer-content .career-card-body {
   width: 100%;
   max-width: none;
   box-sizing: border-box;
 }
 
-.side-panel-container .career-grid {
+.side-panel-container .career-grid,
+.career-drawer-content .career-grid {
   width: 100%;
 }
 
-.side-panel-container .career-grid-2 {
+.side-panel-container .career-grid-2,
+.career-drawer-content .career-grid-2 {
   grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
 }
 .competences-visualisation-scroll {

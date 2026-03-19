@@ -91,7 +91,7 @@ const PreparationLogo = () => {
 
   const fetchExistingLigneCommandes = async (commandId) => {
     axios
-      .get(`http://localhost:8000/api/ligneCommandes/${commandId}`)
+      .get(`/api/ligneCommandes/${commandId}`)
       .then((ligneCommandesResponse) => {
         const existingLigneCommandes =
           ligneCommandesResponse.data.ligneCommandes;
@@ -101,7 +101,7 @@ const PreparationLogo = () => {
   };
   const fetchExistingLignePreparationCommandes = async (commandId) => {
     axios
-      .get(`http://localhost:8000/api/lignePreparationCommandes/${commandId}`)
+      .get(`/api/lignePreparationCommandes/${commandId}`)
       .then((lignePreparationCommandesResponse) => {
         const existingLignePreparationCommandes =
           lignePreparationCommandesResponse.data.lignePreparationCommandes;
@@ -117,10 +117,10 @@ const PreparationLogo = () => {
         siteClientResponse,
         produitsResponse,
       ] = await Promise.all([
-        axios.get("http://localhost:8000/api/commandes"),
-        axios.get("http://localhost:8000/api/clients"),
-        axios.get("http://localhost:8000/api/siteclients"),
-        axios.get("http://localhost:8000/api/produits"),
+        axios.get("/api/commandes"),
+        axios.get("/api/clients"),
+        axios.get("/api/siteclients"),
+        axios.get("/api/produits"),
       ]);
       setCommandes(commandesResponse.data.commandes);
       setClients(clientsResponse.data.client);
@@ -153,7 +153,7 @@ const PreparationLogo = () => {
     setClientid(clientId);
     try {
       console.log(status)
-      const response = await axios.get(`http://localhost:8000/api/clients/${clientId}/commandes`);
+      const response = await axios.get(`/api/clients/${clientId}/commandes`);
 
       const orders = response.data.commandes;
       console.log('comde',response.data.
@@ -179,7 +179,7 @@ const filtredata = async ( id,clientid) => {
       console.log('Status:', status ,clientid);
       
       // Making the API request to fetch orders by client ID
-      const response = await axios.get(`http://localhost:8000/api/clients/${clientid}/commandes`);
+      const response = await axios.get(`/api/clients/${clientid}/commandes`);
       const orders = response.data.commandes;
 
       // Logging preparations for debugging purposes
@@ -427,7 +427,7 @@ const filtrecmddata = async () => {
     setSelectedProductsData(updatedSelectedProductsData);
     if (id) {
       axios
-        .delete(`http://localhost:8000/api/lignePreparationCommandes/${id}`)
+        .delete(`/api/lignePreparationCommandes/${id}`)
         .then(() => {
           fetchData();
         });
@@ -500,7 +500,7 @@ setWidth("63%")
     e.preventDefault();
 
     try {
-      const userResponse = await axios.get("http://localhost:8000/api/users", {
+      const userResponse = await axios.get("/api/users", {
         withCredentials: true,
         headers: {
           "X-CSRF-TOKEN": csrfToken,
@@ -516,7 +516,7 @@ setWidth("63%")
         // Update existing preparation
 console.log('id',id)
         await axios.put(
-          `http://localhost:8000/api/PreparationCommandes/${id}`,
+          `/api/PreparationCommandes/${id}`,
           {
             commande_id:id,
             datePreparationCommande: formData.datePreparationCommande,
@@ -540,7 +540,7 @@ console.log('id',id)
         );
         
         const preparationResponse = await axios.post(
-          `http://localhost:8000/api/PreparationCommandes`,
+          `/api/PreparationCommandes`,
           {
             commande_id: id,
             datePreparationCommande: formData.datePreparationCommande,
@@ -553,7 +553,7 @@ console.log('id',id)
 
         console.log("form",formData)
         await axios.put(
-          `http://localhost:8000/api/commandes/${id}`,
+          `/api/commandes/${id}`,
           {
             status: formData.status_preparation,
            
@@ -566,7 +566,7 @@ console.log('id',id)
 
       // Get existing lignePreparationCommandes
       const existingLignePreparationCommandesResponse = await axios.get(
-        `http://localhost:8000/api/PreparationCommandes/${preparationId}/lignePreparationCommandes`
+        `/api/PreparationCommandes/${preparationId}/lignePreparationCommandes`
       );
       const existingLignePreparationCommandes = Array.isArray(
         existingLignePreparationCommandesResponse.data
@@ -612,7 +612,7 @@ console.log('id',id)
       // Delete lines that are not in the new set
       for (const id of idsToDelete) {
         await axios.delete(
-          `http://localhost:8000/api/lignePreparationCommandes/${id}`,
+          `/api/lignePreparationCommandes/${id}`,
           {
             withCredentials: true,
             headers: {
@@ -626,7 +626,7 @@ console.log('id',id)
       for (const lignePreparationCommandeData of selectedPrdsData) {
         if (lignePreparationCommandeData.id) {
           await axios.put(
-            `http://localhost:8000/api/lignePreparationCommandes/${lignePreparationCommandeData.id}`,
+            `/api/lignePreparationCommandes/${lignePreparationCommandeData.id}`,
             lignePreparationCommandeData,
             {
               withCredentials: true,
@@ -637,7 +637,7 @@ console.log('id',id)
           );
         } else {
           await axios.post(
-            "http://localhost:8000/api/lignePreparationCommandes",
+            "/api/lignePreparationCommandes",
             lignePreparationCommandeData,
             {
               withCredentials: true,
@@ -697,7 +697,7 @@ console.log(maxId);
     try {
       // Récupérer les données de la préparation et de la commande associée
       const response = await axios.get(
-        `http://localhost:8000/api/PreparationCommandes/${maxId}`
+        `/api/PreparationCommandes/${maxId}`
       );
       const { preparation: preparationData, commande: commandeData } =
         response.data;
@@ -747,7 +747,7 @@ console.log(maxId);
     if (result.isConfirmed) {
       try {
         await axios.delete(
-          `http://localhost:8000/api/PreparationCommandes/${preparationId}`,
+          `/api/PreparationCommandes/${preparationId}`,
           {
             withCredentials: true,
             headers: {
@@ -1593,3 +1593,4 @@ console.log(maxId);
 };
 
 export default PreparationLogo;
+

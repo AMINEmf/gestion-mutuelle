@@ -15,8 +15,15 @@ class CnssOperation extends Model
         'employe_id',
         'type_operation',
         'date_operation',
+        'beneficiary_type',
+        'beneficiary_name',
+        'beneficiary_relation',
         'reference',
         'montant',
+        'montant_total',
+        'taux_remboursement',
+        'montant_rembourse',
+        'montant_reste_a_charge',
         'statut',
         'notes',
         'created_by',
@@ -26,6 +33,10 @@ class CnssOperation extends Model
     protected $casts = [
         'date_operation' => 'date',
         'montant' => 'decimal:2',
+        'montant_total' => 'decimal:2',
+        'taux_remboursement' => 'decimal:2',
+        'montant_rembourse' => 'decimal:2',
+        'montant_reste_a_charge' => 'decimal:2',
     ];
 
     public function employe()

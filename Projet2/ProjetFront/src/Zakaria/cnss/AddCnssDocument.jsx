@@ -3,11 +3,10 @@ import axios from "axios";
 import { Button, Form } from "react-bootstrap";
 import Swal from "sweetalert2";
 import { Activity, Save, X, FileText, Upload } from "lucide-react";
+import { API_ORIGIN } from "../../services/apiConfig";
 import "../Employe/AddEmp.css";
 
-const API_BASE = window.location.hostname === "localhost"
-  ? "http://localhost:8000"
-  : "http://127.0.0.1:8000";
+const API_BASE = API_ORIGIN;
 
 function AddCnssDocument({ employeId, onClose, onSaved }) {
   const [documentType, setDocumentType] = useState("");
@@ -79,12 +78,14 @@ function AddCnssDocument({ employeId, onClose, onSaved }) {
           }
           .form-header h3 {
             margin: 0;
-            font-size: 18px;
-            color: #2c767c;
+            font-size: 1.15rem;
+            color: #4b5563;
             font-weight: 600;
             display: flex;
             align-items: center;
-            gap: 10px;
+            justify-content: center;
+            gap: 12px;
+            flex: 1;
           }
           .form-body {
             flex-grow: 1;
@@ -136,8 +137,8 @@ function AddCnssDocument({ employeId, onClose, onSaved }) {
       <div className="side-panel-container" onClick={(e) => e.stopPropagation()}>
         {/* HEADER */}
         <div className="form-header">
+          <div style={{ width: "24px" }}></div> {/* Pour équilibrer le bouton Fermer et centrer le titre */}
           <h3>
-            <Activity size={20} />
             Ajouter un document
           </h3>
           <button
@@ -163,7 +164,6 @@ function AddCnssDocument({ employeId, onClose, onSaved }) {
 
             {/* SECTION: FICHIER */}
             <div className="section-title">
-              <Upload size={16} />
               <span>Sélection du fichier</span>
             </div>
 
@@ -184,7 +184,6 @@ function AddCnssDocument({ employeId, onClose, onSaved }) {
 
             {/* SECTION: DETAILS */}
             <div className="section-title">
-              <FileText size={16} />
               <span>Détails du document</span>
             </div>
 
@@ -223,7 +222,6 @@ function AddCnssDocument({ employeId, onClose, onSaved }) {
             className="px-4 d-flex align-items-center"
             style={{ backgroundColor: "#2c767c", borderColor: "#2c767c" }}
           >
-            <Save size={16} className="me-2" />
             {loading ? "Enregistrement..." : "Enregistrer"}
           </Button>
         </div>

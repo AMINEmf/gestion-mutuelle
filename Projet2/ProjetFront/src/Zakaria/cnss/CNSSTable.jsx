@@ -6,7 +6,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Trash2, Edit2, Plus, Check, X } from 'lucide-react';
 import { FaPlus } from "react-icons/fa6";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
-import { Box } from "@mui/material";
+import { Box, Chip } from "@mui/material";
 // import { faUserPlus } from "@fortawesome/free-solid-svg-icons";
 import PageHeader from "../../ComponentHistorique/PageHeader";
 import jsPDF from 'jspdf';
@@ -21,9 +21,34 @@ import "../Style.css";
 import ExpandRTable from "../Employe/ExpandRTable";
 import { motion, AnimatePresence, color } from 'framer-motion';
 import { FaPlusCircle } from "react-icons/fa";
+import SectionTitle from "./SectionTitle";
 import { useOpen } from "../../Acceuil/OpenProvider";
+import FicheAffiliationCNSS from "./FicheAffiliationCNSS";
 
+// Format date from ISO to DD/MM/YYYY
+const formatDate = (dateString) => {
+  if (!dateString) return '-';
+  try {
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return '-';
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
+  } catch (error) {
+    return '-';
+  }
+};
 
+const themeColors = {
+  teal: "#2c767c",
+  success: "#4caf50",
+  warning: "#ff9800",
+  error: "#f44336",
+  info: "#2196f3",
+  textSecondary: "#64748b",
+  textPrimary: "#1e293b",
+};
 
 const CNSSTable = forwardRef((props, ref) => {
   const {
@@ -53,12 +78,14 @@ const CNSSTable = forwardRef((props, ref) => {
   const [filterOptions, setFilterOptions] = useState({
     filters: [
       { key: 'statut', label: 'Statut', type: 'select', value: '', options: [{ label: 'Actif', value: 'Actif' }, { label: 'Inactif', value: 'Inactif' }], placeholder: 'Tous' },
-      { key: 'salaire', label: 'Salaire', type: 'range', min: '', max: '', placeholderMin: 'Min', placeholderMax: 'Max' }
+      { key: 'periode', label: 'Période d\'affiliation', type: 'dateRange', dateDebut: '', dateFin: '', placeholderDebut: 'Date début', placeholderFin: 'Date fin' }
     ]
   });
   const [showImportDropdown, setShowImportDropdown] = useState(false);
   const [showImportModal, setShowImportModal] = useState(false);
   const [isTableLoading, setIsTableLoading] = useState(false);
+  const [showFicheModal, setShowFicheModal] = useState(false);
+  const [selectedEmployeeForPrint, setSelectedEmployeeForPrint] = useState(null);
   const dropdownRef = useRef(null);
   const employeesCacheRef = useRef(null);
   const affiliationsCacheRef = useRef(null);
@@ -115,29 +142,41 @@ const CNSSTable = forwardRef((props, ref) => {
       key: "date_debut",
       label: "Date affiliation",
       render: (item) => (
-        <span>{item.date_debut || item.date_affiliation || '-'}</span>
+        <span>{formatDate(item.date_debut || item.date_affiliation)}</span>
       )
     },
     {
       key: "date_fin",
       label: "Date fin",
       render: (item) => (
-        <span>{item.date_fin || '-'}</span>
+        <span>{formatDate(item.date_fin)}</span>
       )
     },
     {
       key: "statut",
       label: "Statut",
-      render: (item) => (
-        <span
-          className={`badge ${item.statut === 'Actif' ? 'bg-success' :
-              item.statut === 'Inactif' ? 'bg-secondary' :
-                item.statut === 'Suspendu' ? 'bg-danger' : 'bg-secondary'
-            }`}
-        >
-          {item.statut || 'N/A'}
-        </span>
-      )
+      render: (item) => {
+        const colors = {
+          'Actif': themeColors.success,
+          'Inactif': themeColors.textSecondary,
+          'Suspendu': themeColors.error
+        };
+        const color = colors[item.statut] || themeColors.textSecondary;
+        return (
+          <Chip
+            label={item.statut || "-"}
+            size="small"
+            sx={{
+              backgroundColor: `${color}15`,
+              color,
+              fontWeight: 700,
+              fontSize: "0.65rem",
+              borderRadius: "6px",
+              textTransform: "uppercase"
+            }}
+          />
+        );
+      }
     },
   ], [getEmployeeSalaryValue]);
 
@@ -184,7 +223,7 @@ const CNSSTable = forwardRef((props, ref) => {
       }
     }
     try {
-      const response = await axios.get('http://127.0.0.1:8000/api/departements/employes');
+      const response = await axios.get('/api/departements/employes');
       const employeesData = Array.isArray(response.data) ? response.data : [];
       setEmployees(employeesData);
       localStorage.setItem('cnssEmployees', JSON.stringify(employeesData));
@@ -211,7 +250,7 @@ const CNSSTable = forwardRef((props, ref) => {
       }
     }
     try {
-      const response = await axios.get(`http://127.0.0.1:8000/api/cnss/affiliations`);
+      const response = await axios.get(`/api/cnss/affiliations`);
       const affiliationsData = Array.isArray(response.data) ? response.data : [];
       setCnssAffiliations(affiliationsData);
       localStorage.setItem("cnssAffiliations", JSON.stringify(affiliationsData));
@@ -368,21 +407,30 @@ const CNSSTable = forwardRef((props, ref) => {
   const applyFilters = (cnssData) => {
     return cnssData.filter(cnss => {
       const statutFilter = filterOptions.filters.find(f => f.key === 'statut');
-      const salaireFilter = filterOptions.filters.find(f => f.key === 'salaire');
+      const periodeFilter = filterOptions.filters.find(f => f.key === 'periode');
 
       const matchesStatut = !statutFilter?.value || cnss.statut?.toLowerCase() === statutFilter.value.toLowerCase();
 
-      // Salary filter
-      const matchesSalaire = (() => {
-        if (!salaireFilter?.min && !salaireFilter?.max) return true;
-        const salary = parseFloat(getEmployeeSalaryValue(cnss)) || 0;
-        const minSalary = salaireFilter.min ? parseFloat(salaireFilter.min) : 0;
-        const maxSalary = salaireFilter.max ? parseFloat(salaireFilter.max) : Infinity;
+      // Date period filter
+      const matchesPeriode = (() => {
+        if (!periodeFilter?.dateDebut && !periodeFilter?.dateFin) return true;
+        const affiliationDate = new Date(cnss.date_debut || cnss.date_affiliation);
+        if (isNaN(affiliationDate.getTime())) return true;
 
-        return salary >= minSalary && salary <= maxSalary;
+        if (periodeFilter.dateDebut) {
+          const startDate = new Date(periodeFilter.dateDebut);
+          if (affiliationDate < startDate) return false;
+        }
+
+        if (periodeFilter.dateFin) {
+          const endDate = new Date(periodeFilter.dateFin);
+          if (affiliationDate > endDate) return false;
+        }
+
+        return true;
       })();
 
-      return matchesStatut && matchesSalaire;
+      return matchesStatut && matchesPeriode;
     });
   };
 
@@ -396,6 +444,24 @@ const CNSSTable = forwardRef((props, ref) => {
       normalizeValue(cnss.numero_cnss)?.includes(normalizedGlobalSearch)
     )
   );
+
+
+  const renderCustomActions = useCallback((cnss) => {
+    return (
+      <button
+        onClick={(e) => {
+          e.stopPropagation();
+          setSelectedEmployeeForPrint(cnss);
+          setShowFicheModal(true);
+        }}
+        aria-label="Fiche employé"
+        title="Fiche employé"
+        style={{ border: 'none', backgroundColor: 'transparent', cursor: 'pointer', padding: '0 5px' }}
+      >
+        <FontAwesomeIcon icon={faIdCard} style={{ color: '#17a2b8', fontSize: '14px' }} />
+      </button>
+    );
+  }, []);
 
   const handleColumnsChange = useCallback((column) => {
     setColumnVisibility(prev => {
@@ -450,7 +516,7 @@ const CNSSTable = forwardRef((props, ref) => {
 
     if (result.isConfirmed) {
       try {
-        await axios.delete(`http://127.0.0.1:8000/api/cnss/affiliations/${id}`);
+        await axios.delete(`/api/cnss/affiliations/${id}`);
         setCnssAffiliations(prev => {
           const updated = prev.filter(cnss => cnss.id !== id);
           localStorage.setItem("cnssAffiliations", JSON.stringify(updated));
@@ -572,7 +638,11 @@ const CNSSTable = forwardRef((props, ref) => {
     printWindow.print();
   }, [allColumns, columnVisibility, filteredCnssDataForFilters, departementName]);
 
-  const handleSelectAllChange = useCallback((checked) => {
+  const handleSelectAllChange = useCallback((eventOrChecked) => {
+    const checked = typeof eventOrChecked === 'boolean'
+      ? eventOrChecked
+      : Boolean(eventOrChecked?.target?.checked);
+
     if (checked) {
       setSelectedItems(filteredCnssDataForFilters.map(item => item.id));
     } else {
@@ -604,7 +674,7 @@ const CNSSTable = forwardRef((props, ref) => {
     if (result.isConfirmed) {
       try {
         await Promise.all(
-          selectedItems.map(id => axios.delete(`http://127.0.0.1:8000/api/cnss/affiliations/${id}`))
+          selectedItems.map(id => axios.delete(`/api/cnss/affiliations/${id}`))
         );
 
         setCnssAffiliations(prev => {
@@ -653,11 +723,11 @@ const CNSSTable = forwardRef((props, ref) => {
     });
   };
 
-  // Handle range filter change (for salary and age)
+  // Handle range filter change (for dates)
   const handleRangeFilterChange = (key, type, value) => {
     setFilterOptions(prev => {
       const newFilters = prev.filters.map(filter => {
-        if (filter.key === key && filter.type === 'range') {
+        if (filter.key === key && (filter.type === 'range' || filter.type === 'dateRange')) {
           return { ...filter, [type]: value };
         }
         return filter;
@@ -727,249 +797,304 @@ const CNSSTable = forwardRef((props, ref) => {
   );
 
   return (
+    <>
+      <style>{`
+        .with-split-view .addemp-overlay, 
+        .with-split-view .add-cnss-container, 
+        .with-split-view .add-accident-container,
+        .with-split-view .side-panel-container,
+        .with-split-view .cnss-side-panel {
+            position: relative !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100% !important;
+            height: 100% !important;
+            box-shadow: none !important;
+            animation: none !important;
+            border-radius: 0 !important;
+        }
+        
+        /* Styles de section header */
+        .section-header {
+            border-bottom: none;
+            padding-bottom: 15px;
+            margin: 0.5% 1% 1%;
+        }
 
-    <div style={{
-      position: 'relative',
-      left: "-2%",
-      // top: "14.19%",
-      top: "0",
-      height: 'calc(100vh - 160px)',
-    }} className={`${isAddingCNSS ? "with-form" : "container_employee"}`}>
+        .section-description {
+            color: #6c757d;
+            font-size: 16px;
+            margin-bottom: 0;
+        }
 
+        .btn-primary {
+            background-color: #3a8a90;
+            border-color: #3a8a90;
+            color: white;
+            border-radius: 0.375rem;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            transition: background-color 0.15s ease-in-out;
+        }
 
-      <div className="mt-4"   >
-        <div className="section-header mb-3">
-          <div className="d-flex align-items-center justify-content-between" style={{ gap: 24 }}>
-            {/* Bloc titre */}
-            <div>
-              <span className="section-title mb-1">
-                <i className="fas fa-id-card me-2"></i>
-                Affiliations CNSS
-              </span>
-              {!showAddForm && (
-                <p className="section-description text-muted mb-0">
-                  {filteredCnssData.length} affiliation
-                  {filteredCnssData.length > 1 ? 's' : ''} actuellement affichée
-                  {filteredCnssData.length > 1 ? 's' : ''}
-                </p>
-              )}
+        .content-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #4b5563;
+            margin-bottom: 5px;
+        }
+      `}</style>
 
+      <div className="with-split-view" style={{
+        display: 'flex',
+        width: '100%',
+        height: '100%',
+        overflow: 'hidden',
+        gap: showAddForm ? '10px' : '0',
+        boxSizing: 'border-box'
+      }}>
+        {/* Colonne de Gauche : Tableau */}
+        <div style={{
+          flex: showAddForm ? '0 0 55%' : '1 1 100%',
+          overflowY: 'auto',
+          overflowX: 'auto',
+          border: '1px solid #e2e8f0',
+          borderRadius: '10px',
+          boxShadow: '0 2px 12px rgba(0,0,0,0.07)',
+          transition: 'flex 0.3s ease-in-out',
+          padding: '0 20px',
+          backgroundColor: 'white',
+          boxSizing: 'border-box'
+        }}>
+          <div className="mt-4">
+            <div className="section-header mb-3">
+              <div className="d-flex align-items-center justify-content-between" style={{ gap: 24 }}>
+                <div>
+                  <SectionTitle icon="fas fa-id-card" text="Affiliations CNSS" />
+                  {!showAddForm && (
+                    <p className="section-description text-muted mb-0">
+                      {filteredCnssData.length} affiliation{filteredCnssData.length > 1 ? "s" : ""} affichee
+                      {filteredCnssData.length > 1 ? "s" : ""}
+                    </p>
+                  )}
+                </div>
 
-            </div>
-            {/* Bloc Dropdowns */}
-            <div style={{ display: "flex", gap: "12px" }}>
+                <div style={{ display: "flex", gap: "12px" }}>
+                  {true && (
+                    <FontAwesomeIcon
+                      onClick={() => handleFiltersToggle && handleFiltersToggle(!filtersVisible)}
+                      icon={filtersVisible ? faClose : faFilter}
+                      color={filtersVisible ? 'green' : ''}
+                      style={{
+                        cursor: "pointer",
+                        fontSize: "1.9rem",
+                        color: "#2c767c",
+                        marginTop: "1.3%",
+                        marginRight: "8px",
+                      }}
+                    />
+                  )}
 
-              <FontAwesomeIcon
-                onClick={() => handleFiltersToggle && handleFiltersToggle(!filtersVisible)}
-                icon={filtersVisible ? faClose : faFilter}
-                color={filtersVisible ? 'green' : ''}
-                style={{
-                  cursor: "pointer",
-                  fontSize: "1.9rem",
-                  color: "#2c767c",
-                  marginTop: "1.3%",
-                  marginRight: "8px",
-                }}
-              />
+                  <Button
+                    onClick={() => {
+                      if (!hasSelectedDepartement) return;
+                      handleAddNewCnss();
+                    }}
+                    className={`d-flex align-items-center justify-content-center ${!hasSelectedDepartement ? "disabled-btn" : ""}`}
+                    size="sm"
+                    style={{
+                      minWidth: "220px",
+                      height: "38px",
+                      backgroundColor: hasSelectedDepartement ? "#3a8a90" : "#9ca3af",
+                      border: "none",
+                      borderRadius: "8px",
+                      color: "#ffffff",
+                      fontWeight: 700,
+                      fontSize: "0.95rem",
+                      boxShadow: hasSelectedDepartement ? "0 3px 8px rgba(58, 138, 144, 0.28)" : "none",
+                    }}
+                  >
+                    <FaPlusCircle className="me-2" />
+                    Ajouter une affiliation CNSS
+                  </Button>
 
-
-
-              {/* Bouton Ajouter */}
-              <Button
-                onClick={handleAddNewCnss}
-                className={`btn btn-outline-primary d-flex align-items-center ${!hasSelectedDepartement ? "disabled-btn" : ""}`}
-                disabled={!hasSelectedDepartement}
-                size="sm"
-                style={{
-                  marginRight: '30px !important',
-                  width: '160px',
-                }}
-              >
-                <FaPlusCircle className="me-2" />
-                Ajouter une affiliation CNSS
-              </Button>
-
-
-              <Dropdown show={showDropdown} onToggle={(isOpen) => setShowDropdown(isOpen)} >
-                <Dropdown.Toggle
-                  as="button"
-                  id="dropdown-visibility"
-                  title="Visibilité Colonnes"
-                  style={iconButtonStyle}
-                >
-                  <FontAwesomeIcon
-                    icon={faSliders}
-                    style={{ width: 18, height: 18, color: "#4b5563" }}
-                  />
-                </Dropdown.Toggle>
-                <Dropdown.Menu as={CustomMenu} />
-              </Dropdown>
-              <Dropdown show={showImportDropdown} onToggle={(isOpen) => setShowImportDropdown(isOpen)}>
-                <Dropdown.Toggle
-                  as="button"
-                  id="dropdown-import"
-                  title="Importer Employés"
-                  onClick={() => setShowImportModal(true)}
-                  style={iconButtonStyle}
-                >
-                  <FontAwesomeIcon
-                    icon={faFileExcel}
-                    style={{ width: 18, height: 18, color: '#4b5563' }}
-                  />
-                </Dropdown.Toggle>
-              </Dropdown>
-
-
-
+                  {true && (
+                    <Dropdown show={showDropdown} onToggle={(isOpen) => setShowDropdown(isOpen)} >
+                      <Dropdown.Toggle
+                        as="button"
+                        id="dropdown-visibility"
+                        title="Visibilité Colonnes"
+                        style={iconButtonStyle}
+                      >
+                        <FontAwesomeIcon
+                          icon={faSliders}
+                          style={{ width: 18, height: 18, color: "#4b5563" }}
+                        />
+                      </Dropdown.Toggle>
+                      <Dropdown.Menu as={CustomMenu} />
+                    </Dropdown>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
-        </div>
-      </div>
-      {/* Section des filtres */}
-      <AnimatePresence>
-        {filtersVisible && (
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.3 }}
-            className="filters-container"
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '12px',
-              padding: '16px 20px',
-              minHeight: 0
-            }}
-          >
-            {/* Ligne 1: Icône et titre */}
-            <div className="filters-icon-section" style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              justifyContent: 'center',
-              marginLeft: '-8px',
-              marginRight: '14%',
-            }}>
-              <svg
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="#4a90a4"
-                strokeWidth="2"
-                className="filters-icon"
+          <AnimatePresence>
+            {filtersVisible && (
+              <motion.div
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.3 }}
+                className="filters-container"
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "30px",
+                  padding: "15px 25px",
+                  overflowX: "auto",
+                  flexWrap: "nowrap",
+                  width: "100%",
+                  WebkitOverflowScrolling: "touch",
+                  boxSizing: "border-box"
+                }}
               >
-                <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
-              </svg>
-              <span className="filters-title">Filtres</span>
-            </div>
+                <div
+                  className="filters-icon-section"
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "10px",
+                    flexShrink: 0,
+                    marginRight: "5px",
+                    position: "relative"
+                  }}
+                >
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4a90a4" strokeWidth="2">
+                    <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+                  </svg>
+                  <span className="filters-title">Filtres</span>
+                </div>
 
-            {/* Ligne 2: Tous les filtres */}
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '1px',
-              flexWrap: 'wrap',
-              justifyContent: 'center',
-              marginLeft: '10.2%'
-            }}>
-              {filterOptions.filters.map((filter, index) => (
-                <div key={index} style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  margin: 0,
-                  marginRight: '46px'
-                }}>            <label className="filter-label" style={{
-                  fontSize: '0.9rem',
-                  margin: 0,
-                  marginRight: '-44px',
-                  whiteSpace: 'nowrap',
-                  minWidth: 'auto',
-                  fontWeight: 600,
-                  color: '#2c3e50'
-                }}>
-                    {filter.label}
-                  </label>
-
-                  {filter.type === 'select' ? (
-                    <select
-                      value={filter.value}
-                      onChange={(e) => handleFilterChange(filter.key, e.target.value)}
-                      className="filter-input"
-                      style={{
-                        minWidth: 80,
-                        maxWidth: 110,
-                        height: 30,
-                        fontSize: '0.9rem',
-                        padding: '2px 6px',
-                        borderRadius: 6
-                      }}
-                    >
-                      <option value="">{filter.placeholder}</option>
-                      {filter.options?.map((option, optIndex) => (
-                        <option key={optIndex} value={option.value}>
-                          {option.label}
-                        </option>
-                      ))}
-                    </select>
-                  ) : filter.type === 'range' ? (
-                    <div style={{
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "20px",
+                    flexWrap: "nowrap",
+                    flexShrink: 0
+                  }}
+                >
+                  {filterOptions.filters.map((filter, index) => (
+                    <div key={index} style={{
                       display: 'flex',
                       alignItems: 'center',
-                      gap: '4px'
+                      margin: 0,
+                      marginRight: '46px'
+                    }}>            <label className="filter-label" style={{
+                      fontSize: '0.9rem',
+                      margin: 0,
+                      marginRight: '-44px',
+                      whiteSpace: 'nowrap',
+                      minWidth: 'auto',
+                      fontWeight: 600,
+                      color: '#2c3e50'
                     }}>
-                      <input
-                        type="number"
-                        value={filter.min}
-                        onChange={(e) => handleRangeFilterChange(filter.key, 'min', e.target.value)}
-                        placeholder={filter.placeholderMin}
-                        className="filter-input filter-range-input"
-                        style={{
-                          minWidth: 50,
-                          maxWidth: 70,
-                          height: 30,
-                          fontSize: '0.9rem',
-                          padding: '2px 4px',
-                          borderRadius: 6
-                        }}
-                      />
-                      <span className="filter-range-separator" style={{
-                        margin: '0 2px',
-                        fontSize: '0.9rem',
-                        color: '#666'
-                      }}>
-                        -
-                      </span>
-                      <input
-                        type="number"
-                        value={filter.max}
-                        onChange={(e) => handleRangeFilterChange(filter.key, 'max', e.target.value)}
-                        placeholder={filter.placeholderMax}
-                        className="filter-input filter-range-input"
-                        style={{
-                          minWidth: 50,
-                          maxWidth: 70,
-                          height: 30,
-                          fontSize: '0.9rem',
-                          padding: '2px 4px',
-                          borderRadius: 6
-                        }}
-                      />
+                        {filter.label}
+                      </label>
+
+                      {filter.type === 'select' ? (
+                        <select
+                          value={filter.value}
+                          onChange={(e) => handleFilterChange(filter.key, e.target.value)}
+                          className="filter-input"
+                          style={{
+                            minWidth: 80,
+                            maxWidth: 110,
+                            height: 30,
+                            fontSize: '0.9rem',
+                            padding: '2px 6px',
+                            borderRadius: 6
+                          }}
+                        >
+                          <option value="">{filter.placeholder}</option>
+                          {filter.options?.map((option, optIndex) => (
+                            <option key={optIndex} value={option.value}>
+                              {option.label}
+                            </option>
+                          ))}
+                        </select>
+                      ) : filter.type === 'dateRange' ? (
+                        <div style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '4px'
+                        }}>
+                          <input
+                            type="date"
+                            value={filter.dateDebut}
+                            onChange={(e) => handleRangeFilterChange(filter.key, 'dateDebut', e.target.value)}
+                            placeholder={filter.placeholderDebut}
+                            className="filter-input filter-range-input"
+                            style={{
+                              minWidth: 110,
+                              maxWidth: 130,
+                              height: 30,
+                              fontSize: '0.9rem',
+                              padding: '2px 4px',
+                              borderRadius: 6
+                            }}
+                          />
+                          <span className="filter-range-separator" style={{
+                            margin: '0 2px',
+                            fontSize: '0.9rem',
+                            color: '#666'
+                          }}>
+                            -
+                          </span>
+                          <input
+                            type="date"
+                            value={filter.dateFin}
+                            onChange={(e) => handleRangeFilterChange(filter.key, 'dateFin', e.target.value)}
+                            placeholder={filter.placeholderFin}
+                            className="filter-input filter-range-input"
+                            style={{
+                              minWidth: 110,
+                              maxWidth: 130,
+                              height: 30,
+                              fontSize: '0.9rem',
+                              padding: '2px 4px',
+                              borderRadius: 6
+                            }}
+                          />
+                        </div>
+                      ) : null}
                     </div>
-                  ) : null}
+                  ))}
                 </div>
-              ))}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
 
 
 
 
-      <style jsx>{`
+          <style>{`
+        .filters-container::-webkit-scrollbar {
+          height: 5px;
+        }
+        .filters-container::-webkit-scrollbar-track {
+          background: #f1f5f9;
+          border-radius: 10px;
+        }
+        .filters-container::-webkit-scrollbar-thumb {
+          background: #cbd5e1;
+          border-radius: 10px;
+        }
+        .filters-container::-webkit-scrollbar-thumb:hover {
+          background: #94a3b8;
+        }
+
         // .custom-checkbox1 .form-check-input:checked {
         //   background-color: #00afaa;
         //   border-color: #00afaa;
@@ -1024,45 +1149,66 @@ const CNSSTable = forwardRef((props, ref) => {
 
       `}</style>
 
-      <ExpandRTable
-        columns={visibleColumns}
-        data={hasSelectedDepartement ? filteredCnssDataForFilters : []}
-        loading={hasSelectedDepartement && isTableLoading}
-        loadingText="Chargement des affiliations CNSS..."
-        searchTerm={normalizedGlobalSearch}
-        highlightText={highlightText}
-        selectAll={selectedItems.length === filteredCnssDataForFilters.length && filteredCnssDataForFilters.length > 0}
-        selectedItems={selectedItems}
-        handleSelectAllChange={handleSelectAllChange}
-        handleCheckboxChange={handleCheckboxChange}
-        handleEdit={handleEditCnss}
-        handleDelete={handleDeleteCnss}
-        handleDeleteSelected={handleDeleteSelected}
-        rowsPerPage={itemsPerPage}
-        page={currentPage}
-        handleChangePage={handleChangePage}
-        handleChangeRowsPerPage={handleChangeRowsPerPage}
-        expandedRows={[]}
-        toggleRowExpansion={() => { }}
-        renderExpandedRow={() => null}
-        renderCustomActions={() => null}
+          <ExpandRTable
+            columns={visibleColumns}
+            data={hasSelectedDepartement ? filteredCnssDataForFilters : []}
+            loading={hasSelectedDepartement && isTableLoading}
+            loadingText="Chargement des affiliations CNSS..."
+            searchTerm={normalizedGlobalSearch}
+            highlightText={highlightText}
+            selectAll={selectedItems.length === filteredCnssDataForFilters.length && filteredCnssDataForFilters.length > 0}
+            selectedItems={selectedItems}
+            handleSelectAllChange={handleSelectAllChange}
+            handleCheckboxChange={handleCheckboxChange}
+            handleEdit={handleEditCnss}
+            handleDelete={handleDeleteCnss}
+            handleDeleteSelected={handleDeleteSelected}
+            rowsPerPage={itemsPerPage}
+            page={currentPage}
+            handleChangePage={handleChangePage}
+            handleChangeRowsPerPage={handleChangeRowsPerPage}
+            expandedRows={[]}
+            toggleRowExpansion={() => { }}
+            renderExpandedRow={() => null}
+            renderCustomActions={renderCustomActions}
+          />
+        </div>
+
+        {/* Colonne de Droite : Formulaire */}
+        {showAddForm && (
+          <div style={{
+            flex: '0 0 45%',
+            overflowY: 'auto',
+            backgroundColor: '#ffffff',
+            border: '1px solid #e2e8f0',
+            borderRadius: '10px',
+            boxShadow: '0 2px 12px rgba(0,0,0,0.07)',
+            position: 'relative',
+            height: '100%'
+          }}>
+            <AddCNSS
+              toggleCnssForm={handleCloseForm}
+              selectedDepartementId={departementId}
+              onCnssAdded={handleCnssAdded}
+              selectedCnss={selectedCnss}
+              onCnssUpdated={handleCnssUpdated}
+              fetchCnss={refreshCnssData}
+              employeesList={employees}
+              cnssAffiliationsList={cnssAffiliations}
+            />
+          </div>
+        )}
+      </div>
+
+      <FicheAffiliationCNSS
+        show={showFicheModal}
+        onHide={() => {
+          setShowFicheModal(false);
+          setSelectedEmployeeForPrint(null);
+        }}
+        affiliation={selectedEmployeeForPrint}
       />
-
-      {showAddForm && (
-        <AddCNSS
-          toggleCnssForm={handleCloseForm}
-          selectedDepartementId={departementId}
-          onCnssAdded={handleCnssAdded}
-          selectedCnss={selectedCnss}
-          onCnssUpdated={handleCnssUpdated}
-          fetchCnss={refreshCnssData}
-          employeesList={employees}
-          cnssAffiliationsList={cnssAffiliations}
-        />
-      )}
-
-    </div>
-
+    </>
   );
 });
 

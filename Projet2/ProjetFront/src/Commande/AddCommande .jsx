@@ -50,7 +50,7 @@ const AddCommande = ({ produits, clients, csrfToken, fetchCommandes }) => {
 
   const handleAddCommande = async () => {
     try {
-      const userResponse = await axios.get("http://localhost:8000/api/users", {
+      const userResponse = await axios.get("/api/users", {
         withCredentials: true,
         headers: {
           "X-CSRF-TOKEN": csrfToken,
@@ -60,7 +60,7 @@ const AddCommande = ({ produits, clients, csrfToken, fetchCommandes }) => {
       const authenticatedUserId = userResponse.data[0].id;
       console.log("auth user", authenticatedUserId);
       const commandeResponse = await axios.post(
-        "http://localhost:8000/api/commandes",
+        "/api/commandes",
         {
           client_id: findClientId(getElementValueById("client_id")),
           mode_payement: getElementValueById("modePaiement"),
@@ -89,7 +89,7 @@ const AddCommande = ({ produits, clients, csrfToken, fetchCommandes }) => {
 
       for (const ligneCommandeData of selectedProductsData) {
         await axios.post(
-          "http://localhost:8000/api/ligneCommandes",
+          "/api/ligneCommandes",
           ligneCommandeData,
           {
             withCredentials: true,
@@ -105,7 +105,7 @@ const AddCommande = ({ produits, clients, csrfToken, fetchCommandes }) => {
         status: "EN COURS",
       };
       await axios.post(
-        "http://localhost:8000/api/statusCommande",
+        "/api/statusCommande",
         statusCommandeData,
         {
           withCredentials: true,

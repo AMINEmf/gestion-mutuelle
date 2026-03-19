@@ -8,7 +8,9 @@ import React, {
 } from "react";
 import axios from "axios";
 import { Button, Dropdown, Form } from "react-bootstrap";
-import { faClose, faEye, faFilter, faSliders } from "@fortawesome/free-solid-svg-icons";
+import { Box, Chip } from "@mui/material";
+import { faClose, faEye, faFilter, faSearch, faSliders } from "@fortawesome/free-solid-svg-icons";
+import SectionTitle from "./SectionTitle";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Swal from "sweetalert2";
 import jsPDF from "jspdf";
@@ -20,6 +22,15 @@ import ExpandRTable from "../Employe/ExpandRTable";
 import AddDeclarationCNSS from "./AddDeclarationCNSS";
 import DeclarationDetails from "./DeclarationDetails";
 import "../Style.css";
+const themeColors = {
+  teal: "#2c767c",
+  success: "#4caf50",
+  warning: "#ff9800",
+  error: "#f44336",
+  info: "#2196f3",
+  textSecondary: "#64748b",
+  textPrimary: "#1e293b",
+};
 
 const monthLabelFromNumber = (monthValue) => {
   const month = Number(monthValue);
@@ -68,6 +79,41 @@ const DeclarationsTable = forwardRef((props, ref) => {
   const [filterOptions, setFilterOptions] = useState({
     filters: [
       {
+        key: "mois",
+        label: "Mois",
+        type: "select",
+        value: "",
+        options: [
+          { label: "Janvier", value: "1" },
+          { label: "Fevrier", value: "2" },
+          { label: "Mars", value: "3" },
+          { label: "Avril", value: "4" },
+          { label: "Mai", value: "5" },
+          { label: "Juin", value: "6" },
+          { label: "Juillet", value: "7" },
+          { label: "Aout", value: "8" },
+          { label: "Septembre", value: "9" },
+          { label: "Octobre", value: "10" },
+          { label: "Novembre", value: "11" },
+          { label: "Decembre", value: "12" },
+        ],
+        placeholder: "Tous",
+      },
+      {
+        key: "annee",
+        label: "Annee",
+        type: "select",
+        value: "",
+        options: [
+          { label: "2024", value: "2024" },
+          { label: "2025", value: "2025" },
+          { label: "2026", value: "2026" },
+          { label: "2027", value: "2027" },
+          { label: "2028", value: "2028" },
+        ],
+        placeholder: "Toutes",
+      },
+      {
         key: "statut",
         label: "Statut",
         type: "select",
@@ -109,10 +155,28 @@ const DeclarationsTable = forwardRef((props, ref) => {
         key: "statut",
         label: "Statut",
         render: (item) => {
+          const statusColors = {
+            PAYE: themeColors.success,
+            DECLARE: themeColors.info,
+            EN_ATTENTE: themeColors.textSecondary,
+          };
           const statut = item.statut || "EN_ATTENTE";
-          const badgeClass =
-            statut === "PAYE" ? "bg-success" : statut === "DECLARE" ? "bg-primary" : "bg-secondary";
-          return <span className={`badge ${badgeClass}`}>{statut}</span>;
+          const color = statusColors[statut] || themeColors.textSecondary;
+
+          return (
+            <Chip
+              label={statut.replace("_", " ")}
+              size="small"
+              sx={{
+                backgroundColor: `${color}15`,
+                color,
+                fontWeight: 700,
+                fontSize: "0.65rem",
+                borderRadius: "6px",
+                textTransform: "uppercase",
+              }}
+            />
+          );
         },
       },
     ],
@@ -129,7 +193,7 @@ const DeclarationsTable = forwardRef((props, ref) => {
   const fetchDeclarations = useCallback(async () => {
     setIsTableLoading(true);
     try {
-      const response = await axios.get("http://127.0.0.1:8000/api/cnss/declarations");
+      const response = await axios.get("/api/cnss/declarations");
       const declarationsData = Array.isArray(response.data) ? response.data : [];
       setDeclarations(declarationsData);
     } catch (error) {
@@ -176,11 +240,27 @@ const DeclarationsTable = forwardRef((props, ref) => {
   }, [declarations, globalSearch]);
 
   const filteredDeclarations = useMemo(() => {
+    const moisFilter = filterOptions.filters.find((filter) => filter.key === "mois");
+    const anneeFilter = filterOptions.filters.find((filter) => filter.key === "annee");
     const statutFilter = filterOptions.filters.find((filter) => filter.key === "statut");
 
     return filteredDeclarationsBySearch.filter((item) => {
-      if (!statutFilter?.value) return true;
-      return normalizeValue(item.statut) === normalizeValue(statutFilter.value);
+      // Filtre par mois
+      if (moisFilter?.value && String(item.mois) !== String(moisFilter.value)) {
+        return false;
+      }
+
+      // Filtre par année
+      if (anneeFilter?.value && String(item.annee) !== String(anneeFilter.value)) {
+        return false;
+      }
+
+      // Filtre par statut
+      if (statutFilter?.value && normalizeValue(item.statut) !== normalizeValue(statutFilter.value)) {
+        return false;
+      }
+
+      return true;
     });
   }, [filteredDeclarationsBySearch, filterOptions]);
 
@@ -233,7 +313,7 @@ const DeclarationsTable = forwardRef((props, ref) => {
       if (!result.isConfirmed) return;
 
       try {
-        await axios.delete(`http://127.0.0.1:8000/api/cnss/declarations/${declarationId}`);
+        await axios.delete(`/api/cnss/declarations/${declarationId}`);
         await fetchDeclarations();
         Swal.fire("Supprime", "La declaration a ete supprimee.", "success");
       } catch (error) {
@@ -292,7 +372,7 @@ const DeclarationsTable = forwardRef((props, ref) => {
     try {
       await Promise.all(
         selectedItems.map((declarationId) =>
-          axios.delete(`http://127.0.0.1:8000/api/cnss/declarations/${declarationId}`)
+          axios.delete(`/api/cnss/declarations/${declarationId}`)
         )
       );
       setSelectedItems([]);
@@ -477,18 +557,28 @@ const DeclarationsTable = forwardRef((props, ref) => {
   ));
 
   return (
-    <div className="with-split-view" style={{
-      display: 'flex',
-      width: '100%',
-      height: 'calc(100vh - 120px)',
-      overflow: 'hidden'
-    }}>
-      <style>
-        {`
+    <>
+      <style>{`
+        .filters-container::-webkit-scrollbar {
+          height: 5px;
+        }
+        .filters-container::-webkit-scrollbar-track {
+          background: #f1f5f9;
+          border-radius: 10px;
+        }
+        .filters-container::-webkit-scrollbar-thumb {
+          background: #cbd5e1;
+          border-radius: 10px;
+        }
+        .filters-container::-webkit-scrollbar-thumb:hover {
+          background: #94a3b8;
+        }
+
         .with-split-view .addemp-overlay, 
         .with-split-view .add-cnss-container, 
         .with-split-view .add-accident-container,
-        .with-split-view .side-panel-container {
+        .with-split-view .side-panel-container,
+        .with-split-view .cnss-side-panel {
             position: relative !important;
             top: 0 !important;
             left: 0 !important;
@@ -498,37 +588,69 @@ const DeclarationsTable = forwardRef((props, ref) => {
             animation: none !important;
             border-radius: 0 !important;
         }
-        `}
-      </style>
+        
+        /* Styles de section header */
+        .section-header {
+            border-bottom: none;
+            padding-bottom: 15px;
+            margin: 0.5% 1% 1%;
+        }
 
-      {/* Colonne de Gauche : Tableau */}
-      <div style={{
-        flex: isDrawerOpen ? '0 0 55%' : '1 1 100%',
-        overflowY: 'auto',
-        overflowX: 'auto',
-        borderRight: isDrawerOpen ? '2px solid #eef2f5' : 'none',
-        transition: 'flex 0.3s ease-in-out',
-        padding: '0 20px'
+        .btn-primary {
+            background-color: #3a8a90;
+            border-color: #3a8a90;
+            color: white;
+            border-radius: 0.375rem;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            transition: background-color 0.15s ease-in-out;
+        }
+
+        .content-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #4b5563;
+            margin-bottom: 5px;
+        }
+      `}</style>
+
+      <div className="with-split-view" style={{
+        display: 'flex',
+        width: '100%',
+        height: 'calc(100vh - 130px)',
+        overflow: 'hidden',
+        gap: isDrawerOpen ? '10px' : '0',
+        padding: '8px',
+        boxSizing: 'border-box'
       }}>
-        <div className="mt-4">
-          <div className="section-header mb-3">
-            <div className="d-flex align-items-center justify-content-between" style={{ gap: 24 }}>
-              <div>
-                <span className="section-title mb-1">
-                  <i className="fas fa-id-card me-2"></i>
-                  Declarations CNSS
-                </span>
-                {!isFormDrawerOpen && (
-                  <p className="section-description text-muted mb-0">
-                    {filteredDeclarations.length} declaration{filteredDeclarations.length > 1 ? "s" : ""} affichee
-                    {filteredDeclarations.length > 1 ? "s" : ""}
-                  </p>
-                )}
-              </div>
+        {/* Colonne de Gauche : Tableau */}
+        <div style={{
+          flex: isDrawerOpen ? '0 0 55%' : '1 1 100%',
+          overflowY: 'auto',
+          overflowX: 'auto',
+          border: '1px solid #e2e8f0',
+          borderRadius: '10px',
+          boxShadow: '0 2px 12px rgba(0,0,0,0.07)',
+          transition: 'flex 0.3s ease-in-out',
+          padding: '0 20px',
+          backgroundColor: 'white',
+          boxSizing: 'border-box'
+        }}>
+          <div className="mt-4">
+            <div className="section-header mb-3">
+              <div className="d-flex align-items-center justify-content-between" style={{ gap: 24 }}>
+                <div>
+                  <SectionTitle icon="fas fa-id-card" text="Declarations CNSS" />
+                  {!isFormDrawerOpen && (
+                    <p className="section-description text-muted mb-0">
+                      {filteredDeclarations.length} declaration{filteredDeclarations.length > 1 ? "s" : ""} affichee
+                      {filteredDeclarations.length > 1 ? "s" : ""}
+                    </p>
+                  )}
+                </div>
 
-              <div style={{ display: "flex", gap: "12px" }}>
-                {!isDrawerOpen && (
-                  <>
+                <div style={{ display: "flex", gap: "12px" }}>
+                  {true && (
                     <FontAwesomeIcon
                       onClick={() => handleFiltersToggle && handleFiltersToggle(!filtersVisible)}
                       icon={filtersVisible ? faClose : faFilter}
@@ -541,7 +663,19 @@ const DeclarationsTable = forwardRef((props, ref) => {
                         marginRight: "8px",
                       }}
                     />
+                  )}
 
+                  <Button
+                    onClick={handleAddNewDeclaration}
+                    className="btn btn-outline-primary d-flex align-items-center"
+                    size="sm"
+                    style={{ width: "170px" }}
+                  >
+                    <FaPlusCircle className="me-2" />
+                    Ajouter une declaration CNSS
+                  </Button>
+
+                  {true && (
                     <Dropdown show={showDropdown} onToggle={(isOpen) => setShowDropdown(isOpen)}>
                       <Dropdown.Toggle
                         as="button"
@@ -553,174 +687,170 @@ const DeclarationsTable = forwardRef((props, ref) => {
                       </Dropdown.Toggle>
                       <Dropdown.Menu as={CustomMenu} />
                     </Dropdown>
-                  </>
-                )}
-
-                <Button
-                  onClick={handleAddNewDeclaration}
-                  className="btn btn-outline-primary d-flex align-items-center"
-                  size="sm"
-                  style={{ width: "170px" }}
-                >
-                  <FaPlusCircle className="me-2" />
-                  Ajouter une declaration CNSS
-                </Button>
+                  )}
+                </div>
               </div>
             </div>
           </div>
+
+          <AnimatePresence>
+            {filtersVisible && (
+              <motion.div
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.3 }}
+                className="filters-container"
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "30px",
+                  padding: "15px 25px",
+                  overflowX: "auto",
+                  flexWrap: "nowrap",
+                  width: "100%",
+                  WebkitOverflowScrolling: "touch",
+                  boxSizing: "border-box"
+                }}
+              >
+                <div
+                  className="filters-icon-section"
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "10px",
+                    flexShrink: 0,
+                    marginRight: "5px",
+                    position: "relative"
+                  }}
+                >
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4a90a4" strokeWidth="2">
+                    <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+                  </svg>
+                  <span className="filters-title">Filtres</span>
+                </div>
+
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "20px",
+                    flexWrap: "nowrap",
+                    flexShrink: 0
+                  }}
+                >
+                  {filterOptions.filters.map((filter) => (
+                    <div key={filter.key} style={{ display: "flex", alignItems: "center", margin: 0, marginRight: "46px" }}>
+                      <label
+                        className="filter-label"
+                        style={{
+                          fontSize: "0.9rem",
+                          margin: 0,
+                          marginRight: "-44px",
+                          whiteSpace: "nowrap",
+                          minWidth: "auto",
+                          fontWeight: 600,
+                          color: "#2c3e50",
+                        }}
+                      >
+                        {filter.label}
+                      </label>
+
+                      <select
+                        value={filter.value}
+                        onChange={(event) => handleFilterChange(filter.key, event.target.value)}
+                        className="filter-input"
+                        style={{
+                          minWidth: 110,
+                          maxWidth: 130,
+                          height: 30,
+                          fontSize: "0.9rem",
+                          padding: "2px 6px",
+                          borderRadius: 6,
+                        }}
+                      >
+                        <option value="">{filter.placeholder}</option>
+                        {filter.options?.map((option) => (
+                          <option key={option.value} value={option.value}>
+                            {option.label}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          <ExpandRTable
+            columns={visibleColumns}
+            data={filteredDeclarations}
+            loading={isTableLoading}
+            loadingText="Chargement des declarations CNSS..."
+            searchTerm={normalizeValue(globalSearch)}
+            highlightText={highlightText}
+            selectAll={selectedItems.length === filteredDeclarations.length && filteredDeclarations.length > 0}
+            selectedItems={selectedItems}
+            handleSelectAllChange={handleSelectAllChange}
+            handleCheckboxChange={handleCheckboxChange}
+            handleEdit={handleEditDeclaration}
+            handleDelete={handleDeleteDeclaration}
+            handleDeleteSelected={handleDeleteSelected}
+            rowsPerPage={itemsPerPage}
+            page={currentPage}
+            handleChangePage={handleChangePage}
+            handleChangeRowsPerPage={handleChangeRowsPerPage}
+            expandedRows={[]}
+            toggleRowExpansion={() => { }}
+            renderExpandedRow={() => null}
+            renderCustomActions={(item) => (
+              <button
+                onClick={(event) => {
+                  event.stopPropagation();
+                  handleOpenDetails(item);
+                }}
+                aria-label="Voir details"
+                title="Voir details"
+                style={{
+                  border: "none",
+                  backgroundColor: "transparent",
+                  cursor: "pointer",
+                }}
+              >
+                <FontAwesomeIcon icon={faEye} style={{ color: "#007bff", fontSize: "14px" }} />
+              </button>
+            )}
+          />
         </div>
 
-        <AnimatePresence>
-          {filtersVisible && !isDrawerOpen && (
-            <motion.div
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.3 }}
-              className="filters-container"
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                gap: "12px",
-                padding: "16px 20px",
-                minHeight: 0,
-              }}
-            >
-              <div
-                className="filters-icon-section"
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "8px",
-                  justifyContent: "center",
-                  marginLeft: "-8px",
-                  marginRight: "14%",
-                }}
-              >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4a90a4" strokeWidth="2">
-                  <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
-                </svg>
-                <span className="filters-title">Filtres</span>
-              </div>
+        {/* Colonne de Droite : Formulaire */}
+        {isDrawerOpen && (
+          <div style={{
+            flex: '0 0 45%',
+            overflowY: 'auto',
+            backgroundColor: '#ffffff',
+            border: '1px solid #e2e8f0',
+            borderRadius: '10px',
+            boxShadow: '0 2px 12px rgba(0,0,0,0.07)',
+            position: 'relative',
+            height: '100%'
+          }}>
+            {isFormDrawerOpen && (
+              <AddDeclarationCNSS
+                toggleDeclarationForm={handleCloseDrawer}
+                onDeclarationSaved={handleDeclarationSaved}
+                selectedDeclaration={selectedDeclaration}
+              />
+            )}
 
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "1px",
-                  flexWrap: "wrap",
-                  justifyContent: "center",
-                  marginLeft: "10.2%",
-                }}
-              >
-                {filterOptions.filters.map((filter) => (
-                  <div key={filter.key} style={{ display: "flex", alignItems: "center", margin: 0, marginRight: "46px" }}>
-                    <label
-                      className="filter-label"
-                      style={{
-                        fontSize: "0.9rem",
-                        margin: 0,
-                        marginRight: "-44px",
-                        whiteSpace: "nowrap",
-                        minWidth: "auto",
-                        fontWeight: 600,
-                        color: "#2c3e50",
-                      }}
-                    >
-                      {filter.label}
-                    </label>
-
-                    <select
-                      value={filter.value}
-                      onChange={(event) => handleFilterChange(filter.key, event.target.value)}
-                      className="filter-input"
-                      style={{
-                        minWidth: 110,
-                        maxWidth: 130,
-                        height: 30,
-                        fontSize: "0.9rem",
-                        padding: "2px 6px",
-                        borderRadius: 6,
-                      }}
-                    >
-                      <option value="">{filter.placeholder}</option>
-                      {filter.options?.map((option) => (
-                        <option key={option.value} value={option.value}>
-                          {option.label}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                ))}
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        <ExpandRTable
-          columns={visibleColumns}
-          data={filteredDeclarations}
-          loading={isTableLoading}
-          loadingText="Chargement des declarations CNSS..."
-          searchTerm={normalizeValue(globalSearch)}
-          highlightText={highlightText}
-          selectAll={selectedItems.length === filteredDeclarations.length && filteredDeclarations.length > 0}
-          selectedItems={selectedItems}
-          handleSelectAllChange={handleSelectAllChange}
-          handleCheckboxChange={handleCheckboxChange}
-          handleEdit={handleEditDeclaration}
-          handleDelete={handleDeleteDeclaration}
-          handleDeleteSelected={handleDeleteSelected}
-          rowsPerPage={itemsPerPage}
-          page={currentPage}
-          handleChangePage={handleChangePage}
-          handleChangeRowsPerPage={handleChangeRowsPerPage}
-          expandedRows={[]}
-          toggleRowExpansion={() => { }}
-          renderExpandedRow={() => null}
-          renderCustomActions={(item) => (
-            <button
-              onClick={(event) => {
-                event.stopPropagation();
-                handleOpenDetails(item);
-              }}
-              aria-label="Voir details"
-              title="Voir details"
-              style={{
-                border: "none",
-                backgroundColor: "transparent",
-                cursor: "pointer",
-              }}
-            >
-              <FontAwesomeIcon icon={faEye} style={{ color: "#007bff", fontSize: "14px" }} />
-            </button>
-          )}
-        />
+            {isDetailsDrawerOpen && selectedDeclaration && (
+              <DeclarationDetails declaration={selectedDeclaration} onClose={handleCloseDrawer} />
+            )}
+          </div>
+        )}
       </div>
-
-      {/* Colonne de Droite : Formulaire */}
-      {isDrawerOpen && (
-        <div style={{
-          flex: '0 0 45%',
-          overflowY: 'auto',
-          backgroundColor: '#fdfdfd',
-          boxShadow: '-4px 0 15px rgba(0,0,0,0.05)',
-          position: 'relative'
-        }}>
-          {isFormDrawerOpen && (
-            <AddDeclarationCNSS
-              toggleDeclarationForm={handleCloseDrawer}
-              onDeclarationSaved={handleDeclarationSaved}
-              selectedDeclaration={selectedDeclaration}
-            />
-          )}
-
-          {isDetailsDrawerOpen && selectedDeclaration && (
-            <DeclarationDetails declaration={selectedDeclaration} onClose={handleCloseDrawer} />
-          )}
-        </div>
-      )}
-    </div>
+    </>
   );
 });
 

@@ -544,25 +544,22 @@ button.onClose:hover {
 
 .filters-container {
   display: flex;
-  justify-content: center;
   align-items: center;
   margin-bottom: 30px;
-  padding: 20px 24px;
+  padding: 12px 24px;
   background: rgba(8, 179, 173, 0.03);
   border-radius: 12px;
-  box-shadow: 0 6px 20px rgba(8, 179, 173, 0.15);
+  box-shadow: 0 4px 15px rgba(8, 179, 173, 0.1);
   position: relative;
+  overflow-x: auto;
+  white-space: nowrap;
 }
 
 .filters-icon-section {
   display: flex;
   align-items: center;
-  margin-left: 8px;
-  position: absolute;
-  left: 20px;
-  top: 50%;
-  transform: translateY(-50%);
-  margin-right: 24px;
+  margin-right: 20px;
+  flex-shrink: 0;
 }
 
 .filters-icon {
@@ -580,12 +577,9 @@ button.onClose:hover {
 .filter-group {
   display: flex;
   align-items: center;
-  gap: 8px;
-  min-width: auto;
+  gap: 15px;
   margin-right: 24px;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  flex-wrap: wrap;
-
+  flex-wrap: nowrap;
 }
 
 .filter-group:last-child {
@@ -828,6 +822,6 @@ button.onClose:hover {
 
 .disabled-btn {
   opacity: 0.6;
-  cursor: url("/assets/no-cursor.png"), not-allowed !important;
+  cursor: not-allowed !important;
   user-select: none;
 }

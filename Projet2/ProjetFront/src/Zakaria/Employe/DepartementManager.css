@@ -2,7 +2,7 @@
 .departement_home1 {
   position: relative;
   width: 100%;
-  height: calc(100vh - 160px);
+  height: calc(100vh - 130px);
   display: flex;
   border: none;
   margin: 0;
@@ -20,7 +20,7 @@
   width: 10%;
   min-width: 16%;
   max-width: 20%;
-  height: calc(100vh - 160px);
+  height: calc(100vh - 130px);
   overflow-y: auto;
   overflow-x: hidden;
   background-color: #fff;

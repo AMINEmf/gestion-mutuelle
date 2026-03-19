@@ -32,12 +32,12 @@
 
 //     const fetchOffres = async () => {
 //         try {
-//             const response = await axios.get('http://localhost:8000/api/offres');
+//             const response = await axios.get('/api/offres');
 //             console.log('Response data:', response.data); 
 //             const offresData = Array.isArray(response.data.offres) ? response.data.offres : [];
 //             const offresWithDetails = await Promise.all(offresData.map(async offre => {
 //                 try {
-//                     const detailsResponse = await axios.get(`http://localhost:8000/api/offres/${offre.id}/offre_details`);
+//                     const detailsResponse = await axios.get(`/api/offres/${offre.id}/offre_details`);
 //                     return { ...offre, Offre_details: detailsResponse.data };
 //                 } catch (error) {
 //                     console.error(`Error fetching details for offre ${offre.id}:`, error);
@@ -90,9 +90,9 @@
 //         try {
 //             let response;
 //             if (editing) {
-//                 response = await axios.put(`http://localhost:8000/api/offres/${currentOffre.id}`, offreData);
+//                 response = await axios.put(`/api/offres/${currentOffre.id}`, offreData);
 //             } else {
-//                 response = await axios.post('http://localhost:8000/api/offres', offreData);
+//                 response = await axios.post('/api/offres', offreData);
 //             }     
 //             const offreId = editing ? currentOffre.id : response.data.offre.id;       
 //             const detailPromises = Offre_details.map(detail => {
@@ -100,9 +100,9 @@
 //                 console.log('Detail payload:', payload); 
         
 //                 if (detail.id) {
-//                     return axios.put(`http://localhost:8000/api/offre_details/${detail.id}`, payload);
+//                     return axios.put(`/api/offre_details/${detail.id}`, payload);
 //                 } else {
-//                     return axios.post('http://localhost:8000/api/offre_details', payload);
+//                     return axios.post('/api/offre_details', payload);
 //                 }
 //             });
 //             await Promise.all(detailPromises);
@@ -140,18 +140,18 @@
 
 //     const handleDelete = async (id) => {
 //         try {
-//             const detailsResponse = await axios.get(`http://localhost:8000/api/offres/${id}/offre_details`);
+//             const detailsResponse = await axios.get(`/api/offres/${id}/offre_details`);
 //             const details = detailsResponse.data.offreDetails; 
             
 //             if (Array.isArray(details)) {
-//                 await Promise.all(details.map(detail => axios.delete(`http://localhost:8000/api/offre_details/${detail.id}`)));
+//                 await Promise.all(details.map(detail => axios.delete(`/api/offre_details/${detail.id}`)));
 //             } else {
 //                 console.error('Expected details to be an array but got:', details);
 //                 setError('Error: Details format is incorrect.');
 //                 return;
 //             }
             
-//             await axios.delete(`http://localhost:8000/api/offres/${id}`);
+//             await axios.delete(`/api/offres/${id}`);
 //             fetchOffres();
 //             setError(null);
 //             setSuccessMessage('Offre deleted successfully');
@@ -172,17 +172,17 @@
     
 //             await Promise.all(selectedOffres.map(async (id) => {
 //                 try {
-//                     const detailsResponse = await axios.get(`http://localhost:8000/api/offres/${id}/offre_details`);
+//                     const detailsResponse = await axios.get(`/api/offres/${id}/offre_details`);
 //                     const details = detailsResponse.data.offreDetails; 
     
 //                     if (Array.isArray(details)) {
-//                         await Promise.all(details.map(detail => axios.delete(`http://localhost:8000/api/offre_details/${detail.id}`)));
+//                         await Promise.all(details.map(detail => axios.delete(`/api/offre_details/${detail.id}`)));
 //                     } else {
 //                         console.error('Expected details to be an array but got:', details);
 //                         throw new Error('Error: Details format is incorrect.');
 //                     }
     
-//                     await axios.delete(`http://localhost:8000/api/offres/${id}`);
+//                     await axios.delete(`/api/offres/${id}`);
 //                 } catch (error) {
 //                     console.error(`Error deleting offer with id ${id}:`, error.response ? error.response.data : error.message);
 //                     throw error; 
@@ -306,7 +306,7 @@ function OffrePrix() {
     
     const fetchOffres = async () => {
         try {
-            const response = await axios.get('http://localhost:8000/api/offres?includeDetails=true');
+            const response = await axios.get('/api/offres?includeDetails=true');
             setOffres(response.data.offres);
             localStorage.setItem('offres', JSON.stringify(response.data.offres));
             setError(null);
@@ -376,8 +376,8 @@ function OffrePrix() {
     }
         try {
             const response = editing
-                ? await axios.put(`http://localhost:8000/api/offres/${currentOffre.id}`, offreData)
-                : await axios.post('http://localhost:8000/api/offres', offreData);
+                ? await axios.put(`/api/offres/${currentOffre.id}`, offreData)
+                : await axios.post('/api/offres', offreData);
             
             const offreId = editing ? currentOffre.id : response.data.offre.id;
             await Promise.all(Offre_details.map(detail => {
@@ -387,8 +387,8 @@ function OffrePrix() {
                     id_offre: offreId 
                 };
                 return detail.id
-                    ? axios.put(`http://localhost:8000/api/offre_details/${detail.id}`, payload)
-                    : axios.post('http://localhost:8000/api/offre_details', payload);
+                    ? axios.put(`/api/offre_details/${detail.id}`, payload)
+                    : axios.post('/api/offre_details', payload);
             }));
 
             setForm({ Désignation: '', Offre_prix: '', Date_début: '', Date_fin: '', Offre_details: [] });
@@ -426,11 +426,11 @@ function OffrePrix() {
     // Delete an offre and its details
     const handleDelete = async (id) => {
         try {
-            const detailsResponse = await axios.get(`http://localhost:8000/api/offres/${id}/offre_details`);
+            const detailsResponse = await axios.get(`/api/offres/${id}/offre_details`);
             await Promise.all(detailsResponse.data.offreDetails.map(detail => 
-                axios.delete(`http://localhost:8000/api/offre_details/${detail.id}`)
+                axios.delete(`/api/offre_details/${detail.id}`)
             ));
-            await axios.delete(`http://localhost:8000/api/offres/${id}`);
+            await axios.delete(`/api/offres/${id}`);
             fetchOffres();
             setSuccessMessage('Offre deleted successfully');
         } catch (error) {
@@ -446,11 +446,11 @@ function OffrePrix() {
         }
         try {
             await Promise.all(selectedOffres.map(async (id) => {
-                const detailsResponse = await axios.get(`http://localhost:8000/api/offres/${id}/offre_details`);
+                const detailsResponse = await axios.get(`/api/offres/${id}/offre_details`);
                 await Promise.all(detailsResponse.data.offreDetails.map(detail => 
-                    axios.delete(`http://localhost:8000/api/offre_details/${detail.id}`)
+                    axios.delete(`/api/offre_details/${detail.id}`)
                 ));
-                await axios.delete(`http://localhost:8000/api/offres/${id}`);
+                await axios.delete(`/api/offres/${id}`);
             }));
             setSelectedOffres([]);
             fetchOffres();
@@ -484,7 +484,7 @@ function OffrePrix() {
 
     const handleUpdateOffreGroup = async (offreId, groupeId) => {
         try {
-            await axios.put(`http://localhost:8000/api/offres/${offreId}`, { groupe_client_id: groupeId });
+            await axios.put(`/api/offres/${offreId}`, { groupe_client_id: groupeId });
             fetchOffres(); // Refresh offres list to reflect the changes
             setSuccessMessage('Offre updated with new groupe client successfully.');
         } catch (error) {
@@ -495,7 +495,7 @@ function OffrePrix() {
     const handleGroupUpdate = async (offreId, groupeIds) => {
         try {
             // Refresh the specific offre
-            const response = await axios.get(`http://localhost:8000/api/offres/${offreId}?includeDetails=true`);
+            const response = await axios.get(`/api/offres/${offreId}?includeDetails=true`);
             const updatedOffre = response.data.offre;
 
             setOffres(prevOffres => prevOffres.map(offre => 

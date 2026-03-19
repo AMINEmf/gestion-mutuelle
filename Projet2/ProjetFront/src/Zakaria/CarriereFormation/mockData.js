@@ -1,3 +1,5 @@
+export const USE_MOCK_DATA = true;
+
 export const careerEmployees = [
   {
     id: 1,
@@ -112,29 +114,6 @@ export const careerEmployees = [
       { titre: "Lean Manufacturing", annee: "2022" },
       { titre: "HSE Niveau 2", annee: "2023" }
     ]
-  },
-  {
-    id: 6,
-    matricule: "EMP-006",
-    full_name: "Nora Kabbaj",
-    departement: "Commercial",
-    poste_actuel: "Key Account Manager",
-    grade: "G3",
-    derniere_promotion: "2025-01-15",
-    promotions: [
-      { date: "2020-07-07", poste: "Commerciale", grade: "G1" },
-      { date: "2022-08-30", poste: "Responsable Clients", grade: "G2" },
-      { date: "2025-01-15", poste: "Key Account Manager", grade: "G3" }
-    ],
-    competences: [
-      { nom: "Vente", niveau: 5 },
-      { nom: "Negociation", niveau: 4 },
-      { nom: "CRM", niveau: 3 }
-    ],
-    formations: [
-      { titre: "Sales Excellence", annee: "2024" },
-      { titre: "Account Management", annee: "2025" }
-    ]
   }
 ];
 
@@ -165,33 +144,6 @@ export const positions = [
     statut: "Actif",
     niveau: "Senior",
     competences: ["Talent", "Communication", "Negociation"]
-  },
-  {
-    id: 104,
-    poste: "Chef de produit",
-    departement: "Marketing",
-    grade: "G3",
-    statut: "Actif",
-    niveau: "Confirme",
-    competences: ["Strategie", "Go-To-Market", "Data"]
-  },
-  {
-    id: 105,
-    poste: "Superviseur",
-    departement: "Production",
-    grade: "G2",
-    statut: "Actif",
-    niveau: "Intermediaire",
-    competences: ["Lean", "Qualite", "Securite"]
-  },
-  {
-    id: 106,
-    poste: "Data Analyst",
-    departement: "Informatique",
-    grade: "G2",
-    statut: "Vacant",
-    niveau: "Intermediaire",
-    competences: ["SQL", "Power BI", "Statistiques"]
   }
 ];
 
@@ -272,13 +224,16 @@ export const trainings = [
     code: "FORM-001",
     titre: "Leadership Agile",
     domaine: "Management",
+    type: "Interne",
     duree: "3 jours",
     statut: "En cours",
     date_debut: "2026-02-10",
+    date_fin: "2026-02-13",
     budget: 12000,
+    organisme: "Institut Management Maroc",
     participants: [
-      { id: 1, employe: "Ahmed El Amrani", departement: "Informatique", note: "-" },
-      { id: 2, employe: "Youssef Karim", departement: "RH", note: "-" }
+      { id: 1, employe: "Ahmed El Amrani", departement: "Informatique", note: "-", commentaire: "" },
+      { id: 2, employe: "Youssef Karim", departement: "RH", note: "-", commentaire: "Très impliqué" }
     ],
     suggested: [
       { id: 11, employe: "Lina Omari", raison: "Potentiel leadership" },
@@ -290,12 +245,15 @@ export const trainings = [
     code: "FORM-002",
     titre: "Power BI Essentials",
     domaine: "Data",
+    type: "Externe",
     duree: "2 jours",
     statut: "En attente",
     date_debut: "2026-03-05",
+    date_fin: "2026-03-07",
     budget: 8000,
+    organisme: "DataSkills Academy",
     participants: [
-      { id: 3, employe: "Sara Benali", departement: "Finance", note: "-" }
+      { id: 3, employe: "Sara Benali", departement: "Finance", note: "-", commentaire: "" }
     ],
     suggested: [
       { id: 13, employe: "Hassan Tazi", raison: "Reporting production" }
@@ -306,12 +264,15 @@ export const trainings = [
     code: "FORM-003",
     titre: "Sales Excellence",
     domaine: "Commercial",
+    type: "Externe",
     duree: "4 jours",
     statut: "Termine",
     date_debut: "2025-12-02",
+    date_fin: "2025-12-06",
     budget: 15000,
+    organisme: "SalesForce Training",
     participants: [
-      { id: 4, employe: "Nora Kabbaj", departement: "Commercial", note: 16 }
+      { id: 4, employe: "Nora Kabbaj", departement: "Commercial", note: 16, commentaire: "Excellente participation" }
     ],
     suggested: []
   },
@@ -320,12 +281,15 @@ export const trainings = [
     code: "FORM-004",
     titre: "Lean Operations",
     domaine: "Operations",
+    type: "Interne",
     duree: "3 jours",
     statut: "En cours",
     date_debut: "2026-02-01",
+    date_fin: "2026-02-04",
     budget: 10000,
+    organisme: "Lean Institute",
     participants: [
-      { id: 5, employe: "Hassan Tazi", departement: "Production", note: "-" }
+      { id: 5, employe: "Hassan Tazi", departement: "Production", note: "-", commentaire: "" }
     ],
     suggested: []
   }
@@ -338,7 +302,8 @@ export const trainingTrackingRows = [
     employe: "Ahmed El Amrani",
     statut: "En cours",
     note: "-",
-    attestation: ""
+    attestation: "",
+    documents: []
   },
   {
     id: 502,
@@ -346,7 +311,8 @@ export const trainingTrackingRows = [
     employe: "Youssef Karim",
     statut: "En cours",
     note: "-",
-    attestation: ""
+    attestation: "",
+    documents: []
   },
   {
     id: 503,
@@ -354,7 +320,10 @@ export const trainingTrackingRows = [
     employe: "Nora Kabbaj",
     statut: "Termine",
     note: 16,
-    attestation: "attestation.pdf"
+    attestation: "attestation.pdf",
+    documents: [
+      { id: 1, original_name: "attestation_nora.pdf", created_at: "2026-02-09 10:59:48" }
+    ]
   },
   {
     id: 504,
@@ -362,7 +331,8 @@ export const trainingTrackingRows = [
     employe: "Sara Benali",
     statut: "En attente",
     note: "-",
-    attestation: ""
+    attestation: "",
+    documents: []
   }
 ];
 
