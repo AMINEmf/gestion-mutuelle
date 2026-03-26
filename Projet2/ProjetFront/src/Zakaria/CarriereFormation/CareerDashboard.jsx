@@ -1,0 +1,520 @@
+import React, { useEffect, useState } from "react";
+import {
+  Box,
+  Card,
+  CardContent,
+  Grid,
+  ThemeProvider,
+  Typography,
+  createTheme,
+  Toolbar,
+} from "@mui/material";
+import { BarChart, PieChart } from "@mui/x-charts";
+import {
+  Users,
+  TrendingUp,
+  Briefcase,
+  Award,
+  BarChart3,
+  Target,
+} from "lucide-react";
+import { useHeader } from "../../Acceuil/HeaderContext";
+import { useOpen } from "../../Acceuil/OpenProvider";
+import apiClient from "../../services/apiClient";
+
+const themeColors = {
+  teal: "#2c767c",
+  tealLight: "#4db6ac",
+  tealDark: "#004d40",
+  secondary: "#26a69a",
+  success: "#4caf50",
+  warning: "#ff9800",
+  error: "#f44336",
+  info: "#2196f3",
+  textPrimary: "#1e293b",
+  textSecondary: "#64748b",
+  hoverBg: "#f8fafc",
+  divider: "rgba(44, 118, 124, 0.2)",
+};
+
+const CACHE_TTL = 5 * 60 * 1000;
+const CAREER_DASHBOARD_CACHE_KEY = "dashboard-carrieres-cache-v2";
+
+const DEFAULT_CAREER_DASHBOARD = {
+  kpis: {
+    total_employes: 0,
+    promotions: 0,
+    postes_occupes: 0,
+    grades_distincts: 0,
+    mobilites_total: 0,
+    mobilites_acceptees: 0,
+    mobilites_refusees: 0,
+  },
+  charts: {
+    month_labels: [],
+    month_data: [],
+    grades: [],
+    evolution_types: [],
+  },
+};
+
+const normalizeCareerDashboard = (payload) => {
+  const source = payload && typeof payload === "object" ? payload : {};
+  const kpis = source.kpis && typeof source.kpis === "object" ? source.kpis : {};
+  const charts = source.charts && typeof source.charts === "object" ? source.charts : {};
+
+  return {
+    kpis: {
+      ...DEFAULT_CAREER_DASHBOARD.kpis,
+      ...kpis,
+    },
+    charts: {
+      ...DEFAULT_CAREER_DASHBOARD.charts,
+      ...charts,
+      month_labels: Array.isArray(charts.month_labels) ? charts.month_labels : [],
+      month_data: Array.isArray(charts.month_data) ? charts.month_data : [],
+      grades: Array.isArray(charts.grades) ? charts.grades : [],
+      evolution_types: Array.isArray(charts.evolution_types) ? charts.evolution_types : [],
+    },
+  };
+};
+
+const CareerDashboard = () => {
+  const { setTitle, clearActions } = useHeader();
+  const { dynamicStyles } = useOpen();
+  const [loading, setLoading] = useState(true);
+  const [dashboardData, setDashboardData] = useState(DEFAULT_CAREER_DASHBOARD);
+
+  useEffect(() => {
+    setTitle("Tableau de bord Carrières");
+    return () => {
+      clearActions();
+    };
+  }, [setTitle, clearActions]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      let hasCachedData = false;
+
+      try {
+        const cachedRaw = localStorage.getItem(CAREER_DASHBOARD_CACHE_KEY);
+        if (cachedRaw) {
+          const cached = JSON.parse(cachedRaw);
+          const isFresh = cached?.timestamp && Date.now() - Number(cached.timestamp) < CACHE_TTL;
+          if (isFresh && cached?.data) {
+            setDashboardData(normalizeCareerDashboard(cached.data));
+            setLoading(false);
+            hasCachedData = true;
+          }
+        }
+      } catch (e) {
+        console.warn("Cache dashboard carrières invalide:", e);
+      }
+
+      try {
+        const response = await apiClient.get("/dashboard/carrieres");
+        const normalized = normalizeCareerDashboard(response?.data);
+        setDashboardData(normalized);
+
+        try {
+          localStorage.setItem(
+            CAREER_DASHBOARD_CACHE_KEY,
+            JSON.stringify({
+              data: normalized,
+              timestamp: Date.now(),
+            })
+          );
+        } catch (e) {
+          console.warn("Erreur sauvegarde cache dashboard carrières:", e);
+        }
+      } catch (error) {
+        console.error("Erreur lors du chargement du dashboard carrières:", error);
+        if (!hasCachedData) {
+          setDashboardData(DEFAULT_CAREER_DASHBOARD);
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
+
+  const StatCard = ({ title, value, icon: Icon, color }) => (
+    <Card
+      sx={{
+        background: `linear-gradient(135deg, ${color}08 0%, ${color}04 100%)`,
+        borderRadius: "1.5rem",
+        boxShadow: "0 0.25rem 1.25rem rgba(0,0,0,0.08)",
+        border: `0.0625rem solid ${color}15`,
+        position: "relative",
+        overflow: "hidden",
+        transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+        "&:hover": {
+          transform: "translateY(-0.25rem)",
+          boxShadow: "0 0.75rem 2.5rem rgba(0,0,0,0.12)",
+        },
+        "&::before": {
+          content: '""',
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          height: "0.25rem",
+          background: `linear-gradient(90deg, ${themeColors.teal}, ${themeColors.tealLight})`,
+        },
+      }}
+    >
+      <CardContent sx={{ p: "1.5rem" }}>
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "flex-start",
+            justifyContent: "space-between",
+            flexWrap: "wrap",
+            gap: "1rem",
+          }}
+        >
+          <Box>
+            <Typography
+              variant="body2"
+              sx={{
+                color: themeColors.textSecondary,
+                mb: "0.5rem",
+                fontWeight: 500,
+                fontSize: "0.875rem",
+              }}
+            >
+              {title}
+            </Typography>
+            <Typography
+              variant="h2"
+              sx={{
+                fontWeight: 700,
+                color: themeColors.tealDark,
+                fontSize: { xs: "1.5rem", sm: "1.75rem", md: "2rem" },
+                lineHeight: 1,
+              }}
+            >
+              {loading ? "..." : value}
+            </Typography>
+          </Box>
+          <Box
+            sx={{
+              backgroundColor: `${color}26`,
+              borderRadius: "1rem",
+              p: "0.75rem",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              flexShrink: 0,
+            }}
+          >
+            <Icon size={24} color={color} />
+          </Box>
+        </Box>
+      </CardContent>
+    </Card>
+  );
+
+  const kpis = [
+    {
+      title: "Total Employés avec Carrière",
+      value: dashboardData.kpis.total_employes,
+      icon: Users,
+      color: themeColors.teal,
+    },
+    {
+      title: "Promotions Réalisées",
+      value: dashboardData.kpis.promotions,
+      icon: TrendingUp,
+      color: themeColors.secondary,
+    },
+    {
+      title: "Postes Occupés",
+      value: dashboardData.kpis.postes_occupes,
+      icon: Briefcase,
+      color: themeColors.tealLight,
+    },
+    {
+      title: "Grades Distincts",
+      value: dashboardData.kpis.grades_distincts,
+      icon: Award,
+      color: themeColors.tealDark,
+    },
+    {
+      title: "Mobilités Internes",
+      value: dashboardData.kpis.mobilites_total,
+      icon: BarChart3,
+      color: themeColors.info,
+    },
+    {
+      title: "Mobilités Acceptées",
+      value: dashboardData.kpis.mobilites_acceptees,
+      icon: Target,
+      color: themeColors.success,
+    },
+  ];
+
+  return (
+    <ThemeProvider theme={createTheme()}>
+      <Box
+        sx={{
+          ...dynamicStyles,
+          backgroundColor: "#ffffff",
+          height: "100vh",
+          overflowY: "auto",
+          minHeight: "100vh",
+          boxSizing: "border-box",
+          p: { xs: "1rem", sm: "1.5rem", md: "2rem" },
+          pb: { xs: "3rem", sm: "4rem", md: "5rem" },
+          "&::-webkit-scrollbar": {
+            width: "0.5rem",
+          },
+          "&::-webkit-scrollbar-thumb": {
+            backgroundColor: "#cbd5e1",
+            borderRadius: "0.25rem",
+          },
+        }}
+      >
+        <Toolbar />
+
+        {/* Page Title */}
+        <Box sx={{ mb: 4 }}>
+          <Typography
+            variant="h4"
+            sx={{ fontSize: "1.5rem", fontWeight: 700, color: themeColors.textPrimary }}
+          >
+            Tableau de bord Carrières
+          </Typography>
+          <Typography variant="body2" sx={{ color: themeColors.textSecondary, mt: 0.5 }}>
+            Suivi des promotions, grades et évolutions de carrière
+          </Typography>
+        </Box>
+
+        {/* KPI Grid */}
+        <Grid container spacing={3} sx={{ mb: 4 }}>
+          {kpis.map((item) => (
+            <Grid item xs={12} sm={6} md={3} key={item.title}>
+              <StatCard
+                title={item.title}
+                value={item.value}
+                icon={item.icon}
+                color={item.color}
+              />
+            </Grid>
+          ))}
+        </Grid>
+
+        {/* Charts Section */}
+        <Grid container spacing={3} sx={{ mb: 4 }}>
+          {/* Promotions par mois */}
+          <Grid item xs={12} md={7}>
+            <Card
+              sx={{
+                borderRadius: "1.5rem",
+                boxShadow: "0 0.25rem 1.25rem rgba(0,0,0,0.08)",
+                border: `0.0625rem solid ${themeColors.divider}`,
+              }}
+            >
+              <CardContent sx={{ p: "1.5rem" }}>
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    mb: "1.5rem",
+                    flexWrap: "wrap",
+                    gap: "0.75rem",
+                  }}
+                >
+                  <Box
+                    sx={{
+                      backgroundColor: `${themeColors.teal}26`,
+                      borderRadius: "0.75rem",
+                      p: "0.5rem",
+                      display: "flex",
+                      alignItems: "center",
+                    }}
+                  >
+                    <BarChart3 size={20} color={themeColors.teal} />
+                  </Box>
+                  <Typography
+                    variant="h6"
+                    sx={{
+                      fontWeight: 700,
+                      fontSize: "1.1rem",
+                      color: themeColors.textPrimary,
+                    }}
+                  >
+                    Promotions par Mois
+                  </Typography>
+                </Box>
+                {loading ? (
+                  <Box sx={{ textAlign: "center", py: 8, color: themeColors.textSecondary }}>
+                    Chargement...
+                  </Box>
+                ) : dashboardData.charts.month_data.length > 0 ? (
+                  <Box sx={{ width: "100%", height: 300 }}>
+                    <BarChart
+                      height={300}
+                      xAxis={[{ data: dashboardData.charts.month_labels, scaleType: "band" }]}
+                      series={[{ data: dashboardData.charts.month_data, color: themeColors.teal }]}
+                      margin={{ left: 40, right: 20, top: 20, bottom: 40 }}
+                    />
+                  </Box>
+                ) : (
+                  <Box sx={{ textAlign: "center", py: 8, color: themeColors.textSecondary }}>
+                    Aucune donnée disponible
+                  </Box>
+                )}
+              </CardContent>
+            </Card>
+          </Grid>
+
+          {/* Répartition par grade */}
+          <Grid item xs={12} md={5}>
+            <Card
+              sx={{
+                borderRadius: "1.5rem",
+                boxShadow: "0 0.25rem 1.25rem rgba(0,0,0,0.08)",
+                border: `0.0625rem solid ${themeColors.divider}`,
+              }}
+            >
+              <CardContent sx={{ p: "1.5rem" }}>
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    mb: "1.5rem",
+                    flexWrap: "wrap",
+                    gap: "0.75rem",
+                  }}
+                >
+                  <Box
+                    sx={{
+                      backgroundColor: `${themeColors.secondary}26`,
+                      borderRadius: "0.75rem",
+                      p: "0.5rem",
+                      display: "flex",
+                      alignItems: "center",
+                    }}
+                  >
+                    <Award size={20} color={themeColors.secondary} />
+                  </Box>
+                  <Typography
+                    variant="h6"
+                    sx={{
+                      fontWeight: 700,
+                      fontSize: "1.1rem",
+                      color: themeColors.textPrimary,
+                    }}
+                  >
+                    Répartition des Grades
+                  </Typography>
+                </Box>
+                {loading ? (
+                  <Box sx={{ textAlign: "center", py: 8, color: themeColors.textSecondary }}>
+                    Chargement...
+                  </Box>
+                ) : dashboardData.charts.grades.length > 0 ? (
+                  <Box sx={{ width: "100%", height: 300 }}>
+                    <PieChart
+                      height={300}
+                      series={[
+                        {
+                          data: dashboardData.charts.grades,
+                          innerRadius: 50,
+                          outerRadius: 120,
+                          paddingAngle: 2,
+                        },
+                      ]}
+                      margin={{ left: 20, right: 20, top: 20, bottom: 20 }}
+                    />
+                  </Box>
+                ) : (
+                  <Box sx={{ textAlign: "center", py: 8, color: themeColors.textSecondary }}>
+                    Aucune donnée disponible
+                  </Box>
+                )}
+              </CardContent>
+            </Card>
+          </Grid>
+
+          {/* Types d'évolution */}
+          <Grid item xs={12}>
+            <Card
+              sx={{
+                borderRadius: "1.5rem",
+                boxShadow: "0 0.25rem 1.25rem rgba(0,0,0,0.08)",
+                border: `0.0625rem solid ${themeColors.divider}`,
+              }}
+            >
+              <CardContent sx={{ p: "1.5rem" }}>
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    mb: "1.5rem",
+                    flexWrap: "wrap",
+                    gap: "0.75rem",
+                  }}
+                >
+                  <Box
+                    sx={{
+                      backgroundColor: `${themeColors.info}26`,
+                      borderRadius: "0.75rem",
+                      p: "0.5rem",
+                      display: "flex",
+                      alignItems: "center",
+                    }}
+                  >
+                    <Target size={20} color={themeColors.info} />
+                  </Box>
+                  <Typography
+                    variant="h6"
+                    sx={{
+                      fontWeight: 700,
+                      fontSize: "1.1rem",
+                      color: themeColors.textPrimary,
+                    }}
+                  >
+                    Types d'Évolution
+                  </Typography>
+                </Box>
+                {loading ? (
+                  <Box sx={{ textAlign: "center", py: 8, color: themeColors.textSecondary }}>
+                    Chargement...
+                  </Box>
+                ) : dashboardData.charts.evolution_types.length > 0 ? (
+                  <Box sx={{ width: "100%", height: 300 }}>
+                    <BarChart
+                      height={300}
+                      xAxis={[
+                        {
+                          data: dashboardData.charts.evolution_types.map((t) => t.label),
+                          scaleType: "band",
+                        },
+                      ]}
+                      series={[
+                        {
+                          data: dashboardData.charts.evolution_types.map((t) => t.value),
+                          color: themeColors.secondary,
+                        },
+                      ]}
+                      margin={{ left: 40, right: 20, top: 20, bottom: 60 }}
+                    />
+                  </Box>
+                ) : (
+                  <Box sx={{ textAlign: "center", py: 8, color: themeColors.textSecondary }}>
+                    Aucune donnée disponible
+                  </Box>
+                )}
+              </CardContent>
+            </Card>
+          </Grid>
+        </Grid>
+      </Box>
+    </ThemeProvider>
+  );
+};
+
+export default CareerDashboard;
